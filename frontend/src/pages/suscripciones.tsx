@@ -16,7 +16,7 @@ import { z } from "zod"
 
 const esquema = z.object({
   nombre: z.string().min(1, "obligatorio"),
-  importe: z.string().min(1).refine((v) => Number(v) > 0, "debe ser > 0"),
+  importe: z.string().min(1).refine((v) => Number(v.replace(",", ".")) > 0, "debe ser > 0"),
   categoria_id: z.string().optional(),
   dia_cobro: z.string().optional(),
   notas: z.string().optional(),
@@ -41,7 +41,7 @@ export default function PaginaSuscripciones() {
   const crear = useMutation({
     mutationFn: (d: Campos) => api.post("/suscripciones/", {
       nombre: d.nombre,
-      importe: d.importe,
+      importe: d.importe.replace(",", "."),
       categoria_id: d.categoria_id ? Number(d.categoria_id) : null,
       dia_cobro: d.dia_cobro ? Number(d.dia_cobro) : null,
       notas: d.notas || null,
@@ -63,7 +63,7 @@ export default function PaginaSuscripciones() {
   const editar = useMutation({
     mutationFn: ({ id, d }: { id: number; d: Campos }) => api.patch(`/suscripciones/${id}`, {
       nombre: d.nombre,
-      importe: d.importe,
+      importe: d.importe.replace(",", "."),
       categoria_id: d.categoria_id ? Number(d.categoria_id) : null,
       dia_cobro: d.dia_cobro ? Number(d.dia_cobro) : null,
       notas: d.notas || null,

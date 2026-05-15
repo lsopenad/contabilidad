@@ -17,7 +17,7 @@ import { z } from "zod"
 
 const esquema = z.object({
   categoria_id: z.string().min(1, "obligatorio"),
-  importe: z.string().min(1).refine((v) => Number(v) > 0, "debe ser > 0"),
+  importe: z.string().min(1).refine((v) => Number(v.replace(",", ".")) > 0, "debe ser > 0"),
   mes: z.string().min(1),
   anio: z.string().min(1),
 })
@@ -42,7 +42,7 @@ export default function PaginaPresupuestos() {
 
   const guardar = useMutation({
     mutationFn: (d: Campos) => api.put("/presupuestos/", {
-      categoria_id: Number(d.categoria_id), importe: d.importe,
+      categoria_id: Number(d.categoria_id), importe: d.importe.replace(",", "."),
       mes: Number(d.mes), anio: Number(d.anio),
     }),
     onSuccess: () => { qc.invalidateQueries({ queryKey: ["presupuestos"] }); setAbierto(false); toast.success("presupuesto guardado") },

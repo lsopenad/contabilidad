@@ -16,7 +16,7 @@ import { toast } from "sonner"
 import { z } from "zod"
 
 const esquema = z.object({
-  importe: z.string().min(1).refine((v) => Number(v) > 0, "debe ser > 0"),
+  importe: z.string().min(1).refine((v) => Number(v.replace(",", ".")) > 0, "debe ser > 0"),
   fecha: z.string().min(1, "obligatorio"),
   categoria_id: z.string().optional(),
   descripcion: z.string().optional(),
@@ -41,7 +41,7 @@ export default function PaginaIngresos() {
 
   const crear = useMutation({
     mutationFn: (d: Campos) => api.post("/ingresos/", {
-      importe: d.importe, fecha: d.fecha,
+      importe: d.importe.replace(",", "."), fecha: d.fecha,
       categoria_id: d.categoria_id ? Number(d.categoria_id) : null,
       descripcion: d.descripcion || null,
     }),
@@ -55,7 +55,7 @@ export default function PaginaIngresos() {
 
   const editar = useMutation({
     mutationFn: ({ id, d }: { id: number; d: Campos }) => api.patch(`/ingresos/${id}`, {
-      importe: d.importe, fecha: d.fecha,
+      importe: d.importe.replace(",", "."), fecha: d.fecha,
       categoria_id: d.categoria_id ? Number(d.categoria_id) : null,
       descripcion: d.descripcion || null,
     }),
