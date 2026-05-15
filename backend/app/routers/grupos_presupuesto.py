@@ -1,7 +1,8 @@
+import uuid
 from decimal import Decimal
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
-from sqlalchemy import extract, func, select
+from sqlalchemy import delete, extract, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..database import obtener_sesion
@@ -42,21 +43,26 @@ async def _respuesta(grupo: GrupoPresupuesto, mes: int, anio: int, db: AsyncSess
         anio=grupo.anio,
         categorias=[CategoriaResumen(id=c.id, nombre=c.nombre) for c in grupo.categorias],
         total_gastado=await _total_gastado(grupo, mes, anio, db),
+        repeticion_id=grupo.repeticion_id,
     )
 
 
 @router.get("/", response_model=list[GrupoPresupuestoRespuesta])
 async def listar_grupos(
-    mes: int = Query(..., ge=1, le=12),
-    anio: int = Query(..., ge=2000),
+    mes: int | None = Query(None, ge=1, le=12),
+    anio: int | None = Query(None, ge=2000),
+    repeticion_id: str | None = Query(None),
     db: AsyncSession = Depends(obtener_sesion),
 ) -> list[GrupoPresupuestoRespuesta]:
-    grupos = (await db.execute(
-        select(GrupoPresupuesto)
-        .where(GrupoPresupuesto.mes == mes, GrupoPresupuesto.anio == anio)
-        .order_by(GrupoPresupuesto.nombre)
-    )).scalars().all()
-    return [await _respuesta(g, mes, anio, db) for g in grupos]
+    consulta = select(GrupoPresupuesto).order_by(GrupoPresupuesto.nombre)
+    if mes is not None:
+        consulta = consulta.where(GrupoPresupuesto.mes == mes)
+    if anio is not None:
+        consulta = consulta.where(GrupoPresupuesto.anio == anio)
+    if repeticion_id is not None:
+        consulta = consulta.where(GrupoPresupuesto.repeticion_id == repeticion_id)
+    grupos = (await db.execute(consulta)).scalars().all()
+    return [await _respuesta(g, g.mes, g.anio, db) for g in grupos]
 
 
 @router.post("/", response_model=GrupoPresupuestoRespuesta, status_code=status.HTTP_201_CREATED)
@@ -64,16 +70,34 @@ async def crear_grupo(
     datos: GrupoPresupuestoCrear,
     db: AsyncSession = Depends(obtener_sesion),
 ) -> GrupoPresupuestoRespuesta:
+    meses_extra = datos.meses_extra
+    rep_id = str(uuid.uuid4()) if meses_extra else None
+
+    cats: list[Categoria] = []
+    if datos.categoria_ids:
+        cats = list((await db.execute(select(Categoria).where(Categoria.id.in_(datos.categoria_ids)))).scalars().all())
+
     grupo = GrupoPresupuesto(
         nombre=datos.nombre,
         importe=datos.importe,
         mes=datos.mes,
         anio=datos.anio,
+        repeticion_id=rep_id,
+        categorias=cats,
     )
-    if datos.categoria_ids:
-        cats = (await db.execute(select(Categoria).where(Categoria.id.in_(datos.categoria_ids)))).scalars().all()
-        grupo.categorias = list(cats)
     db.add(grupo)
+
+    for mes_copia in meses_extra:
+        copia = GrupoPresupuesto(
+            nombre=datos.nombre,
+            importe=datos.importe,
+            mes=mes_copia,
+            anio=datos.anio,
+            repeticion_id=rep_id,
+            categorias=cats,
+        )
+        db.add(copia)
+
     await db.commit()
     await db.refresh(grupo)
     return await _respuesta(grupo, datos.mes, datos.anio, db)
@@ -95,6 +119,38 @@ async def actualizar_grupo(
     if datos.categoria_ids is not None:
         cats = (await db.execute(select(Categoria).where(Categoria.id.in_(datos.categoria_ids)))).scalars().all()
         grupo.categorias = list(cats)
+    if datos.meses_eliminar and grupo.repeticion_id:
+        await db.execute(
+            delete(GrupoPresupuesto).where(
+                GrupoPresupuesto.repeticion_id == grupo.repeticion_id,
+                GrupoPresupuesto.mes.in_(datos.meses_eliminar),
+                GrupoPresupuesto.id != grupo_id,
+            )
+        )
+        restantes = await db.scalar(
+            select(func.count(GrupoPresupuesto.id)).where(
+                GrupoPresupuesto.repeticion_id == grupo.repeticion_id,
+                GrupoPresupuesto.id != grupo_id,
+            )
+        )
+        if restantes == 0:
+            grupo.repeticion_id = None
+
+    if datos.meses_extra:
+        if not grupo.repeticion_id:
+            grupo.repeticion_id = str(uuid.uuid4())
+        cats_actuales = list(grupo.categorias)
+        for mes_copia in datos.meses_extra:
+            copia = GrupoPresupuesto(
+                nombre=grupo.nombre,
+                importe=grupo.importe,
+                mes=mes_copia,
+                anio=grupo.anio,
+                repeticion_id=grupo.repeticion_id,
+                categorias=cats_actuales,
+            )
+            db.add(copia)
+
     await db.commit()
     await db.refresh(grupo)
     return await _respuesta(grupo, grupo.mes, grupo.anio, db)

@@ -16,6 +16,7 @@ class GrupoPresupuestoCrear(BaseModel):
     mes: int
     anio: int
     categoria_ids: list[int] = []
+    meses_extra: list[int] = []
 
     @field_validator("importe")
     @classmethod
@@ -36,6 +37,8 @@ class GrupoPresupuestoActualizar(BaseModel):
     nombre: Optional[str] = None
     importe: Optional[Decimal] = None
     categoria_ids: Optional[list[int]] = None
+    meses_extra: list[int] = []
+    meses_eliminar: list[int] = []
 
     @field_validator("importe")
     @classmethod
@@ -53,3 +56,4 @@ class GrupoPresupuestoRespuesta(BaseModel):
     anio: int
     categorias: list[CategoriaResumen]
     total_gastado: Decimal
+    repeticion_id: Optional[str] = None

@@ -2,7 +2,7 @@ from datetime import date, datetime
 from decimal import Decimal
 from typing import Optional
 
-from sqlalchemy import Date, ForeignKey, Numeric, Text, func
+from sqlalchemy import Date, ForeignKey, Numeric, String, Text, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from ..database import Base
@@ -17,5 +17,6 @@ class Gasto(Base):
     descripcion: Mapped[Optional[str]] = mapped_column(Text)
     fecha: Mapped[date] = mapped_column(Date, nullable=False, server_default=func.current_date())
     creado_en: Mapped[Optional[datetime]] = mapped_column(server_default=func.now())
+    repeticion_id: Mapped[Optional[str]] = mapped_column(String(36), nullable=True, index=True)
 
     categoria: Mapped[Optional["Categoria"]] = relationship("Categoria", lazy="joined")  # noqa: F821

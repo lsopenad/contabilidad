@@ -16,6 +16,7 @@ export interface Ingreso {
   fecha: string
   descripcion?: string
   categoria?: CategoriaResumen
+  repeticion_id?: string
 }
 
 export interface Gasto {
@@ -24,6 +25,7 @@ export interface Gasto {
   fecha: string
   descripcion?: string
   categoria?: CategoriaResumen
+  repeticion_id?: string
 }
 
 export interface Suscripcion {
@@ -43,6 +45,7 @@ export interface Presupuesto {
   anio: number
   categoria_id: number
   categoria: CategoriaResumen
+  repeticion_id?: string
 }
 
 export interface ResumenMes {
@@ -74,6 +77,7 @@ export interface GrupoPresupuesto {
   anio: number
   categorias: CategoriaResumen[]
   total_gastado: string
+  repeticion_id?: string
 }
 
 export interface Movimiento {

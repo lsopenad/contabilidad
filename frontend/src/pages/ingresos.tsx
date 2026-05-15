@@ -9,9 +9,10 @@ import { api } from "@/lib/api"
 import { SelectorMes, useMes } from "@/lib/mes-context"
 import { ThSort, useSorte } from "@/lib/tabla"
 import { type Ingreso } from "@/lib/tipos"
-import { fechaHoy, formatearEuros, formatearFecha, normalizarImporte } from "@/lib/utils"
+import { MESES_ABREV, fechaHoy, formatearEuros, formatearFecha, normalizarImporte } from "@/lib/utils"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { toast } from "sonner"
 import { z } from "zod"
@@ -25,23 +26,103 @@ const esquema = z.object({
 
 type Campos = z.infer<typeof esquema>
 
+function ChipsMeses({ mesesSeleccionados, onChangeMesesExtra, mesesEliminar, onChangeMesesEliminar, mesBase, mesesExistentes = [] }: {
+  mesesSeleccionados: number[]
+  onChangeMesesExtra: (meses: number[]) => void
+  mesesEliminar: number[]
+  onChangeMesesEliminar: (meses: number[]) => void
+  mesBase: number
+  mesesExistentes?: number[]
+}) {
+  function toggle(m: number) {
+    if (m === mesBase) return
+    if (mesesExistentes.includes(m)) {
+      onChangeMesesEliminar(
+        mesesEliminar.includes(m)
+          ? mesesEliminar.filter((x) => x !== m)
+          : [...mesesEliminar, m]
+      )
+    } else {
+      onChangeMesesExtra(
+        mesesSeleccionados.includes(m)
+          ? mesesSeleccionados.filter((x) => x !== m)
+          : [...mesesSeleccionados, m]
+      )
+    }
+  }
+  return (
+    <div>
+      <div style={{ color: "#3D6676", fontSize: "0.70rem", marginBottom: "6px" }}>meses con copia:</div>
+      <div style={{ display: "flex", flexWrap: "wrap", gap: "4px" }}>
+        {MESES_ABREV.map((nombre, i) => {
+          const m = i + 1
+          const esBase = m === mesBase
+          const existe = mesesExistentes.includes(m)
+          const eliminando = existe && mesesEliminar.includes(m)
+          const sel = !existe && mesesSeleccionados.includes(m)
+          return (
+            <button
+              key={m}
+              type="button"
+              disabled={esBase}
+              onClick={() => toggle(m)}
+              style={{
+                padding: "2px 8px",
+                fontSize: "0.68rem",
+                border: `1px solid ${esBase ? "#112B3A" : eliminando ? "#FF6B35" : existe ? "#0E7490" : sel ? "#7DD3FC" : "#1A3F54"}`,
+                background: eliminando ? "#1A0A00" : existe ? "#083344" : sel ? "#0A2535" : "transparent",
+                color: esBase ? "#1F4A5E" : eliminando ? "#FF6B35" : existe ? "#22D3EE" : sel ? "#7DD3FC" : "#3D6676",
+                cursor: esBase ? "default" : "pointer",
+                textDecoration: eliminando ? "line-through" : "none",
+              }}
+            >
+              {nombre}
+            </button>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
 export default function PaginaIngresos() {
   const qc = useQueryClient()
   const { abierto, setAbierto, editando, setEditando, confirmandoId, setConfirmandoId } = useDialogoCrud<Ingreso>()
   const { mes, anio } = useMes()
+
+  const [mesesExtra, setMesesExtra] = useState<number[]>([])
+  const [mesesEliminar, setMesesEliminar] = useState<number[]>([])
 
   const { data: ingresos = [] } = useQuery<Ingreso[]>({
     queryKey: ["ingresos", mes, anio],
     queryFn: async () => (await api.get(`/ingresos/?mes=${mes}&anio=${anio}`)).data,
   })
 
+  const { data: hermanosIngreso = [] } = useQuery<Ingreso[]>({
+    queryKey: ["ingresos-hermanos", editando?.repeticion_id],
+    queryFn: async () => (await api.get(`/ingresos/?repeticion_id=${editando!.repeticion_id}`)).data,
+    enabled: !!editando?.repeticion_id,
+  })
+
+  const mesesExistentes = hermanosIngreso
+    .filter((h) => h.id !== editando?.id)
+    .map((h) => new Date(h.fecha + "T12:00:00").getMonth() + 1)
+
   const crear = useMutation({
     mutationFn: (d: Campos) => api.post("/ingresos/", {
       importe: normalizarImporte(d.importe), fecha: d.fecha,
       categoria_id: d.categoria_id ? Number(d.categoria_id) : null,
       descripcion: d.descripcion || null,
+      meses_extra: mesesExtra,
     }),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ["ingresos"] }); qc.invalidateQueries({ queryKey: ["informes"] }); setAbierto(false); toast.success("ingreso creado") },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["ingresos"] })
+      qc.invalidateQueries({ queryKey: ["informes"] })
+      setAbierto(false)
+      setMesesExtra([])
+      setMesesEliminar([])
+      toast.success("ingreso creado")
+    },
   })
 
   const eliminar = useMutation({
@@ -50,18 +131,33 @@ export default function PaginaIngresos() {
   })
 
   const editar = useMutation({
-    mutationFn: ({ id, d }: { id: number; d: Campos }) => api.patch(`/ingresos/${id}`, {
+    mutationFn: (d: Campos) => api.patch(`/ingresos/${editando!.id}`, {
       importe: normalizarImporte(d.importe), fecha: d.fecha,
       categoria_id: d.categoria_id ? Number(d.categoria_id) : null,
       descripcion: d.descripcion || null,
+      meses_extra: mesesExtra,
+      meses_eliminar: mesesEliminar,
     }),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ["ingresos"] }); qc.invalidateQueries({ queryKey: ["informes"] }); setAbierto(false); setEditando(null); toast.success("ingreso actualizado") },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["ingresos"] })
+      qc.invalidateQueries({ queryKey: ["informes"] })
+      setAbierto(false)
+      setEditando(null)
+      setMesesExtra([])
+      setMesesEliminar([])
+      toast.success("ingreso actualizado")
+    },
   })
 
   const form = useForm<Campos>({
     resolver: zodResolver(esquema),
     defaultValues: { fecha: fechaHoy() },
   })
+
+  const fechaWatched = form.watch("fecha")
+  const mesBase = fechaWatched
+    ? new Date(fechaWatched + "T12:00:00").getMonth() + 1
+    : new Date().getMonth() + 1
 
   const total = ingresos.reduce((s, i) => s + Number(i.importe), 0)
 
@@ -75,6 +171,27 @@ export default function PaginaIngresos() {
     },
   )
 
+  function abrirNuevo() {
+    setEditando(null)
+    setMesesExtra([])
+    setMesesEliminar([])
+    form.reset({ fecha: fechaHoy() })
+    setAbierto(true)
+  }
+
+  function abrirEditar(ing: Ingreso) {
+    setEditando(ing)
+    setMesesExtra([])
+    setMesesEliminar([])
+    form.reset({
+      importe: ing.importe,
+      fecha: ing.fecha,
+      categoria_id: ing.categoria ? String(ing.categoria.id) : undefined,
+      descripcion: ing.descripcion ?? undefined,
+    })
+    setAbierto(true)
+  }
+
   return (
     <div className="p-6">
       <div className="flex items-center justify-between mb-4" style={{ borderBottom: "1px solid #0F3244", paddingBottom: "0.75rem" }}>
@@ -86,10 +203,7 @@ export default function PaginaIngresos() {
           <span style={{ color: "#00ED64", fontSize: "1.00rem", fontWeight: 600 }}>
             {formatearEuros(total)}
           </span>
-          <Button
-            onClick={() => { setEditando(null); form.reset({ fecha: fechaHoy() }); setAbierto(true) }}
-            style={{ background: "#011829", color: "#5C8097", border: "1px solid #2A5A6E" }}
-          >
+          <Button onClick={abrirNuevo} style={{ background: "#011829", color: "#5C8097", border: "1px solid #2A5A6E" }}>
             + nuevo
           </Button>
         </div>
@@ -118,22 +232,16 @@ export default function PaginaIngresos() {
               onMouseEnter={(e) => (e.currentTarget.style.background = "#012030")}
               onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
             >
-              <td style={{ padding: "4px 12px", color: "#4E7A8A" }}>{formatearFecha(ing.fecha)}</td>
+              <td style={{ padding: "4px 12px", color: "#4E7A8A" }}>
+                {formatearFecha(ing.fecha)}
+                {ing.repeticion_id && <span style={{ color: "#7DD3FC", marginLeft: "4px", fontSize: "0.70rem" }}>↻</span>}
+              </td>
               <td style={{ padding: "4px 12px", color: "#00ED64" }}>{formatearEuros(ing.importe)}</td>
               <td style={{ padding: "4px 12px", color: "#3D6676" }}>{ing.categoria?.nombre ?? "—"}</td>
               <td style={{ padding: "4px 12px", color: "#2A5A6E" }}>{ing.descripcion ?? "—"}</td>
               <td style={{ padding: "4px 12px", whiteSpace: "nowrap" }}>
                 <button
-                  onClick={() => {
-                    setEditando(ing)
-                    form.reset({
-                      importe: ing.importe,
-                      fecha: ing.fecha,
-                      categoria_id: ing.categoria ? String(ing.categoria.id) : undefined,
-                      descripcion: ing.descripcion ?? undefined,
-                    })
-                    setAbierto(true)
-                  }}
+                  onClick={() => abrirEditar(ing)}
                   style={{ color: "#1F4A5E", background: "none", border: "none", cursor: "pointer", fontSize: "0.80rem", marginRight: "0.5rem" }}
                   onMouseEnter={(e) => (e.currentTarget.style.color = "#5C8097")}
                   onMouseLeave={(e) => (e.currentTarget.style.color = "#1F4A5E")}
@@ -171,7 +279,7 @@ export default function PaginaIngresos() {
         </tbody>
       </table>
 
-      <Dialog open={abierto} onOpenChange={(v) => { setAbierto(v); if (!v) setEditando(null) }}>
+      <Dialog open={abierto} onOpenChange={(v) => { setAbierto(v); if (!v) { setEditando(null); setMesesExtra([]); setMesesEliminar([]) } }}>
         <DialogContent style={{ background: "#012030", border: "1px solid #1A3F54" }}>
           <DialogHeader>
             <DialogTitle style={{ color: "#5C8097", fontSize: "0.80rem", letterSpacing: "0.1em" }}>
@@ -179,9 +287,7 @@ export default function PaginaIngresos() {
             </DialogTitle>
           </DialogHeader>
           <Form {...form}>
-            <form onSubmit={form.handleSubmit((d) =>
-              editando ? editar.mutate({ id: editando.id, d }) : crear.mutate(d)
-            )} className="space-y-3">
+            <form onSubmit={form.handleSubmit((d) => editando ? editar.mutate(d) : crear.mutate(d))} className="space-y-3">
               <FormField control={form.control} name="importe" render={({ field }) => (
                 <FormItem>
                   <FormLabel>importe (€)</FormLabel>
@@ -208,6 +314,16 @@ export default function PaginaIngresos() {
                   <FormControl><Input {...field} /></FormControl>
                 </FormItem>
               )} />
+
+              <ChipsMeses
+                mesesSeleccionados={mesesExtra}
+                onChangeMesesExtra={setMesesExtra}
+                mesesEliminar={mesesEliminar}
+                onChangeMesesEliminar={setMesesEliminar}
+                mesBase={mesBase}
+                mesesExistentes={mesesExistentes}
+              />
+
               <div className="flex justify-end gap-2 pt-1">
                 <Button type="button" variant="outline" onClick={() => setAbierto(false)}
                   style={{ background: "none", border: "1px solid #1A3F54", color: "#6B95A7" }}>

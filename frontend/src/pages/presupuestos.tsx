@@ -10,7 +10,7 @@ import { SelectorMes, useMes } from "@/lib/mes-context"
 import { ThSort, useSorte } from "@/lib/tabla"
 import { type Categoria, type GrupoPresupuesto, type Presupuesto } from "@/lib/tipos"
 import { SelectorCategoria } from "@/components/selector-categoria"
-import { MESES_NOMBRE, formatearEuros, normalizarImporte } from "@/lib/utils"
+import { MESES_ABREV, MESES_NOMBRE, formatearEuros, normalizarImporte } from "@/lib/utils"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { useState } from "react"
@@ -36,6 +36,65 @@ const esquemaGrupo = z.object({
 
 type CamposGrupo = z.infer<typeof esquemaGrupo>
 
+function ChipsMeses({ mesesSeleccionados, onChangeMesesExtra, mesesEliminar, onChangeMesesEliminar, mesBase, mesesExistentes = [] }: {
+  mesesSeleccionados: number[]
+  onChangeMesesExtra: (meses: number[]) => void
+  mesesEliminar: number[]
+  onChangeMesesEliminar: (meses: number[]) => void
+  mesBase: number
+  mesesExistentes?: number[]
+}) {
+  function toggle(m: number) {
+    if (m === mesBase) return
+    if (mesesExistentes.includes(m)) {
+      onChangeMesesEliminar(
+        mesesEliminar.includes(m)
+          ? mesesEliminar.filter((x) => x !== m)
+          : [...mesesEliminar, m]
+      )
+    } else {
+      onChangeMesesExtra(
+        mesesSeleccionados.includes(m)
+          ? mesesSeleccionados.filter((x) => x !== m)
+          : [...mesesSeleccionados, m]
+      )
+    }
+  }
+  return (
+    <div>
+      <div style={{ color: "#3D6676", fontSize: "0.70rem", marginBottom: "6px" }}>meses con copia:</div>
+      <div style={{ display: "flex", flexWrap: "wrap", gap: "4px" }}>
+        {MESES_ABREV.map((nombre, i) => {
+          const m = i + 1
+          const esBase = m === mesBase
+          const existe = mesesExistentes.includes(m)
+          const eliminando = existe && mesesEliminar.includes(m)
+          const sel = !existe && mesesSeleccionados.includes(m)
+          return (
+            <button
+              key={m}
+              type="button"
+              disabled={esBase}
+              onClick={() => toggle(m)}
+              style={{
+                padding: "2px 8px",
+                fontSize: "0.68rem",
+                border: `1px solid ${esBase ? "#112B3A" : eliminando ? "#FF6B35" : existe ? "#0E7490" : sel ? "#7DD3FC" : "#1A3F54"}`,
+                background: eliminando ? "#1A0A00" : existe ? "#083344" : sel ? "#0A2535" : "transparent",
+                color: esBase ? "#1F4A5E" : eliminando ? "#FF6B35" : existe ? "#22D3EE" : sel ? "#7DD3FC" : "#3D6676",
+                cursor: esBase ? "default" : "pointer",
+                textDecoration: eliminando ? "line-through" : "none",
+              }}
+            >
+              {nombre}
+            </button>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
 export default function PaginaPresupuestos() {
   const qc = useQueryClient()
   const { abierto, setAbierto, editando, setEditando, confirmandoId, setConfirmandoId } = useDialogoCrud<Presupuesto>()
@@ -47,6 +106,10 @@ export default function PaginaPresupuestos() {
   const { mes, anio } = useMes()
 
   const [catIdsSeleccionadas, setCatIdsSeleccionadas] = useState<number[]>([])
+  const [mesesExtraPres, setMesesExtraPres] = useState<number[]>([])
+  const [mesesExtraGrupo, setMesesExtraGrupo] = useState<number[]>([])
+  const [mesesEliminarPres, setMesesEliminarPres] = useState<number[]>([])
+  const [mesesEliminarGrupo, setMesesEliminarGrupo] = useState<number[]>([])
 
   const { data: presupuestos = [] } = useQuery<Presupuesto[]>({
     queryKey: ["presupuestos", mes, anio],
@@ -58,6 +121,21 @@ export default function PaginaPresupuestos() {
     queryFn: async () => (await api.get(`/grupos-presupuesto/?mes=${mes}&anio=${anio}`)).data,
   })
 
+  const { data: hermanosPres = [] } = useQuery<Presupuesto[]>({
+    queryKey: ["presupuestos-hermanos", editando?.repeticion_id],
+    queryFn: async () => (await api.get(`/presupuestos/?repeticion_id=${editando!.repeticion_id}`)).data,
+    enabled: !!editando?.repeticion_id,
+  })
+
+  const { data: hermanosGrupo = [] } = useQuery<GrupoPresupuesto[]>({
+    queryKey: ["grupos-hermanos", editandoGrupo?.repeticion_id],
+    queryFn: async () => (await api.get(`/grupos-presupuesto/?repeticion_id=${editandoGrupo!.repeticion_id}`)).data,
+    enabled: !!editandoGrupo?.repeticion_id,
+  })
+
+  const mesesExistentesPres = hermanosPres.filter((h) => h.id !== editando?.id).map((h) => h.mes)
+  const mesesExistentesGrupo = hermanosGrupo.filter((h) => h.id !== editandoGrupo?.id).map((h) => h.mes)
+
   const { data: categoriasGasto = [] } = useQuery<Categoria[]>({
     queryKey: ["categorias"],
     queryFn: async () => (await api.get("/categorias/")).data,
@@ -65,11 +143,21 @@ export default function PaginaPresupuestos() {
   })
 
   const guardar = useMutation({
-    mutationFn: (d: Campos) => api.put("/presupuestos/", {
-      categoria_id: Number(d.categoria_id), importe: normalizarImporte(d.importe),
-      mes: Number(d.mes), anio: Number(d.anio),
-    }),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ["presupuestos"] }); setAbierto(false); toast.success("presupuesto guardado") },
+    mutationFn: async (d: Campos) => {
+      return api.put("/presupuestos/", {
+        categoria_id: Number(d.categoria_id), importe: normalizarImporte(d.importe),
+        mes: Number(d.mes), anio: Number(d.anio),
+        meses_extra: mesesExtraPres,
+        meses_eliminar: mesesEliminarPres,
+      })
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["presupuestos"] })
+      setAbierto(false)
+      setMesesExtraPres([])
+      setMesesEliminarPres([])
+      toast.success("presupuesto guardado")
+    },
   })
 
   const eliminar = useMutation({
@@ -79,21 +167,26 @@ export default function PaginaPresupuestos() {
 
   const guardarGrupo = useMutation({
     mutationFn: (d: CamposGrupo) => {
-      const body = {
-        nombre: d.nombre,
-        importe: normalizarImporte(d.importe),
-        mes: Number(d.mes),
-        anio: Number(d.anio),
-        categoria_ids: catIdsSeleccionadas,
-      }
       return editandoGrupo
-        ? api.patch(`/grupos-presupuesto/${editandoGrupo.id}`, { nombre: body.nombre, importe: body.importe, categoria_ids: body.categoria_ids })
-        : api.post("/grupos-presupuesto/", body)
+        ? api.patch(`/grupos-presupuesto/${editandoGrupo.id}`, {
+            nombre: d.nombre, importe: normalizarImporte(d.importe),
+            categoria_ids: catIdsSeleccionadas,
+            meses_extra: mesesExtraGrupo,
+            meses_eliminar: mesesEliminarGrupo,
+          })
+        : api.post("/grupos-presupuesto/", {
+            nombre: d.nombre, importe: normalizarImporte(d.importe),
+            mes: Number(d.mes), anio: Number(d.anio),
+            categoria_ids: catIdsSeleccionadas,
+            meses_extra: mesesExtraGrupo,
+          })
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["grupos-presupuesto"] })
       setAbiertoGrupo(false)
       setEditandoGrupo(null)
+      setMesesExtraGrupo([])
+      setMesesEliminarGrupo([])
       toast.success(editandoGrupo ? "grupo actualizado" : "grupo creado")
     },
   })
@@ -121,6 +214,8 @@ export default function PaginaPresupuestos() {
   function abrirNuevoGrupo() {
     setEditandoGrupo(null)
     setCatIdsSeleccionadas([])
+    setMesesExtraGrupo([])
+    setMesesEliminarGrupo([])
     formGrupo.reset({ mes: String(mes), anio: String(anio) })
     setAbiertoGrupo(true)
   }
@@ -128,6 +223,8 @@ export default function PaginaPresupuestos() {
   function abrirEditarGrupo(g: GrupoPresupuesto) {
     setEditandoGrupo(g)
     setCatIdsSeleccionadas(g.categorias.map((c) => c.id))
+    setMesesExtraGrupo([])
+    setMesesEliminarGrupo([])
     formGrupo.reset({ nombre: g.nombre, importe: String(g.importe), mes: String(g.mes), anio: String(g.anio) })
     setAbiertoGrupo(true)
   }
@@ -185,6 +282,7 @@ export default function PaginaPresupuestos() {
                       importe: String(p.importe),
                       mes: String(p.mes),
                       anio: String(p.anio),
+                      repetir_mensual: !!p.repeticion_id,
                     })
                     setAbierto(true)
                   }}
@@ -295,7 +393,7 @@ export default function PaginaPresupuestos() {
       )}
 
       {/* Dialog presupuesto individual */}
-      <Dialog open={abierto} onOpenChange={(v) => { setAbierto(v); if (!v) setEditando(null) }}>
+      <Dialog open={abierto} onOpenChange={(v) => { setAbierto(v); if (!v) { setEditando(null); setMesesExtraPres([]); setMesesEliminarPres([]) } }}>
         <DialogContent style={{ background: "#012030", border: "1px solid #1A3F54" }}>
           <DialogHeader>
             <DialogTitle style={{ color: "#5C8097", fontSize: "0.80rem", letterSpacing: "0.1em" }}>
@@ -333,6 +431,14 @@ export default function PaginaPresupuestos() {
                   </FormItem>
                 )} />
               </div>
+              <ChipsMeses
+                mesesSeleccionados={mesesExtraPres}
+                onChangeMesesExtra={setMesesExtraPres}
+                mesesEliminar={mesesEliminarPres}
+                onChangeMesesEliminar={setMesesEliminarPres}
+                mesBase={Number(form.watch("mes")) || mes}
+                mesesExistentes={mesesExistentesPres}
+              />
               <div className="flex justify-end gap-2 pt-1">
                 <Button type="button" variant="outline" onClick={() => setAbierto(false)}
                   style={{ background: "none", border: "1px solid #1A3F54", color: "#6B95A7" }}>
@@ -349,7 +455,7 @@ export default function PaginaPresupuestos() {
       </Dialog>
 
       {/* Dialog grupo */}
-      <Dialog open={abiertoGrupo} onOpenChange={(v) => { setAbiertoGrupo(v); if (!v) setEditandoGrupo(null) }}>
+      <Dialog open={abiertoGrupo} onOpenChange={(v) => { setAbiertoGrupo(v); if (!v) { setEditandoGrupo(null); setMesesExtraGrupo([]); setMesesEliminarGrupo([]) } }}>
         <DialogContent style={{ background: "#012030", border: "1px solid #1A3F54" }}>
           <DialogHeader>
             <DialogTitle style={{ color: "#5C8097", fontSize: "0.80rem", letterSpacing: "0.1em" }}>
@@ -403,6 +509,14 @@ export default function PaginaPresupuestos() {
                   ))}
                 </div>
               </div>
+              <ChipsMeses
+                mesesSeleccionados={mesesExtraGrupo}
+                onChangeMesesExtra={setMesesExtraGrupo}
+                mesesEliminar={mesesEliminarGrupo}
+                onChangeMesesEliminar={setMesesEliminarGrupo}
+                mesBase={Number(formGrupo.watch("mes")) || mes}
+                mesesExistentes={mesesExistentesGrupo}
+              />
               <div className="flex justify-end gap-2 pt-1">
                 <Button type="button" variant="outline" onClick={() => setAbiertoGrupo(false)}
                   style={{ background: "none", border: "1px solid #1A3F54", color: "#6B95A7" }}>

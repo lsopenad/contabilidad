@@ -4,7 +4,7 @@ from datetime import datetime
 from decimal import Decimal
 from typing import TYPE_CHECKING, Optional
 
-from sqlalchemy import Column, ForeignKey, Integer, Numeric, String, Table, UniqueConstraint, func
+from sqlalchemy import Column, ForeignKey, Integer, Numeric, String, Table, UniqueConstraint, func, Index
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from ..database import Base
@@ -30,6 +30,7 @@ class GrupoPresupuesto(Base):
     mes: Mapped[int] = mapped_column(Integer, nullable=False)
     anio: Mapped[int] = mapped_column(Integer, nullable=False)
     creado_en: Mapped[Optional[datetime]] = mapped_column(server_default=func.now())
+    repeticion_id: Mapped[Optional[str]] = mapped_column(String(36), nullable=True, index=True)
 
     categorias: Mapped[list["Categoria"]] = relationship(
         "Categoria", secondary=tabla_grupo_categorias, lazy="selectin"

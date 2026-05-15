@@ -12,6 +12,8 @@ class PresupuestoCrear(BaseModel):
     importe: Decimal
     mes: int
     anio: int
+    meses_extra: list[int] = []
+    meses_eliminar: list[int] = []
 
     @field_validator("importe")
     @classmethod
@@ -36,5 +38,6 @@ class PresupuestoRespuesta(BaseModel):
     anio: int
     creado_en: Optional[datetime] = None
     categoria: Optional[CategoriaRespuesta] = None
+    repeticion_id: Optional[str] = None
 
     model_config = {"from_attributes": True}
