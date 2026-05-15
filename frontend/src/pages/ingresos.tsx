@@ -181,7 +181,7 @@ export default function PaginaIngresos() {
       </table>
 
       <Dialog open={abierto} onOpenChange={(v) => { setAbierto(v); if (!v) setEditando(null) }}>
-        <DialogContent style={{ background: "#012030", border: "1px solid #2a2a2a" }}>
+        <DialogContent style={{ background: "#012030", border: "1px solid #1A3F54" }}>
           <DialogHeader>
             <DialogTitle style={{ color: "#00ED64", fontSize: "0.80rem", letterSpacing: "0.1em" }}>
               {editando ? "EDITAR INGRESO" : "NUEVO INGRESO"}
@@ -228,7 +228,7 @@ export default function PaginaIngresos() {
               )} />
               <div className="flex justify-end gap-2 pt-1">
                 <Button type="button" variant="outline" onClick={() => setAbierto(false)}
-                  style={{ background: "none", border: "1px solid #2a2a2a", color: "#3D6676" }}>
+                  style={{ background: "none", border: "1px solid #1A3F54", color: "#6B95A7" }}>
                   cancelar
                 </Button>
                 <Button type="submit" disabled={crear.isPending || editar.isPending}
