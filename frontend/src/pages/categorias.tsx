@@ -31,6 +31,7 @@ interface Categoria { id: number; nombre: string; tipo: Tipo }
 export default function PaginaCategorias() {
   const qc = useQueryClient()
   const [abierto, setAbierto] = useState(false)
+  const [editando, setEditando] = useState<Categoria | null>(null)
 
   const { data: categorias = [] } = useQuery<Categoria[]>({
     queryKey: ["categorias"],
@@ -45,6 +46,11 @@ export default function PaginaCategorias() {
   const eliminar = useMutation({
     mutationFn: (id: number) => api.delete(`/categorias/${id}`),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["categorias"] }),
+  })
+
+  const editar = useMutation({
+    mutationFn: ({ id, d }: { id: number; d: Campos }) => api.patch(`/categorias/${id}`, { nombre: d.nombre, tipo: d.tipo }),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ["categorias"] }); setAbierto(false); setEditando(null) },
   })
 
   const form = useForm<Campos>({
@@ -62,7 +68,7 @@ export default function PaginaCategorias() {
       <div className="flex items-center justify-between mb-4" style={{ borderBottom: "1px solid #1e1e1e", paddingBottom: "0.75rem" }}>
         <div style={{ color: "#c586c0", fontSize: "0.70rem", letterSpacing: "0.12em" }}>CATEGORÍAS</div>
         <Button
-          onClick={() => { form.reset({ nombre: "", tipo: "gasto" }); setAbierto(true) }}
+          onClick={() => { setEditando(null); form.reset({ nombre: "", tipo: "gasto" }); setAbierto(true) }}
           style={{ background: "#1e0d1e", color: "#c586c0", border: "1px solid #3a1a3a" }}
         >
           + nueva
@@ -94,7 +100,19 @@ export default function PaginaCategorias() {
               <td style={{ padding: "4px 12px" }}>
                 <span style={{ color: colorTipo[c.tipo], fontSize: "0.70rem" }}>{c.tipo}</span>
               </td>
-              <td style={{ padding: "4px 12px" }}>
+              <td style={{ padding: "4px 12px", whiteSpace: "nowrap" }}>
+                <button
+                  onClick={() => {
+                    setEditando(c)
+                    form.reset({ nombre: c.nombre, tipo: c.tipo })
+                    setAbierto(true)
+                  }}
+                  style={{ color: "#333", background: "none", border: "none", cursor: "pointer", fontSize: "0.75rem", marginRight: "0.5rem" }}
+                  onMouseEnter={(e) => (e.currentTarget.style.color = "#c586c0")}
+                  onMouseLeave={(e) => (e.currentTarget.style.color = "#333")}
+                >
+                  [e]
+                </button>
                 <button
                   onClick={() => eliminar.mutate(c.id)}
                   style={{ color: "#333", background: "none", border: "none", cursor: "pointer", fontSize: "0.75rem" }}
@@ -109,15 +127,17 @@ export default function PaginaCategorias() {
         </tbody>
       </table>
 
-      <Dialog open={abierto} onOpenChange={setAbierto}>
+      <Dialog open={abierto} onOpenChange={(v) => { setAbierto(v); if (!v) setEditando(null) }}>
         <DialogContent style={{ background: "#111", border: "1px solid #2a2a2a" }}>
           <DialogHeader>
             <DialogTitle style={{ color: "#c586c0", fontSize: "0.80rem", letterSpacing: "0.1em" }}>
-              NUEVA CATEGORÍA
+              {editando ? "EDITAR CATEGORÍA" : "NUEVA CATEGORÍA"}
             </DialogTitle>
           </DialogHeader>
           <Form {...form}>
-            <form onSubmit={form.handleSubmit((d) => crear.mutate(d))} className="space-y-3">
+            <form onSubmit={form.handleSubmit((d) =>
+              editando ? editar.mutate({ id: editando.id, d }) : crear.mutate(d)
+            )} className="space-y-3">
               <FormField control={form.control} name="nombre" render={({ field }) => (
                 <FormItem>
                   <FormLabel>nombre</FormLabel>
@@ -146,9 +166,9 @@ export default function PaginaCategorias() {
                   style={{ background: "none", border: "1px solid #2a2a2a", color: "#555" }}>
                   cancelar
                 </Button>
-                <Button type="submit" disabled={crear.isPending}
+                <Button type="submit" disabled={crear.isPending || editar.isPending}
                   style={{ background: "#1e0d1e", color: "#c586c0", border: "1px solid #3a1a3a" }}>
-                  {crear.isPending ? "..." : "guardar"}
+                  {crear.isPending || editar.isPending ? "..." : "guardar"}
                 </Button>
               </div>
             </form>

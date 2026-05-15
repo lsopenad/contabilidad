@@ -30,6 +30,7 @@ interface Suscripcion {
 export default function PaginaSuscripciones() {
   const qc = useQueryClient()
   const [abierto, setAbierto] = useState(false)
+  const [editando, setEditando] = useState<Suscripcion | null>(null)
 
   const { data: suscripciones = [] } = useQuery<Suscripcion[]>({
     queryKey: ["suscripciones"],
@@ -63,6 +64,17 @@ export default function PaginaSuscripciones() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ["suscripciones"] }),
   })
 
+  const editar = useMutation({
+    mutationFn: ({ id, d }: { id: number; d: Campos }) => api.patch(`/suscripciones/${id}`, {
+      nombre: d.nombre,
+      importe: d.importe,
+      categoria_id: d.categoria_id ? Number(d.categoria_id) : null,
+      dia_cobro: d.dia_cobro ? Number(d.dia_cobro) : null,
+      notas: d.notas || null,
+    }),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ["suscripciones"] }); setAbierto(false); setEditando(null) },
+  })
+
   const form = useForm<Campos>({ resolver: zodResolver(esquema) })
 
   const totalActivas = suscripciones.filter((s) => s.activa).reduce((acc, s) => acc + Number(s.importe), 0)
@@ -91,7 +103,7 @@ export default function PaginaSuscripciones() {
             {formatearEuros(totalActivas)}<span style={{ color: "#333", fontSize: "0.70rem" }}>/mes</span>
           </span>
           <Button
-            onClick={() => { form.reset(); setAbierto(true) }}
+            onClick={() => { setEditando(null); form.reset(); setAbierto(true) }}
             style={{ background: "#38260e", color: "#ce9178", border: "1px solid #4a3010" }}
           >
             + nueva
@@ -139,7 +151,25 @@ export default function PaginaSuscripciones() {
                   {s.activa ? "[activa]" : "[inactiva]"}
                 </button>
               </td>
-              <td style={{ padding: "4px 12px" }}>
+              <td style={{ padding: "4px 12px", whiteSpace: "nowrap" }}>
+                <button
+                  onClick={() => {
+                    setEditando(s)
+                    form.reset({
+                      nombre: s.nombre,
+                      importe: String(s.importe),
+                      categoria_id: s.categoria ? String(s.categoria.id) : undefined,
+                      dia_cobro: s.dia_cobro ? String(s.dia_cobro) : undefined,
+                      notas: s.notas ?? undefined,
+                    })
+                    setAbierto(true)
+                  }}
+                  style={{ color: "#333", background: "none", border: "none", cursor: "pointer", fontSize: "0.80rem", marginRight: "0.5rem" }}
+                  onMouseEnter={(e) => (e.currentTarget.style.color = "#ce9178")}
+                  onMouseLeave={(e) => (e.currentTarget.style.color = "#333")}
+                >
+                  [e]
+                </button>
                 <button
                   onClick={() => eliminar.mutate(s.id)}
                   style={{ color: "#333", background: "none", border: "none", cursor: "pointer", fontSize: "0.80rem" }}
@@ -154,15 +184,17 @@ export default function PaginaSuscripciones() {
         </tbody>
       </table>
 
-      <Dialog open={abierto} onOpenChange={setAbierto}>
+      <Dialog open={abierto} onOpenChange={(v) => { setAbierto(v); if (!v) setEditando(null) }}>
         <DialogContent style={{ background: "#111", border: "1px solid #2a2a2a" }}>
           <DialogHeader>
             <DialogTitle style={{ color: "#ce9178", fontSize: "0.80rem", letterSpacing: "0.1em" }}>
-              NUEVA SUSCRIPCIÓN
+              {editando ? "EDITAR SUSCRIPCIÓN" : "NUEVA SUSCRIPCIÓN"}
             </DialogTitle>
           </DialogHeader>
           <Form {...form}>
-            <form onSubmit={form.handleSubmit((d) => crear.mutate(d))} className="space-y-3">
+            <form onSubmit={form.handleSubmit((d) =>
+              editando ? editar.mutate({ id: editando.id, d }) : crear.mutate(d)
+            )} className="space-y-3">
               <FormField control={form.control} name="nombre" render={({ field }) => (
                 <FormItem><FormLabel>nombre</FormLabel>
                   <FormControl><Input placeholder="Spotify, Netflix…" {...field} /></FormControl>
@@ -202,9 +234,9 @@ export default function PaginaSuscripciones() {
                   style={{ background: "none", border: "1px solid #2a2a2a", color: "#555" }}>
                   cancelar
                 </Button>
-                <Button type="submit" disabled={crear.isPending}
+                <Button type="submit" disabled={crear.isPending || editar.isPending}
                   style={{ background: "#38260e", color: "#ce9178", border: "1px solid #4a3010" }}>
-                  {crear.isPending ? "..." : "guardar"}
+                  {crear.isPending || editar.isPending ? "..." : "guardar"}
                 </Button>
               </div>
             </form>

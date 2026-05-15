@@ -22,13 +22,14 @@ const esquema = z.object({
 
 type Campos = z.infer<typeof esquema>
 interface Categoria { id: number; nombre: string }
-interface Presupuesto { id: number; importe: string; mes: number; anio: number; categoria: Categoria }
+interface Presupuesto { id: number; importe: string; mes: number; anio: number; categoria_id: number; categoria: Categoria }
 
 const MESES = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"]
 
 export default function PaginaPresupuestos() {
   const qc = useQueryClient()
   const [abierto, setAbierto] = useState(false)
+  const [editando, setEditando] = useState<Presupuesto | null>(null)
   const { mes, anio } = useMes()
 
   const { data: presupuestos = [] } = useQuery<Presupuesto[]>({
@@ -71,7 +72,7 @@ export default function PaginaPresupuestos() {
           <SelectorMes />
         </div>
         <Button
-          onClick={() => { form.reset({ mes: String(mes), anio: String(anio) }); setAbierto(true) }}
+          onClick={() => { setEditando(null); form.reset({ mes: String(mes), anio: String(anio) }); setAbierto(true) }}
           style={{ background: "#0a1525", color: "#569cd6", border: "1px solid #1a3050" }}
         >
           + nuevo
@@ -101,7 +102,24 @@ export default function PaginaPresupuestos() {
             >
               <td style={{ padding: "4px 12px", color: "#569cd6" }}>{p.categoria.nombre}</td>
               <td style={{ padding: "4px 12px", color: "#569cd6" }}>{formatearEuros(p.importe)}</td>
-              <td style={{ padding: "4px 12px" }}>
+              <td style={{ padding: "4px 12px", whiteSpace: "nowrap" }}>
+                <button
+                  onClick={() => {
+                    setEditando(p)
+                    form.reset({
+                      categoria_id: String(p.categoria_id),
+                      importe: String(p.importe),
+                      mes: String(p.mes),
+                      anio: String(p.anio),
+                    })
+                    setAbierto(true)
+                  }}
+                  style={{ color: "#333", background: "none", border: "none", cursor: "pointer", fontSize: "0.80rem", marginRight: "0.5rem" }}
+                  onMouseEnter={(e) => (e.currentTarget.style.color = "#569cd6")}
+                  onMouseLeave={(e) => (e.currentTarget.style.color = "#333")}
+                >
+                  [e]
+                </button>
                 <button
                   onClick={() => eliminar.mutate(p.id)}
                   style={{ color: "#333", background: "none", border: "none", cursor: "pointer", fontSize: "0.80rem" }}
@@ -116,11 +134,11 @@ export default function PaginaPresupuestos() {
         </tbody>
       </table>
 
-      <Dialog open={abierto} onOpenChange={setAbierto}>
+      <Dialog open={abierto} onOpenChange={(v) => { setAbierto(v); if (!v) setEditando(null) }}>
         <DialogContent style={{ background: "#111", border: "1px solid #2a2a2a" }}>
           <DialogHeader>
             <DialogTitle style={{ color: "#569cd6", fontSize: "0.80rem", letterSpacing: "0.1em" }}>
-              NUEVO PRESUPUESTO
+              {editando ? "EDITAR PRESUPUESTO" : "NUEVO PRESUPUESTO"}
             </DialogTitle>
           </DialogHeader>
           <Form {...form}>

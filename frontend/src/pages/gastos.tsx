@@ -27,6 +27,7 @@ interface Gasto { id: number; importe: string; fecha: string; descripcion?: stri
 export default function PaginaGastos() {
   const qc = useQueryClient()
   const [abierto, setAbierto] = useState(false)
+  const [editando, setEditando] = useState<Gasto | null>(null)
   const { mes, anio } = useMes()
 
   const { data: gastos = [] } = useQuery<Gasto[]>({
@@ -51,6 +52,15 @@ export default function PaginaGastos() {
   const eliminar = useMutation({
     mutationFn: (id: number) => api.delete(`/gastos/${id}`),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["gastos"] }),
+  })
+
+  const editar = useMutation({
+    mutationFn: ({ id, d }: { id: number; d: Campos }) => api.patch(`/gastos/${id}`, {
+      importe: d.importe, fecha: d.fecha,
+      categoria_id: d.categoria_id ? Number(d.categoria_id) : null,
+      descripcion: d.descripcion || null,
+    }),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ["gastos"] }); setAbierto(false); setEditando(null) },
   })
 
   const form = useForm<Campos>({
@@ -82,7 +92,7 @@ export default function PaginaGastos() {
             {formatearEuros(total)}
           </span>
           <Button
-            onClick={() => { form.reset({ fecha: new Date().toISOString().slice(0, 10) }); setAbierto(true) }}
+            onClick={() => { setEditando(null); form.reset({ fecha: new Date().toISOString().slice(0, 10) }); setAbierto(true) }}
             style={{ background: "#3b1010", color: "#f48771", border: "1px solid #5a1a1a" }}
           >
             + nuevo
@@ -117,7 +127,24 @@ export default function PaginaGastos() {
               <td style={{ padding: "4px 12px", color: "#f48771" }}>{formatearEuros(g.importe)}</td>
               <td style={{ padding: "4px 12px", color: "#555" }}>{g.categoria?.nombre ?? "—"}</td>
               <td style={{ padding: "4px 12px", color: "#444" }}>{g.descripcion ?? "—"}</td>
-              <td style={{ padding: "4px 12px" }}>
+              <td style={{ padding: "4px 12px", whiteSpace: "nowrap" }}>
+                <button
+                  onClick={() => {
+                    setEditando(g)
+                    form.reset({
+                      importe: g.importe,
+                      fecha: g.fecha,
+                      categoria_id: g.categoria ? String(g.categoria.id) : undefined,
+                      descripcion: g.descripcion ?? undefined,
+                    })
+                    setAbierto(true)
+                  }}
+                  style={{ color: "#333", background: "none", border: "none", cursor: "pointer", fontSize: "0.80rem", marginRight: "0.5rem" }}
+                  onMouseEnter={(e) => (e.currentTarget.style.color = "#f48771")}
+                  onMouseLeave={(e) => (e.currentTarget.style.color = "#333")}
+                >
+                  [e]
+                </button>
                 <button
                   onClick={() => eliminar.mutate(g.id)}
                   style={{ color: "#333", background: "none", border: "none", cursor: "pointer", fontSize: "0.80rem" }}
@@ -132,15 +159,17 @@ export default function PaginaGastos() {
         </tbody>
       </table>
 
-      <Dialog open={abierto} onOpenChange={setAbierto}>
+      <Dialog open={abierto} onOpenChange={(v) => { setAbierto(v); if (!v) setEditando(null) }}>
         <DialogContent style={{ background: "#111", border: "1px solid #2a2a2a" }}>
           <DialogHeader>
             <DialogTitle style={{ color: "#f48771", fontSize: "0.80rem", letterSpacing: "0.1em" }}>
-              NUEVO GASTO
+              {editando ? "EDITAR GASTO" : "NUEVO GASTO"}
             </DialogTitle>
           </DialogHeader>
           <Form {...form}>
-            <form onSubmit={form.handleSubmit((d) => crear.mutate(d))} className="space-y-3">
+            <form onSubmit={form.handleSubmit((d) =>
+              editando ? editar.mutate({ id: editando.id, d }) : crear.mutate(d)
+            )} className="space-y-3">
               <FormField control={form.control} name="importe" render={({ field }) => (
                 <FormItem><FormLabel>importe (€)</FormLabel>
                   <FormControl><Input placeholder="0.00" {...field} /></FormControl>
@@ -175,9 +204,9 @@ export default function PaginaGastos() {
                   style={{ background: "none", border: "1px solid #2a2a2a", color: "#555" }}>
                   cancelar
                 </Button>
-                <Button type="submit" disabled={crear.isPending}
+                <Button type="submit" disabled={crear.isPending || editar.isPending}
                   style={{ background: "#3b1010", color: "#f48771", border: "1px solid #5a1a1a" }}>
-                  {crear.isPending ? "..." : "guardar"}
+                  {crear.isPending || editar.isPending ? "..." : "guardar"}
                 </Button>
               </div>
             </form>
