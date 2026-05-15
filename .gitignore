@@ -1,10 +1,8 @@
 # ── Entorno ──────────────────────────────────────────────────────────────────
 .env
+.env.local
+.env.*.local
 .envrc
-.venv
-venv/
-env/
-ENV/
 
 # ── Python ───────────────────────────────────────────────────────────────────
 __pycache__/
@@ -18,6 +16,10 @@ build/
 dist/
 .eggs/
 pip-log.txt
+.venv/
+venv/
+env/
+ENV/
 
 # ── Tests / cobertura ────────────────────────────────────────────────────────
 .coverage
@@ -37,12 +39,35 @@ dmypy.json
 .pytype/
 .ruff_cache/
 
-# ── Alembic ──────────────────────────────────────────────────────────────────
-# No ignorar alembic/versions/ — las migraciones se versionan
+# ── Node / pnpm ──────────────────────────────────────────────────────────────
+node_modules/
+.pnp
+.pnp.js
+.pnp.cjs
+
+# ── Frontend build ───────────────────────────────────────────────────────────
+frontend/dist/
+frontend/dist-ssr/
+frontend/.vite/
+frontend/build/
+# Directorio generado erróneamente por shadcn al instalar sin tsconfig resuelto
+frontend/@/
+
+# ── Vite / React ─────────────────────────────────────────────────────────────
+*.local
 
 # ── Exportaciones ────────────────────────────────────────────────────────────
 *.xlsx
 *.xls
+
+# ── Logs ─────────────────────────────────────────────────────────────────────
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
 
 # ── macOS ────────────────────────────────────────────────────────────────────
 .DS_Store
@@ -61,3 +86,5 @@ dmypy.json
 .vscode/
 *.swp
 *~
+*.sublime-project
+*.sublime-workspace
