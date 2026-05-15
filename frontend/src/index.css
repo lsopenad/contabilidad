@@ -1,0 +1,149 @@
+@import "tailwindcss";
+@plugin "tailwindcss-animate";
+
+@custom-variant dark (&:is(.dark *));
+
+/* ── Tokens ──────────────────────────────────────────────────────────────── */
+@theme inline {
+  --color-background:          var(--background);
+  --color-foreground:          var(--foreground);
+  --color-card:                var(--card);
+  --color-card-foreground:     var(--card-foreground);
+  --color-popover:             var(--popover);
+  --color-popover-foreground:  var(--popover-foreground);
+  --color-primary:             var(--primary);
+  --color-primary-foreground:  var(--primary-foreground);
+  --color-secondary:           var(--secondary);
+  --color-secondary-foreground:var(--secondary-foreground);
+  --color-muted:               var(--muted);
+  --color-muted-foreground:    var(--muted-foreground);
+  --color-accent:              var(--accent);
+  --color-accent-foreground:   var(--accent-foreground);
+  --color-destructive:         var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border:              var(--border);
+  --color-input:               var(--input);
+  --color-ring:                var(--ring);
+  --color-positive:            var(--positive);
+  --color-negative:            var(--negative);
+  --color-warning:             var(--warning);
+
+  --radius-sm: 0px;
+  --radius-md: 1px;
+  --radius-lg: 1px;
+  --radius-xl: 1px;
+  --radius:    1px;
+}
+
+:root {
+  --radius: 1px;
+
+  /* Terminal dark palette */
+  --background:           #0c0c0c;
+  --foreground:           #aaaaaa;
+  --card:                 #111111;
+  --card-foreground:      #aaaaaa;
+  --popover:              #161616;
+  --popover-foreground:   #aaaaaa;
+
+  /* Primary = teal terminal */
+  --primary:              #4ec9b0;
+  --primary-foreground:   #000000;
+
+  --secondary:            #1a1a1a;
+  --secondary-foreground: #666666;
+
+  --muted:                #111111;
+  --muted-foreground:     #555555;
+
+  --accent:               #1a1a1a;
+  --accent-foreground:    #888888;
+
+  --destructive:          #f48771;
+  --destructive-foreground: #000000;
+
+  --border:               #1e1e1e;
+  --input:                #0f0f0f;
+  --ring:                 #4ec9b0;
+
+  /* Semantic */
+  --positive:             #4ec9b0;
+  --negative:             #f48771;
+  --warning:              #ce9178;
+}
+
+/* ── Base ────────────────────────────────────────────────────────────────── */
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+    font-family: 'SF Mono', 'Menlo', 'Monaco', 'Cascadia Mono',
+                 ui-monospace, 'Courier New', monospace !important;
+    border-radius: 1px !important;
+    box-shadow: none !important;
+  }
+
+  body {
+    background: var(--background);
+    color: var(--foreground);
+    font-size: 0.82rem;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Scrollbars */
+  ::-webkit-scrollbar       { width: 4px; height: 4px; }
+  ::-webkit-scrollbar-track { background: #080808; }
+  ::-webkit-scrollbar-thumb { background: #222; border-radius: 0; }
+  ::-webkit-scrollbar-thumb:hover { background: #333; }
+
+  /* Table headers — uppercase tracked */
+  th {
+    font-size: 0.65rem !important;
+    letter-spacing: 0.12em !important;
+    text-transform: uppercase !important;
+    color: var(--muted-foreground) !important;
+  }
+
+  /* Inputs */
+  input, select, textarea {
+    background: var(--input) !important;
+    color: var(--foreground) !important;
+    font-size: 0.82rem !important;
+    border-color: #222 !important;
+  }
+  input:focus, select:focus, textarea:focus {
+    border-color: var(--primary) !important;
+    outline: none !important;
+  }
+  input::placeholder { color: #333 !important; }
+
+  /* Buttons — squared, tracked */
+  button {
+    letter-spacing: 0.06em !important;
+    font-size: 0.75rem !important;
+    border-radius: 1px !important;
+  }
+
+  /* Labels */
+  label {
+    color: var(--muted-foreground) !important;
+    font-size: 0.72rem !important;
+    letter-spacing: 0.06em;
+  }
+}
+
+/* ── Utilities ───────────────────────────────────────────────────────────── */
+@layer utilities {
+  .text-positive { color: var(--positive) !important; }
+  .text-negative { color: var(--negative) !important; }
+  .text-warning  { color: var(--warning)  !important; }
+
+  .bg-positive-subtle { background: #0d3028 !important; }
+  .bg-negative-subtle { background: #3b1010 !important; }
+  .bg-warning-subtle  { background: #38260e !important; }
+
+  /* Terminal cursor blink for active nav */
+  .nav-active::before {
+    content: '> ';
+    color: var(--primary);
+  }
+}
