@@ -17,7 +17,7 @@ export default function Layout() {
       <div className="flex h-screen" style={{ background: "#0c0c0c" }}>
         <aside className="w-48 flex flex-col" style={{ borderRight: "1px solid #1e1e1e" }}>
           <div className="p-4" style={{ borderBottom: "1px solid #1e1e1e" }}>
-            <span style={{ color: "#4ec9b0", fontSize: "0.72rem", letterSpacing: "0.1em" }}>
+            <span style={{ color: "#4ec9b0", fontSize: "0.77rem", letterSpacing: "0.1em" }}>
               CONTABILIDAD
             </span>
           </div>
@@ -48,7 +48,7 @@ export default function Layout() {
           </nav>
 
           <div className="p-3" style={{ borderTop: "1px solid #1e1e1e" }}>
-            <span style={{ color: "#2a2a2a", fontSize: "0.6rem" }}>v2.0.0</span>
+            <span style={{ color: "#2a2a2a", fontSize: "0.70rem" }}>v2.0.0</span>
           </div>
         </aside>
 

@@ -54,7 +54,7 @@ export function SelectorMes() {
 
   const btn = {
     background: "none", border: "none", cursor: "pointer",
-    color: "#444", fontSize: "0.65rem", padding: "0 2px", lineHeight: 1,
+    color: "#444", fontSize: "0.70rem", padding: "0 2px", lineHeight: 1,
   }
 
   return (
@@ -63,7 +63,7 @@ export function SelectorMes() {
         onMouseEnter={(e) => (e.currentTarget.style.color = "#888")}
         onMouseLeave={(e) => (e.currentTarget.style.color = "#444")}
       >[&lt;]</button>
-      <span style={{ color: "#555", fontSize: "0.65rem", minWidth: "5.5rem", textAlign: "center" }}>
+      <span style={{ color: "#555", fontSize: "0.70rem", minWidth: "5.5rem", textAlign: "center" }}>
         {etiqueta}
       </span>
       <button style={btn} onClick={irSiguiente}

@@ -61,7 +61,7 @@ export default function PaginaPresupuestos() {
     <div className="p-6">
       <div className="flex items-center justify-between mb-4" style={{ borderBottom: "1px solid #1e1e1e", paddingBottom: "0.75rem" }}>
         <div>
-          <div style={{ color: "#aaa", fontSize: "0.65rem", letterSpacing: "0.12em" }}>PRESUPUESTOS</div>
+          <div style={{ color: "#aaa", fontSize: "0.70rem", letterSpacing: "0.12em" }}>PRESUPUESTOS</div>
           <SelectorMes />
         </div>
         <Button
@@ -98,7 +98,7 @@ export default function PaginaPresupuestos() {
               <td style={{ padding: "4px 12px" }}>
                 <button
                   onClick={() => eliminar.mutate(p.id)}
-                  style={{ color: "#333", background: "none", border: "none", cursor: "pointer", fontSize: "0.7rem" }}
+                  style={{ color: "#333", background: "none", border: "none", cursor: "pointer", fontSize: "0.80rem" }}
                   onMouseEnter={(e) => (e.currentTarget.style.color = "#f48771")}
                   onMouseLeave={(e) => (e.currentTarget.style.color = "#333")}
                 >
@@ -113,7 +113,7 @@ export default function PaginaPresupuestos() {
       <Dialog open={abierto} onOpenChange={setAbierto}>
         <DialogContent style={{ background: "#111", border: "1px solid #2a2a2a" }}>
           <DialogHeader>
-            <DialogTitle style={{ color: "#aaa", fontSize: "0.75rem", letterSpacing: "0.1em" }}>
+            <DialogTitle style={{ color: "#aaa", fontSize: "0.80rem", letterSpacing: "0.1em" }}>
               NUEVO PRESUPUESTO
             </DialogTitle>
           </DialogHeader>

@@ -34,7 +34,7 @@ export default function PaginaInformes() {
   return (
     <div className="p-6">
       <div className="mb-4" style={{ borderBottom: "1px solid #1e1e1e", paddingBottom: "0.75rem" }}>
-        <span style={{ color: "#aaa", fontSize: "0.65rem", letterSpacing: "0.12em" }}>INFORMES {anio}</span>
+        <span style={{ color: "#aaa", fontSize: "0.70rem", letterSpacing: "0.12em" }}>INFORMES {anio}</span>
       </div>
 
       {informe && (
@@ -46,8 +46,8 @@ export default function PaginaInformes() {
               color: Number(informe.balance) >= 0 ? "#4ec9b0" : "#f48771" },
           ].map(({ label, valor, color }) => (
             <div key={label} style={{ borderLeft: `2px solid ${color}`, paddingLeft: "0.75rem" }}>
-              <div style={{ color: "#333", fontSize: "0.6rem", letterSpacing: "0.1em", textTransform: "uppercase" }}>{label}</div>
-              <div style={{ color, fontSize: "1.1rem", fontWeight: 600 }}>{formatearEuros(valor)}</div>
+              <div style={{ color: "#333", fontSize: "0.70rem", letterSpacing: "0.1em", textTransform: "uppercase" }}>{label}</div>
+              <div style={{ color, fontSize: "1.15rem", fontWeight: 600 }}>{formatearEuros(valor)}</div>
             </div>
           ))}
         </div>
@@ -78,7 +78,7 @@ export default function PaginaInformes() {
                 <td style={{ padding: "4px 12px" }}>
                   <button
                     onClick={() => exportar(m.mes)}
-                    style={{ color: "#333", background: "none", border: "none", cursor: "pointer", fontSize: "0.7rem" }}
+                    style={{ color: "#333", background: "none", border: "none", cursor: "pointer", fontSize: "0.80rem" }}
                     onMouseEnter={(e) => (e.currentTarget.style.color = "#4ec9b0")}
                     onMouseLeave={(e) => (e.currentTarget.style.color = "#333")}
                     title="exportar xlsx"

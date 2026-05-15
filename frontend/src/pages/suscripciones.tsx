@@ -70,12 +70,12 @@ export default function PaginaSuscripciones() {
     <div className="p-6">
       <div className="flex items-center justify-between mb-4" style={{ borderBottom: "1px solid #1e1e1e", paddingBottom: "0.75rem" }}>
         <div>
-          <div style={{ color: "#ce9178", fontSize: "0.65rem", letterSpacing: "0.12em" }}>SUSCRIPCIONES</div>
-          <div style={{ color: "#333", fontSize: "0.65rem" }}>recurrentes mensuales</div>
+          <div style={{ color: "#ce9178", fontSize: "0.70rem", letterSpacing: "0.12em" }}>SUSCRIPCIONES</div>
+          <div style={{ color: "#333", fontSize: "0.70rem" }}>recurrentes mensuales</div>
         </div>
         <div className="flex items-center gap-4">
-          <span style={{ color: "#ce9178", fontSize: "0.95rem", fontWeight: 600 }}>
-            {formatearEuros(totalActivas)}<span style={{ color: "#333", fontSize: "0.65rem" }}>/mes</span>
+          <span style={{ color: "#ce9178", fontSize: "1.00rem", fontWeight: 600 }}>
+            {formatearEuros(totalActivas)}<span style={{ color: "#333", fontSize: "0.70rem" }}>/mes</span>
           </span>
           <Button
             onClick={() => { form.reset(); setAbierto(true) }}
@@ -117,7 +117,7 @@ export default function PaginaSuscripciones() {
               <td style={{ padding: "4px 12px" }}>
                 <button
                   onClick={() => toggleActiva.mutate({ id: s.id, activa: !s.activa })}
-                  style={{ color: s.activa ? "#4ec9b0" : "#333", background: "none", border: "none", cursor: "pointer", fontSize: "0.7rem" }}
+                  style={{ color: s.activa ? "#4ec9b0" : "#333", background: "none", border: "none", cursor: "pointer", fontSize: "0.80rem" }}
                 >
                   {s.activa ? "[activa]" : "[inactiva]"}
                 </button>
@@ -125,7 +125,7 @@ export default function PaginaSuscripciones() {
               <td style={{ padding: "4px 12px" }}>
                 <button
                   onClick={() => eliminar.mutate(s.id)}
-                  style={{ color: "#333", background: "none", border: "none", cursor: "pointer", fontSize: "0.7rem" }}
+                  style={{ color: "#333", background: "none", border: "none", cursor: "pointer", fontSize: "0.80rem" }}
                   onMouseEnter={(e) => (e.currentTarget.style.color = "#f48771")}
                   onMouseLeave={(e) => (e.currentTarget.style.color = "#333")}
                 >
@@ -140,7 +140,7 @@ export default function PaginaSuscripciones() {
       <Dialog open={abierto} onOpenChange={setAbierto}>
         <DialogContent style={{ background: "#111", border: "1px solid #2a2a2a" }}>
           <DialogHeader>
-            <DialogTitle style={{ color: "#ce9178", fontSize: "0.75rem", letterSpacing: "0.1em" }}>
+            <DialogTitle style={{ color: "#ce9178", fontSize: "0.80rem", letterSpacing: "0.1em" }}>
               NUEVA SUSCRIPCIÓN
             </DialogTitle>
           </DialogHeader>

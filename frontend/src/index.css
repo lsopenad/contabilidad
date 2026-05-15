@@ -85,7 +85,7 @@
   body {
     background: var(--background);
     color: var(--foreground);
-    font-size: 0.82rem;
+    font-size: 0.87rem;
     -webkit-font-smoothing: antialiased;
   }
 
@@ -97,7 +97,7 @@
 
   /* Table headers — uppercase tracked */
   th {
-    font-size: 0.65rem !important;
+    font-size: 0.70rem !important;
     letter-spacing: 0.12em !important;
     text-transform: uppercase !important;
     color: var(--muted-foreground) !important;
@@ -107,7 +107,7 @@
   input, select, textarea {
     background: var(--input) !important;
     color: var(--foreground) !important;
-    font-size: 0.82rem !important;
+    font-size: 0.87rem !important;
     border-color: #222 !important;
   }
   input:focus, select:focus, textarea:focus {
@@ -119,14 +119,14 @@
   /* Buttons — squared, tracked */
   button {
     letter-spacing: 0.06em !important;
-    font-size: 0.75rem !important;
+    font-size: 0.80rem !important;
     border-radius: 1px !important;
   }
 
   /* Labels */
   label {
     color: var(--muted-foreground) !important;
-    font-size: 0.72rem !important;
+    font-size: 0.77rem !important;
     letter-spacing: 0.06em;
   }
 }
