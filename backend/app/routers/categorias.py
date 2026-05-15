@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..database import obtener_sesion
@@ -57,5 +58,12 @@ async def eliminar_categoria(
     categoria = await db.get(Categoria, categoria_id)
     if not categoria:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Categoría no encontrada")
-    await db.delete(categoria)
-    await db.commit()
+    try:
+        await db.delete(categoria)
+        await db.commit()
+    except IntegrityError:
+        await db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="No se puede eliminar: la categoría tiene registros asociados",
+        )

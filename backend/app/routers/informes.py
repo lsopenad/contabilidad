@@ -46,9 +46,38 @@ async def informe_anual(
     anio: int,
     db: AsyncSession = Depends(obtener_sesion),
 ) -> InformeAnual:
-    meses = [await _resumen_mes(db, mes, anio) for mes in range(1, 13)]
-    total_ingresos = sum(m.total_ingresos for m in meses)
-    total_gastos = sum(m.total_gastos for m in meses)
+    filas_ingresos = (await db.execute(
+        select(
+            extract("month", Ingreso.fecha).label("mes"),
+            func.sum(Ingreso.importe).label("total"),
+        )
+        .where(extract("year", Ingreso.fecha) == anio)
+        .group_by(extract("month", Ingreso.fecha))
+    )).all()
+
+    filas_gastos = (await db.execute(
+        select(
+            extract("month", Gasto.fecha).label("mes"),
+            func.sum(Gasto.importe).label("total"),
+        )
+        .where(extract("year", Gasto.fecha) == anio)
+        .group_by(extract("month", Gasto.fecha))
+    )).all()
+
+    ingresos_por_mes = {int(f.mes): Decimal(str(f.total)) for f in filas_ingresos}
+    gastos_por_mes = {int(f.mes): Decimal(str(f.total)) for f in filas_gastos}
+
+    meses = [
+        ResumenMes(
+            mes=m,
+            anio=anio,
+            total_ingresos=ingresos_por_mes.get(m, Decimal("0")),
+            total_gastos=gastos_por_mes.get(m, Decimal("0")),
+        )
+        for m in range(1, 13)
+    ]
+    total_ingresos = sum(r.total_ingresos for r in meses)
+    total_gastos = sum(r.total_gastos for r in meses)
     return InformeAnual(
         anio=anio,
         meses=meses,

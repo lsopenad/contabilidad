@@ -5,7 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..database import obtener_sesion
 from ..modelos.presupuesto import Presupuesto
-from ..schemas.presupuesto import PresupuestoActualizar, PresupuestoCrear, PresupuestoRespuesta
+from ..schemas.presupuesto import PresupuestoCrear, PresupuestoRespuesta
 
 router = APIRouter()
 
