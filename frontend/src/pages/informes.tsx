@@ -38,7 +38,7 @@ export default function PaginaInformes() {
   return (
     <div className="p-6">
       <div className="flex items-center justify-between mb-4" style={{ borderBottom: "1px solid #0F3244", paddingBottom: "0.75rem" }}>
-        <span style={{ color: "#5C8097", fontSize: "0.70rem", letterSpacing: "0.12em" }}>INFORMES</span>
+        <span style={{ color: "#A5B4FC", fontSize: "0.70rem", letterSpacing: "0.12em" }}>INFORMES</span>
         <div className="flex items-center gap-2">
           <button
             onClick={() => setAnio((a) => a - 1)}

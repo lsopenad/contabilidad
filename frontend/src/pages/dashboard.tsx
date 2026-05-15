@@ -57,7 +57,7 @@ export default function PaginaDashboard() {
   return (
     <div className="p-6 space-y-6">
       <div style={{ borderBottom: "1px solid #0F3244", paddingBottom: "0.75rem" }}>
-        <span style={{ color: "#5C8097", fontSize: "0.70rem", letterSpacing: "0.12em" }}>
+        <span style={{ color: "#A5B4FC", fontSize: "0.70rem", letterSpacing: "0.12em" }}>
           DASHBOARD
         </span>
         <SelectorMes />

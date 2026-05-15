@@ -91,7 +91,7 @@ export default function PaginaSuscripciones() {
     <div className="p-6">
       <div className="flex items-center justify-between mb-4" style={{ borderBottom: "1px solid #0F3244", paddingBottom: "0.75rem" }}>
         <div>
-          <div style={{ color: "#5C8097", fontSize: "0.70rem", letterSpacing: "0.12em" }}>SUSCRIPCIONES</div>
+          <div style={{ color: "#A5B4FC", fontSize: "0.70rem", letterSpacing: "0.12em" }}>SUSCRIPCIONES</div>
           <div style={{ color: "#1F4A5E", fontSize: "0.70rem" }}>recurrentes mensuales</div>
         </div>
         <div className="flex items-center gap-4">
