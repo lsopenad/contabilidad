@@ -13,16 +13,14 @@ class GastoBase(BaseModel):
     categoria_id: Optional[int] = None
     descripcion: Optional[str] = None
 
+
+class GastoCrear(GastoBase):
     @field_validator("importe")
     @classmethod
     def importe_positivo(cls, v: Decimal) -> Decimal:
         if v <= 0:
             raise ValueError("El importe debe ser mayor que 0")
         return v
-
-
-class GastoCrear(GastoBase):
-    pass
 
 
 class GastoActualizar(BaseModel):

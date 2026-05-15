@@ -38,6 +38,13 @@ class SuscripcionActualizar(BaseModel):
     activa: Optional[bool] = None
     notas: Optional[str] = None
 
+    @field_validator("importe")
+    @classmethod
+    def importe_positivo(cls, v: Optional[Decimal]) -> Optional[Decimal]:
+        if v is not None and v <= 0:
+            raise ValueError("El importe debe ser mayor que 0")
+        return v
+
 
 class SuscripcionRespuesta(BaseModel):
     id: int

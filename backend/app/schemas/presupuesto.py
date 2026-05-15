@@ -28,10 +28,6 @@ class PresupuestoCrear(BaseModel):
         return v
 
 
-class PresupuestoActualizar(BaseModel):
-    importe: Optional[Decimal] = None
-
-
 class PresupuestoRespuesta(BaseModel):
     id: int
     categoria_id: int
