@@ -3,13 +3,14 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { useDialogoCrud } from "@/lib/crud"
 import { api } from "@/lib/api"
 import { SelectorMes, useMes } from "@/lib/mes-context"
 import { ThSort, useSorte } from "@/lib/tabla"
+import { type CategoriaResumen, type Gasto } from "@/lib/tipos"
 import { formatearEuros, formatearFecha } from "@/lib/utils"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { toast } from "sonner"
 import { z } from "zod"
@@ -22,14 +23,10 @@ const esquema = z.object({
 })
 
 type Campos = z.infer<typeof esquema>
-interface Categoria { id: number; nombre: string }
-interface Gasto { id: number; importe: string; fecha: string; descripcion?: string; categoria?: Categoria }
 
 export default function PaginaGastos() {
   const qc = useQueryClient()
-  const [abierto, setAbierto] = useState(false)
-  const [editando, setEditando] = useState<Gasto | null>(null)
-  const [confirmandoId, setConfirmandoId] = useState<number | null>(null)
+  const { abierto, setAbierto, editando, setEditando, confirmandoId, setConfirmandoId } = useDialogoCrud<Gasto>()
   const { mes, anio } = useMes()
 
   const { data: gastos = [] } = useQuery<Gasto[]>({
@@ -37,7 +34,7 @@ export default function PaginaGastos() {
     queryFn: async () => (await api.get(`/gastos/?mes=${mes}&anio=${anio}`)).data,
   })
 
-  const { data: categorias = [] } = useQuery<Categoria[]>({
+  const { data: categorias = [] } = useQuery<CategoriaResumen[]>({
     queryKey: ["categorias", "gasto"],
     queryFn: async () => (await api.get("/categorias/?tipo=gasto")).data,
   })
@@ -86,7 +83,7 @@ export default function PaginaGastos() {
     <div className="p-6">
       <div className="flex items-center justify-between mb-4" style={{ borderBottom: "1px solid #0F3244", paddingBottom: "0.75rem" }}>
         <div>
-          <div style={{ color: "#FF6B35", fontSize: "0.70rem", letterSpacing: "0.12em" }}>GASTOS</div>
+          <div style={{ color: "#5C8097", fontSize: "0.70rem", letterSpacing: "0.12em" }}>GASTOS</div>
           <SelectorMes />
         </div>
         <div className="flex items-center gap-4">
@@ -95,7 +92,7 @@ export default function PaginaGastos() {
           </span>
           <Button
             onClick={() => { setEditando(null); form.reset({ fecha: new Date().toISOString().slice(0, 10) }); setAbierto(true) }}
-            style={{ background: "#1F0D05", color: "#FF6B35", border: "1px solid #4D1E09" }}
+            style={{ background: "#011829", color: "#5C8097", border: "1px solid #2A5A6E" }}
           >
             + nuevo
           </Button>
@@ -105,10 +102,10 @@ export default function PaginaGastos() {
       <table style={{ width: "100%", borderCollapse: "collapse" }}>
         <thead>
           <tr style={{ borderBottom: "1px solid #112B3A" }}>
-            <ThSort label="fecha"       campo="fecha"       actual={campo} dir={dir} onClick={ordenarPor} color="#FF6B35" />
-            <ThSort label="importe"     campo="importe"     actual={campo} dir={dir} onClick={ordenarPor} color="#FF6B35" />
-            <ThSort label="categoría"   campo="categoria"   actual={campo} dir={dir} onClick={ordenarPor} color="#FF6B35" />
-            <ThSort label="descripción" campo="descripcion" actual={campo} dir={dir} onClick={ordenarPor} color="#FF6B35" />
+            <ThSort label="fecha"       campo="fecha"       actual={campo} dir={dir} onClick={ordenarPor} color="#5C8097" />
+            <ThSort label="importe"     campo="importe"     actual={campo} dir={dir} onClick={ordenarPor} color="#5C8097" />
+            <ThSort label="categoría"   campo="categoria"   actual={campo} dir={dir} onClick={ordenarPor} color="#5C8097" />
+            <ThSort label="descripción" campo="descripcion" actual={campo} dir={dir} onClick={ordenarPor} color="#5C8097" />
             <th style={{ padding: "4px 12px" }} />
           </tr>
         </thead>
@@ -142,7 +139,7 @@ export default function PaginaGastos() {
                     setAbierto(true)
                   }}
                   style={{ color: "#1F4A5E", background: "none", border: "none", cursor: "pointer", fontSize: "0.80rem", marginRight: "0.5rem" }}
-                  onMouseEnter={(e) => (e.currentTarget.style.color = "#FF6B35")}
+                  onMouseEnter={(e) => (e.currentTarget.style.color = "#5C8097")}
                   onMouseLeave={(e) => (e.currentTarget.style.color = "#1F4A5E")}
                 >
                   [e]
@@ -181,7 +178,7 @@ export default function PaginaGastos() {
       <Dialog open={abierto} onOpenChange={(v) => { setAbierto(v); if (!v) setEditando(null) }}>
         <DialogContent style={{ background: "#012030", border: "1px solid #1A3F54" }}>
           <DialogHeader>
-            <DialogTitle style={{ color: "#FF6B35", fontSize: "0.80rem", letterSpacing: "0.1em" }}>
+            <DialogTitle style={{ color: "#5C8097", fontSize: "0.80rem", letterSpacing: "0.1em" }}>
               {editando ? "EDITAR GASTO" : "NUEVO GASTO"}
             </DialogTitle>
           </DialogHeader>
@@ -224,7 +221,7 @@ export default function PaginaGastos() {
                   cancelar
                 </Button>
                 <Button type="submit" disabled={crear.isPending || editar.isPending}
-                  style={{ background: "#1F0D05", color: "#FF6B35", border: "1px solid #4D1E09" }}>
+                  style={{ background: "#011829", color: "#5C8097", border: "1px solid #2A5A6E" }}>
                   {crear.isPending || editar.isPending ? "..." : "guardar"}
                 </Button>
               </div>

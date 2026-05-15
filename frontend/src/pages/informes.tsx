@@ -1,21 +1,14 @@
 import { api } from "@/lib/api"
 import { ThSort, useSorte } from "@/lib/tabla"
+import { type InformeAnual } from "@/lib/tipos"
 import { formatearEuros } from "@/lib/utils"
 import { useQuery } from "@tanstack/react-query"
+import { useState } from "react"
 
 const MESES = ["ene","feb","mar","abr","may","jun","jul","ago","sep","oct","nov","dic"]
 
-interface ResumenMes {
-  mes: number; anio: number
-  total_ingresos: string; total_gastos: string
-}
-interface InformeAnual {
-  anio: number; meses: ResumenMes[]
-  total_ingresos: string; total_gastos: string; balance: string
-}
-
 export default function PaginaInformes() {
-  const anio = new Date().getFullYear()
+  const [anio, setAnio] = useState(new Date().getFullYear())
 
   const { data: informe } = useQuery<InformeAnual>({
     queryKey: ["informes", "anual", anio],
@@ -44,8 +37,23 @@ export default function PaginaInformes() {
 
   return (
     <div className="p-6">
-      <div className="mb-4" style={{ borderBottom: "1px solid #0F3244", paddingBottom: "0.75rem" }}>
-        <span style={{ color: "#84B8C9", fontSize: "0.70rem", letterSpacing: "0.12em" }}>INFORMES {anio}</span>
+      <div className="flex items-center justify-between mb-4" style={{ borderBottom: "1px solid #0F3244", paddingBottom: "0.75rem" }}>
+        <span style={{ color: "#5C8097", fontSize: "0.70rem", letterSpacing: "0.12em" }}>INFORMES</span>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setAnio((a) => a - 1)}
+            style={{ color: "#1F4A5E", background: "none", border: "none", cursor: "pointer", fontSize: "0.80rem" }}
+            onMouseEnter={(e) => (e.currentTarget.style.color = "#5C8097")}
+            onMouseLeave={(e) => (e.currentTarget.style.color = "#1F4A5E")}
+          >‹</button>
+          <span style={{ color: "#5C8097", fontSize: "0.80rem", minWidth: "3rem", textAlign: "center" }}>{anio}</span>
+          <button
+            onClick={() => setAnio((a) => a + 1)}
+            style={{ color: "#1F4A5E", background: "none", border: "none", cursor: "pointer", fontSize: "0.80rem" }}
+            onMouseEnter={(e) => (e.currentTarget.style.color = "#5C8097")}
+            onMouseLeave={(e) => (e.currentTarget.style.color = "#1F4A5E")}
+          >›</button>
+        </div>
       </div>
 
       {informe && (
@@ -67,10 +75,10 @@ export default function PaginaInformes() {
       <table style={{ width: "100%", borderCollapse: "collapse" }}>
         <thead>
           <tr style={{ borderBottom: "1px solid #112B3A" }}>
-            <ThSort label="mes"      campo="mes"      actual={campo} dir={dir} onClick={ordenarPor} color="#84B8C9" />
-            <ThSort label="ingresos" campo="ingresos" actual={campo} dir={dir} onClick={ordenarPor} color="#84B8C9" />
-            <ThSort label="gastos"   campo="gastos"   actual={campo} dir={dir} onClick={ordenarPor} color="#84B8C9" />
-            <ThSort label="balance"  campo="balance"  actual={campo} dir={dir} onClick={ordenarPor} color="#84B8C9" />
+            <ThSort label="mes"      campo="mes"      actual={campo} dir={dir} onClick={ordenarPor} color="#5C8097" />
+            <ThSort label="ingresos" campo="ingresos" actual={campo} dir={dir} onClick={ordenarPor} color="#5C8097" />
+            <ThSort label="gastos"   campo="gastos"   actual={campo} dir={dir} onClick={ordenarPor} color="#5C8097" />
+            <ThSort label="balance"  campo="balance"  actual={campo} dir={dir} onClick={ordenarPor} color="#5C8097" />
             <th style={{ padding: "4px 12px" }} />
           </tr>
         </thead>
@@ -92,7 +100,7 @@ export default function PaginaInformes() {
                   <button
                     onClick={() => exportar(m.mes)}
                     style={{ color: "#1F4A5E", background: "none", border: "none", cursor: "pointer", fontSize: "0.80rem" }}
-                    onMouseEnter={(e) => (e.currentTarget.style.color = "#00ED64")}
+                    onMouseEnter={(e) => (e.currentTarget.style.color = "#5C8097")}
                     onMouseLeave={(e) => (e.currentTarget.style.color = "#1F4A5E")}
                     title="exportar xlsx"
                   >

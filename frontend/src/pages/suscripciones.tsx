@@ -3,12 +3,13 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { useDialogoCrud } from "@/lib/crud"
 import { api } from "@/lib/api"
 import { ThSort, useSorte } from "@/lib/tabla"
+import { type CategoriaResumen, type Suscripcion } from "@/lib/tipos"
 import { formatearEuros } from "@/lib/utils"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { toast } from "sonner"
 import { z } from "zod"
@@ -22,24 +23,17 @@ const esquema = z.object({
 })
 
 type Campos = z.infer<typeof esquema>
-interface Categoria { id: number; nombre: string }
-interface Suscripcion {
-  id: number; nombre: string; importe: string; activa: boolean
-  dia_cobro?: number; notas?: string; categoria?: Categoria
-}
 
 export default function PaginaSuscripciones() {
   const qc = useQueryClient()
-  const [abierto, setAbierto] = useState(false)
-  const [editando, setEditando] = useState<Suscripcion | null>(null)
-  const [confirmandoId, setConfirmandoId] = useState<number | null>(null)
+  const { abierto, setAbierto, editando, setEditando, confirmandoId, setConfirmandoId } = useDialogoCrud<Suscripcion>()
 
   const { data: suscripciones = [] } = useQuery<Suscripcion[]>({
     queryKey: ["suscripciones"],
     queryFn: async () => (await api.get("/suscripciones/")).data,
   })
 
-  const { data: categorias = [] } = useQuery<Categoria[]>({
+  const { data: categorias = [] } = useQuery<CategoriaResumen[]>({
     queryKey: ["categorias", "gasto"],
     queryFn: async () => (await api.get("/categorias/?tipo=gasto")).data,
   })
@@ -97,16 +91,16 @@ export default function PaginaSuscripciones() {
     <div className="p-6">
       <div className="flex items-center justify-between mb-4" style={{ borderBottom: "1px solid #0F3244", paddingBottom: "0.75rem" }}>
         <div>
-          <div style={{ color: "#FFB020", fontSize: "0.70rem", letterSpacing: "0.12em" }}>SUSCRIPCIONES</div>
+          <div style={{ color: "#5C8097", fontSize: "0.70rem", letterSpacing: "0.12em" }}>SUSCRIPCIONES</div>
           <div style={{ color: "#1F4A5E", fontSize: "0.70rem" }}>recurrentes mensuales</div>
         </div>
         <div className="flex items-center gap-4">
-          <span style={{ color: "#FFB020", fontSize: "1.00rem", fontWeight: 600 }}>
+          <span style={{ color: "#5C8097", fontSize: "1.00rem", fontWeight: 600 }}>
             {formatearEuros(totalActivas)}<span style={{ color: "#1F4A5E", fontSize: "0.70rem" }}>/mes</span>
           </span>
           <Button
             onClick={() => { setEditando(null); form.reset(); setAbierto(true) }}
-            style={{ background: "#1F1400", color: "#FFB020", border: "1px solid #4D3300" }}
+            style={{ background: "#011829", color: "#5C8097", border: "1px solid #2A5A6E" }}
           >
             + nueva
           </Button>
@@ -116,12 +110,12 @@ export default function PaginaSuscripciones() {
       <table style={{ width: "100%", borderCollapse: "collapse" }}>
         <thead>
           <tr style={{ borderBottom: "1px solid #112B3A" }}>
-            <ThSort label="nombre"    campo="nombre"    actual={campo} dir={dir} onClick={ordenarPor} color="#FFB020" />
-            <ThSort label="importe"   campo="importe"   actual={campo} dir={dir} onClick={ordenarPor} color="#FFB020" />
-            <ThSort label="día cobro" campo="dia_cobro" actual={campo} dir={dir} onClick={ordenarPor} color="#FFB020" />
-            <ThSort label="categoría" campo="categoria" actual={campo} dir={dir} onClick={ordenarPor} color="#FFB020" />
-            <ThSort label="notas"     campo="notas"     actual={campo} dir={dir} onClick={ordenarPor} color="#FFB020" />
-            <ThSort label="estado"    campo="estado"    actual={campo} dir={dir} onClick={ordenarPor} color="#FFB020" />
+            <ThSort label="nombre"    campo="nombre"    actual={campo} dir={dir} onClick={ordenarPor} color="#5C8097" />
+            <ThSort label="importe"   campo="importe"   actual={campo} dir={dir} onClick={ordenarPor} color="#5C8097" />
+            <ThSort label="día cobro" campo="dia_cobro" actual={campo} dir={dir} onClick={ordenarPor} color="#5C8097" />
+            <ThSort label="categoría" campo="categoria" actual={campo} dir={dir} onClick={ordenarPor} color="#5C8097" />
+            <ThSort label="notas"     campo="notas"     actual={campo} dir={dir} onClick={ordenarPor} color="#5C8097" />
+            <ThSort label="estado"    campo="estado"    actual={campo} dir={dir} onClick={ordenarPor} color="#5C8097" />
             <th style={{ padding: "4px 12px" }} />
           </tr>
         </thead>
@@ -139,7 +133,7 @@ export default function PaginaSuscripciones() {
               onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
             >
               <td style={{ padding: "4px 12px", color: "#9BB7C4" }}>{s.nombre}</td>
-              <td style={{ padding: "4px 12px", color: "#FFB020" }}>{formatearEuros(s.importe)}</td>
+              <td style={{ padding: "4px 12px", color: "#5C8097" }}>{formatearEuros(s.importe)}</td>
               <td style={{ padding: "4px 12px", color: "#3D6676" }}>{s.dia_cobro ? `día ${s.dia_cobro}` : "—"}</td>
               <td style={{ padding: "4px 12px", color: "#3D6676" }}>{s.categoria?.nombre ?? "—"}</td>
               <td style={{ padding: "4px 12px", color: "#2A5A6E", maxWidth: "10rem", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
@@ -169,7 +163,7 @@ export default function PaginaSuscripciones() {
                     setAbierto(true)
                   }}
                   style={{ color: "#1F4A5E", background: "none", border: "none", cursor: "pointer", fontSize: "0.80rem", marginRight: "0.5rem" }}
-                  onMouseEnter={(e) => (e.currentTarget.style.color = "#FFB020")}
+                  onMouseEnter={(e) => (e.currentTarget.style.color = "#5C8097")}
                   onMouseLeave={(e) => (e.currentTarget.style.color = "#1F4A5E")}
                 >
                   [e]
@@ -208,7 +202,7 @@ export default function PaginaSuscripciones() {
       <Dialog open={abierto} onOpenChange={(v) => { setAbierto(v); if (!v) setEditando(null) }}>
         <DialogContent style={{ background: "#012030", border: "1px solid #1A3F54" }}>
           <DialogHeader>
-            <DialogTitle style={{ color: "#FFB020", fontSize: "0.80rem", letterSpacing: "0.1em" }}>
+            <DialogTitle style={{ color: "#5C8097", fontSize: "0.80rem", letterSpacing: "0.1em" }}>
               {editando ? "EDITAR SUSCRIPCIÓN" : "NUEVA SUSCRIPCIÓN"}
             </DialogTitle>
           </DialogHeader>
@@ -256,7 +250,7 @@ export default function PaginaSuscripciones() {
                   cancelar
                 </Button>
                 <Button type="submit" disabled={crear.isPending || editar.isPending}
-                  style={{ background: "#1F1400", color: "#FFB020", border: "1px solid #4D3300" }}>
+                  style={{ background: "#011829", color: "#5C8097", border: "1px solid #2A5A6E" }}>
                   {crear.isPending || editar.isPending ? "..." : "guardar"}
                 </Button>
               </div>

@@ -3,13 +3,14 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { useDialogoCrud } from "@/lib/crud"
 import { api } from "@/lib/api"
 import { SelectorMes, useMes } from "@/lib/mes-context"
 import { ThSort, useSorte } from "@/lib/tabla"
+import { type CategoriaResumen, type Presupuesto } from "@/lib/tipos"
 import { formatearEuros } from "@/lib/utils"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { toast } from "sonner"
 import { z } from "zod"
@@ -22,23 +23,19 @@ const esquema = z.object({
 })
 
 type Campos = z.infer<typeof esquema>
-interface Categoria { id: number; nombre: string }
-interface Presupuesto { id: number; importe: string; mes: number; anio: number; categoria_id: number; categoria: Categoria }
 
 const MESES = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"]
 
 export default function PaginaPresupuestos() {
   const qc = useQueryClient()
-  const [abierto, setAbierto] = useState(false)
-  const [editando, setEditando] = useState<Presupuesto | null>(null)
-  const [confirmandoId, setConfirmandoId] = useState<number | null>(null)
+  const { abierto, setAbierto, editando, setEditando, confirmandoId, setConfirmandoId } = useDialogoCrud<Presupuesto>()
   const { mes, anio } = useMes()
 
   const { data: presupuestos = [] } = useQuery<Presupuesto[]>({
     queryKey: ["presupuestos", mes, anio],
     queryFn: async () => (await api.get(`/presupuestos/?mes=${mes}&anio=${anio}`)).data,
   })
-  const { data: categorias = [] } = useQuery<Categoria[]>({
+  const { data: categorias = [] } = useQuery<CategoriaResumen[]>({
     queryKey: ["categorias", "gasto"],
     queryFn: async () => (await api.get("/categorias/?tipo=gasto")).data,
   })
@@ -68,14 +65,14 @@ export default function PaginaPresupuestos() {
 
   return (
     <div className="p-6">
-      <div className="flex items-center justify-between mb-4" style={{ borderBottom: "1px solid #1e1e1e", paddingBottom: "0.75rem" }}>
+      <div className="flex items-center justify-between mb-4" style={{ borderBottom: "1px solid #0F3244", paddingBottom: "0.75rem" }}>
         <div>
-          <div style={{ color: "#5AC4F8", fontSize: "0.70rem", letterSpacing: "0.12em" }}>PRESUPUESTOS</div>
+          <div style={{ color: "#5C8097", fontSize: "0.70rem", letterSpacing: "0.12em" }}>PRESUPUESTOS</div>
           <SelectorMes />
         </div>
         <Button
           onClick={() => { setEditando(null); form.reset({ mes: String(mes), anio: String(anio) }); setAbierto(true) }}
-          style={{ background: "#051525", color: "#5AC4F8", border: "1px solid #0A2B49" }}
+          style={{ background: "#011829", color: "#5C8097", border: "1px solid #2A5A6E" }}
         >
           + nuevo
         </Button>
@@ -84,8 +81,8 @@ export default function PaginaPresupuestos() {
       <table style={{ width: "100%", borderCollapse: "collapse" }}>
         <thead>
           <tr style={{ borderBottom: "1px solid #112B3A" }}>
-            <ThSort label="categoría"   campo="categoria" actual={campo} dir={dir} onClick={ordenarPor} color="#5AC4F8" />
-            <ThSort label="presupuesto" campo="importe"   actual={campo} dir={dir} onClick={ordenarPor} color="#5AC4F8" />
+            <ThSort label="categoría"   campo="categoria" actual={campo} dir={dir} onClick={ordenarPor} color="#5C8097" />
+            <ThSort label="presupuesto" campo="importe"   actual={campo} dir={dir} onClick={ordenarPor} color="#5C8097" />
             <th style={{ padding: "4px 12px" }} />
           </tr>
         </thead>
@@ -102,8 +99,8 @@ export default function PaginaPresupuestos() {
               onMouseEnter={(e) => (e.currentTarget.style.background = "#012030")}
               onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
             >
-              <td style={{ padding: "4px 12px", color: "#5AC4F8" }}>{p.categoria.nombre}</td>
-              <td style={{ padding: "4px 12px", color: "#5AC4F8" }}>{formatearEuros(p.importe)}</td>
+              <td style={{ padding: "4px 12px", color: "#4E7A8A" }}>{p.categoria.nombre}</td>
+              <td style={{ padding: "4px 12px", color: "#5C8097" }}>{formatearEuros(p.importe)}</td>
               <td style={{ padding: "4px 12px", whiteSpace: "nowrap" }}>
                 <button
                   onClick={() => {
@@ -117,7 +114,7 @@ export default function PaginaPresupuestos() {
                     setAbierto(true)
                   }}
                   style={{ color: "#1F4A5E", background: "none", border: "none", cursor: "pointer", fontSize: "0.80rem", marginRight: "0.5rem" }}
-                  onMouseEnter={(e) => (e.currentTarget.style.color = "#5AC4F8")}
+                  onMouseEnter={(e) => (e.currentTarget.style.color = "#5C8097")}
                   onMouseLeave={(e) => (e.currentTarget.style.color = "#1F4A5E")}
                 >
                   [e]
@@ -156,7 +153,7 @@ export default function PaginaPresupuestos() {
       <Dialog open={abierto} onOpenChange={(v) => { setAbierto(v); if (!v) setEditando(null) }}>
         <DialogContent style={{ background: "#012030", border: "1px solid #1A3F54" }}>
           <DialogHeader>
-            <DialogTitle style={{ color: "#5AC4F8", fontSize: "0.80rem", letterSpacing: "0.1em" }}>
+            <DialogTitle style={{ color: "#5C8097", fontSize: "0.80rem", letterSpacing: "0.1em" }}>
               {editando ? "EDITAR PRESUPUESTO" : "NUEVO PRESUPUESTO"}
             </DialogTitle>
           </DialogHeader>
@@ -202,7 +199,7 @@ export default function PaginaPresupuestos() {
                   cancelar
                 </Button>
                 <Button type="submit" disabled={guardar.isPending}
-                  style={{ background: "#051525", color: "#5AC4F8", border: "1px solid #0A2B49" }}>
+                  style={{ background: "#011829", color: "#5C8097", border: "1px solid #2A5A6E" }}>
                   {guardar.isPending ? "..." : "guardar"}
                 </Button>
               </div>

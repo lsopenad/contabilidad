@@ -1,13 +1,8 @@
 import { api } from "@/lib/api"
 import { SelectorMes, useMes } from "@/lib/mes-context"
+import { type GastoCategoria, type Movimiento, type Presupuesto, type ResumenMes, type Suscripcion } from "@/lib/tipos"
 import { formatearEuros, formatearFecha } from "@/lib/utils"
 import { useQuery } from "@tanstack/react-query"
-
-interface ResumenMes { mes: number; anio: number; total_ingresos: string; total_gastos: string }
-interface Movimiento { id: number; importe: string; fecha: string; descripcion?: string; categoria?: { nombre: string }; tipo: "ingreso" | "gasto" }
-interface GastoCategoria { categoria_id: number; categoria_nombre: string; total: string }
-interface Presupuesto { id: number; importe: string; mes: number; anio: number; categoria: { id: number; nombre: string } }
-interface Suscripcion { id: number; nombre: string; importe: string; activa: boolean }
 
 const MESES = ["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"]
 
@@ -21,13 +16,13 @@ export default function PaginaDashboard() {
 
   const { data: ingresosRaw = [] } = useQuery<Movimiento[]>({
     queryKey: ["ingresos", mes, anio],
-    queryFn: async () => (await api.get(`/ingresos/?mes=${mes}&anio=${anio}&limite=5`)).data
+    queryFn: async () => (await api.get(`/ingresos/?mes=${mes}&anio=${anio}`)).data
       .map((i: Movimiento) => ({ ...i, tipo: "ingreso" as const })),
   })
 
   const { data: gastosRaw = [] } = useQuery<Movimiento[]>({
     queryKey: ["gastos", mes, anio],
-    queryFn: async () => (await api.get(`/gastos/?mes=${mes}&anio=${anio}&limite=5`)).data
+    queryFn: async () => (await api.get(`/gastos/?mes=${mes}&anio=${anio}`)).data
       .map((g: Movimiento) => ({ ...g, tipo: "gasto" as const })),
   })
 
@@ -61,21 +56,19 @@ export default function PaginaDashboard() {
 
   return (
     <div className="p-6 space-y-6">
-      {/* Cabecera */}
-      <div style={{ borderBottom: "1px solid #1e1e1e", paddingBottom: "0.75rem" }}>
-        <span style={{ color: "#00ED64", fontSize: "0.70rem", letterSpacing: "0.12em" }}>
+      <div style={{ borderBottom: "1px solid #0F3244", paddingBottom: "0.75rem" }}>
+        <span style={{ color: "#5C8097", fontSize: "0.70rem", letterSpacing: "0.12em" }}>
           DASHBOARD
         </span>
         <SelectorMes />
       </div>
 
-      {/* KPIs */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "1px", background: "#0F3244" }}>
         {[
           { label: "ingresos",      valor: resumen?.total_ingresos ?? "0", color: "#00ED64" },
           { label: "gastos",        valor: resumen?.total_gastos   ?? "0", color: "#FF6B35" },
           { label: "balance",       valor: String(balance),                color: balance >= 0 ? "#00ED64" : "#FF6B35" },
-          { label: "suscripciones", valor: String(totalSus),               color: "#FFB020" },
+          { label: "suscripciones", valor: String(totalSus),               color: "#5C8097" },
         ].map(({ label, valor, color }) => (
           <div key={label} style={{ background: "#001E2B", padding: "1rem 1.25rem" }}>
             <div style={{ color: "#1F4A5E", fontSize: "0.70rem", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "0.3rem" }}>
@@ -89,7 +82,6 @@ export default function PaginaDashboard() {
       </div>
 
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "2rem" }}>
-        {/* Últimos movimientos */}
         <div>
           <div style={{ color: "#1F4A5E", fontSize: "0.70rem", letterSpacing: "0.12em", marginBottom: "0.5rem" }}>
             ÚLTIMOS MOVIMIENTOS
@@ -116,7 +108,6 @@ export default function PaginaDashboard() {
           </table>
         </div>
 
-        {/* Gastos por categoría */}
         <div>
           <div style={{ color: "#1F4A5E", fontSize: "0.70rem", letterSpacing: "0.12em", marginBottom: "0.5rem" }}>
             GASTOS POR CATEGORÍA
@@ -150,7 +141,6 @@ export default function PaginaDashboard() {
         </div>
       </div>
 
-      {/* Suscripciones activas */}
       {suscripcionesActivas.length > 0 && (
         <div>
           <div style={{ color: "#1F4A5E", fontSize: "0.70rem", letterSpacing: "0.12em", marginBottom: "0.5rem" }}>
@@ -160,10 +150,10 @@ export default function PaginaDashboard() {
             {suscripcionesActivas.map((s) => (
               <div
                 key={s.id}
-                style={{ border: "1px solid #1e1e1e", padding: "0.25rem 0.75rem", fontSize: "0.77rem" }}
+                style={{ border: "1px solid #0F3244", padding: "0.25rem 0.75rem", fontSize: "0.77rem" }}
               >
                 <span style={{ color: "#3D6676" }}>{s.nombre}</span>
-                <span style={{ color: "#FFB020", marginLeft: "0.5rem" }}>{formatearEuros(s.importe)}</span>
+                <span style={{ color: "#5C8097", marginLeft: "0.5rem" }}>{formatearEuros(s.importe)}</span>
               </div>
             ))}
           </div>

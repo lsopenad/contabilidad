@@ -1,16 +1,15 @@
-import { cn } from "@/lib/utils"
 import { MesProvider } from "@/lib/mes-context"
 import { NavLink, Outlet } from "react-router-dom"
 import { Toaster } from "sonner"
 
 const navegacion = [
-  { ruta: "/",              etiqueta: "dashboard" },
-  { ruta: "/ingresos",      etiqueta: "ingresos" },
-  { ruta: "/gastos",        etiqueta: "gastos" },
-  { ruta: "/suscripciones", etiqueta: "suscripciones" },
-  { ruta: "/presupuestos",  etiqueta: "presupuestos" },
-  { ruta: "/informes",      etiqueta: "informes" },
-  { ruta: "/categorias",    etiqueta: "categorias" },
+  { ruta: "/",              etiqueta: "dashboard",     end: true  },
+  { ruta: "/ingresos",      etiqueta: "ingresos",      end: false },
+  { ruta: "/gastos",        etiqueta: "gastos",        end: false },
+  { ruta: "/suscripciones", etiqueta: "suscripciones", end: false },
+  { ruta: "/presupuestos",  etiqueta: "presupuestos",  end: false },
+  { ruta: "/informes",      etiqueta: "informes",      end: false },
+  { ruta: "/categorias",    etiqueta: "categorias",    end: false },
 ]
 
 export default function Layout() {
@@ -25,22 +24,23 @@ export default function Layout() {
           </div>
 
           <nav className="flex-1 p-2 space-y-px">
-            {navegacion.map(({ ruta, etiqueta }) => (
+            {navegacion.map(({ ruta, etiqueta, end }) => (
               <NavLink
                 key={ruta}
                 to={ruta}
-                end={ruta === "/"}
+                end={end}
                 className={({ isActive }) =>
-                  cn(
-                    "flex items-center px-3 py-1.5 text-xs transition-colors",
-                    isActive ? "text-[#00ED64]" : "text-[#3D6676] hover:text-[#5C8097]",
-                  )
+                  `flex items-center px-3 py-1.5 text-xs transition-colors ${
+                    isActive
+                      ? "text-[#5C8097]"
+                      : "text-[#3D6676] hover:text-[#5C8097]"
+                  }`
                 }
               >
                 {({ isActive }) => (
                   <>
-                    <span className="mr-2 w-3 inline-block" style={{ color: "#00ED64" }}>
-                      {isActive ? ">" : " "}
+                    <span className="mr-2 w-3 inline-block" style={{ color: isActive ? "#5C8097" : "transparent" }}>
+                      &gt;
                     </span>
                     {etiqueta}
                   </>

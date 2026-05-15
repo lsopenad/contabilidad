@@ -3,19 +3,17 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { useDialogoCrud } from "@/lib/crud"
 import { api } from "@/lib/api"
 import { ThSort, useSorte } from "@/lib/tabla"
+import { TIPOS_CATEGORIA, type Categoria, type TipoCategoria } from "@/lib/tipos"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { toast } from "sonner"
 import { z } from "zod"
 
-const TIPOS = ["ingreso", "gasto", "ambos"] as const
-type Tipo = typeof TIPOS[number]
-
-const colorTipo: Record<Tipo, string> = {
+const colorTipo: Record<TipoCategoria, string> = {
   ingreso: "#00ED64",
   gasto:   "#FF6B35",
   ambos:   "#5C8097",
@@ -23,17 +21,14 @@ const colorTipo: Record<Tipo, string> = {
 
 const esquema = z.object({
   nombre: z.string().min(1, "obligatorio"),
-  tipo: z.enum(TIPOS),
+  tipo: z.enum(TIPOS_CATEGORIA),
 })
 
 type Campos = z.infer<typeof esquema>
-interface Categoria { id: number; nombre: string; tipo: Tipo }
 
 export default function PaginaCategorias() {
   const qc = useQueryClient()
-  const [abierto, setAbierto] = useState(false)
-  const [editando, setEditando] = useState<Categoria | null>(null)
-  const [confirmandoId, setConfirmandoId] = useState<number | null>(null)
+  const { abierto, setAbierto, editando, setEditando, confirmandoId, setConfirmandoId } = useDialogoCrud<Categoria>()
 
   const { data: categorias = [] } = useQuery<Categoria[]>({
     queryKey: ["categorias"],
@@ -68,10 +63,10 @@ export default function PaginaCategorias() {
   return (
     <div className="p-6">
       <div className="flex items-center justify-between mb-4" style={{ borderBottom: "1px solid #0F3244", paddingBottom: "0.75rem" }}>
-        <div style={{ color: "#9B59F5", fontSize: "0.70rem", letterSpacing: "0.12em" }}>CATEGORÍAS</div>
+        <div style={{ color: "#5C8097", fontSize: "0.70rem", letterSpacing: "0.12em" }}>CATEGORÍAS</div>
         <Button
           onClick={() => { setEditando(null); form.reset({ nombre: "", tipo: "gasto" }); setAbierto(true) }}
-          style={{ background: "#130D1F", color: "#9B59F5", border: "1px solid #2E1A4A" }}
+          style={{ background: "#011829", color: "#5C8097", border: "1px solid #2A5A6E" }}
         >
           + nueva
         </Button>
@@ -80,8 +75,8 @@ export default function PaginaCategorias() {
       <table style={{ width: "100%", borderCollapse: "collapse" }}>
         <thead>
           <tr style={{ borderBottom: "1px solid #112B3A" }}>
-            <ThSort label="nombre" campo="nombre" actual={campo} dir={dir} onClick={ordenarPor} color="#9B59F5" />
-            <ThSort label="tipo"   campo="tipo"   actual={campo} dir={dir} onClick={ordenarPor} color="#9B59F5" />
+            <ThSort label="nombre" campo="nombre" actual={campo} dir={dir} onClick={ordenarPor} color="#5C8097" />
+            <ThSort label="tipo"   campo="tipo"   actual={campo} dir={dir} onClick={ordenarPor} color="#5C8097" />
             <th style={{ padding: "4px 12px" }} />
           </tr>
         </thead>
@@ -110,7 +105,7 @@ export default function PaginaCategorias() {
                     setAbierto(true)
                   }}
                   style={{ color: "#1F4A5E", background: "none", border: "none", cursor: "pointer", fontSize: "0.75rem", marginRight: "0.5rem" }}
-                  onMouseEnter={(e) => (e.currentTarget.style.color = "#9B59F5")}
+                  onMouseEnter={(e) => (e.currentTarget.style.color = "#5C8097")}
                   onMouseLeave={(e) => (e.currentTarget.style.color = "#1F4A5E")}
                 >
                   [e]
@@ -149,7 +144,7 @@ export default function PaginaCategorias() {
       <Dialog open={abierto} onOpenChange={(v) => { setAbierto(v); if (!v) setEditando(null) }}>
         <DialogContent style={{ background: "#012030", border: "1px solid #1A3F54" }}>
           <DialogHeader>
-            <DialogTitle style={{ color: "#9B59F5", fontSize: "0.80rem", letterSpacing: "0.1em" }}>
+            <DialogTitle style={{ color: "#5C8097", fontSize: "0.80rem", letterSpacing: "0.1em" }}>
               {editando ? "EDITAR CATEGORÍA" : "NUEVA CATEGORÍA"}
             </DialogTitle>
           </DialogHeader>
@@ -172,7 +167,7 @@ export default function PaginaCategorias() {
                       <SelectTrigger><SelectValue /></SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {TIPOS.map((t) => (
+                      {TIPOS_CATEGORIA.map((t) => (
                         <SelectItem key={t} value={t}>{t}</SelectItem>
                       ))}
                     </SelectContent>
@@ -186,7 +181,7 @@ export default function PaginaCategorias() {
                   cancelar
                 </Button>
                 <Button type="submit" disabled={crear.isPending || editar.isPending}
-                  style={{ background: "#130D1F", color: "#9B59F5", border: "1px solid #2E1A4A" }}>
+                  style={{ background: "#011829", color: "#5C8097", border: "1px solid #2A5A6E" }}>
                   {crear.isPending || editar.isPending ? "..." : "guardar"}
                 </Button>
               </div>
