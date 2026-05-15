@@ -9,6 +9,7 @@ const navegacion = [
   { ruta: "/suscripciones", etiqueta: "suscripciones" },
   { ruta: "/presupuestos",  etiqueta: "presupuestos" },
   { ruta: "/informes",      etiqueta: "informes" },
+  { ruta: "/categorias",    etiqueta: "categorias" },
 ]
 
 export default function Layout() {
