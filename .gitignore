@@ -1,0 +1,63 @@
+# ── Entorno ──────────────────────────────────────────────────────────────────
+.env
+.envrc
+.venv
+venv/
+env/
+ENV/
+
+# ── Python ───────────────────────────────────────────────────────────────────
+__pycache__/
+*.py[codz]
+*$py.class
+*.so
+*.egg-info/
+*.egg
+MANIFEST
+build/
+dist/
+.eggs/
+pip-log.txt
+
+# ── Tests / cobertura ────────────────────────────────────────────────────────
+.coverage
+.coverage.*
+htmlcov/
+.pytest_cache/
+.hypothesis/
+coverage.xml
+*.cover
+*.lcov
+
+# ── Type checkers ────────────────────────────────────────────────────────────
+.mypy_cache/
+.dmypy.json
+dmypy.json
+.pyre/
+.pytype/
+.ruff_cache/
+
+# ── Alembic ──────────────────────────────────────────────────────────────────
+# No ignorar alembic/versions/ — las migraciones se versionan
+
+# ── Exportaciones ────────────────────────────────────────────────────────────
+*.xlsx
+*.xls
+
+# ── macOS ────────────────────────────────────────────────────────────────────
+.DS_Store
+.localized
+.__MACOSX/
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+.fseventsd
+.TemporaryItems
+
+# ── IDEs ─────────────────────────────────────────────────────────────────────
+.idea/
+.vscode/
+*.swp
+*~
