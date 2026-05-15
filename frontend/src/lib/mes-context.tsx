@@ -63,7 +63,7 @@ export function SelectorMes() {
         onMouseEnter={(e) => (e.currentTarget.style.color = "#5C8097")}
         onMouseLeave={(e) => (e.currentTarget.style.color = "#2A5A6E")}
       >[&lt;]</button>
-      <span style={{ color: "#3D6676", fontSize: "0.70rem", minWidth: "5.5rem", textAlign: "center" }}>
+      <span style={{ color: "#7DD3FC", fontSize: "0.70rem", minWidth: "5.5rem", textAlign: "center" }}>
         {etiqueta}
       </span>
       <button style={btn} onClick={irSiguiente}
