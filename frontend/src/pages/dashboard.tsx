@@ -49,7 +49,7 @@ export default function PaginaDashboard() {
     .slice(0, 8)
 
   const suscripcionesActivas = suscripciones.filter((s) => s.activa)
-  const totalSus = suscripcionesActivas.reduce((acc, s) => acc + Number(s.importe), 0)
+  const totalSus = resumen ? Number(resumen.total_suscripciones) : 0
   const balance = resumen ? Number(resumen.total_ingresos) - Number(resumen.total_gastos) - totalSus : 0
 const presupuestoPorCategoria = Object.fromEntries(
     presupuestos.map((p) => [p.categoria.id, Number(p.importe)])

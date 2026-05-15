@@ -9,6 +9,7 @@ class ResumenMes(BaseModel):
     anio: int
     total_ingresos: Decimal = Decimal("0")
     total_gastos: Decimal = Decimal("0")
+    total_suscripciones: Decimal = Decimal("0")
 
 
 class GastoCategoria(BaseModel):
@@ -22,4 +23,5 @@ class InformeAnual(BaseModel):
     meses: list[ResumenMes]
     total_ingresos: Decimal
     total_gastos: Decimal
+    total_suscripciones: Decimal
     balance: Decimal

@@ -1,8 +1,10 @@
 from datetime import datetime
 from decimal import Decimal
-from typing import Optional
+from typing import Literal, Optional
 
 from pydantic import BaseModel, field_validator
+
+FrecuenciaSuscripcion = Literal["mensual", "bimestral", "trimestral", "semestral", "anual"]
 
 from .categoria import CategoriaRespuesta
 
@@ -12,6 +14,7 @@ class SuscripcionCrear(BaseModel):
     importe: Decimal
     categoria_id: Optional[int] = None
     dia_cobro: Optional[int] = None
+    frecuencia: FrecuenciaSuscripcion = "mensual"
     activa: bool = True
     notas: Optional[str] = None
 
@@ -35,6 +38,7 @@ class SuscripcionActualizar(BaseModel):
     importe: Optional[Decimal] = None
     categoria_id: Optional[int] = None
     dia_cobro: Optional[int] = None
+    frecuencia: Optional[FrecuenciaSuscripcion] = None
     activa: Optional[bool] = None
     notas: Optional[str] = None
 
@@ -52,6 +56,7 @@ class SuscripcionRespuesta(BaseModel):
     importe: Decimal
     categoria_id: Optional[int] = None
     dia_cobro: Optional[int] = None
+    frecuencia: FrecuenciaSuscripcion = "mensual"
     activa: bool
     notas: Optional[str] = None
     creado_en: Optional[datetime] = None

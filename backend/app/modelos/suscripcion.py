@@ -16,6 +16,7 @@ class Suscripcion(Base):
     importe: Mapped[Decimal] = mapped_column(Numeric(10, 2), nullable=False)
     categoria_id: Mapped[Optional[int]] = mapped_column(ForeignKey("categorias.id"))
     dia_cobro: Mapped[Optional[int]] = mapped_column(Integer)
+    frecuencia: Mapped[str] = mapped_column(String(20), nullable=False, server_default="mensual")
     activa: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default="true")
     notas: Mapped[Optional[str]] = mapped_column(Text)
     creado_en: Mapped[Optional[datetime]] = mapped_column(server_default=func.now())

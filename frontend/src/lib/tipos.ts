@@ -28,12 +28,19 @@ export interface Gasto {
   repeticion_id?: string
 }
 
+export const FRECUENCIAS = ["mensual", "bimestral", "trimestral", "semestral", "anual"] as const
+export type FrecuenciaSuscripcion = typeof FRECUENCIAS[number]
+export const FACTOR_MENSUAL: Record<FrecuenciaSuscripcion, number> = {
+  mensual: 1, bimestral: 2, trimestral: 3, semestral: 6, anual: 12,
+}
+
 export interface Suscripcion {
   id: number
   nombre: string
   importe: string
   activa: boolean
   dia_cobro?: number
+  frecuencia: FrecuenciaSuscripcion
   notas?: string
   categoria?: CategoriaResumen
 }
@@ -53,6 +60,7 @@ export interface ResumenMes {
   anio: number
   total_ingresos: string
   total_gastos: string
+  total_suscripciones: string
 }
 
 export interface InformeAnual {
@@ -60,6 +68,7 @@ export interface InformeAnual {
   meses: ResumenMes[]
   total_ingresos: string
   total_gastos: string
+  total_suscripciones: string
   balance: string
 }
 

@@ -43,11 +43,13 @@ frontend/src/
   pages/               # Una página por sección
   components/layout/   # Nav + Outlet
   components/ui/       # shadcn/ui
+  components/selector-categoria.tsx  # Selector compartido de categorías (tipo: ingreso/gasto/ambos)
   lib/api.ts           # axios instance → /api (proxy Vite → :8000)
-  lib/utils.ts         # cn(), formatearEuros(), formatearFecha()
+  lib/utils.ts         # cn(), formatearEuros(), formatearFecha(), MESES_ABREV, MESES_NOMBRE
   lib/mes-context.tsx  # MesProvider + SelectorMes + useMes
   lib/tabla.tsx        # ThSort + useSorte (ordenación de tablas)
-  lib/colores.ts       # COLORES_SECCION — paleta centralizada (sin uso activo)
+  lib/crud.ts          # useDialogoCrud<T>() — estado compartido de diálogos CRUD
+  lib/esquemas.ts      # esquemaImporte (Zod) compartido
 ```
 
 ---
@@ -56,15 +58,19 @@ frontend/src/
 
 Tablas activas — esquema exacto en `backend/alembic/versions/`.
 
-| Tabla          | Propósito                                                      |
-| -------------- | -------------------------------------------------------------- |
-| `categorias`   | Categorías de ingresos/gastos (`tipo`: ingreso/gasto/ambos)    |
-| `ingresos`     | Entradas de ingresos                                           |
-| `gastos`       | Entradas de gastos (FK categoría)                              |
-| `presupuestos` | Presupuesto mensual por categoría                              |
-| `suscripciones`| Suscripciones recurrentes (`dia_cobro` 1-31, `activa` bool)    |
+| Tabla                | Propósito                                                                        |
+| -------------------- | -------------------------------------------------------------------------------- |
+| `categorias`         | Categorías de ingresos/gastos (`tipo`: ingreso/gasto/ambos)                      |
+| `ingresos`           | Entradas de ingresos (`repeticion_id` UUID vincula copias mensuales)             |
+| `gastos`             | Entradas de gastos, FK categoría (`repeticion_id` igual)                         |
+| `presupuestos`       | Presupuesto mensual por categoría, unique (categoria_id, mes, anio)              |
+| `suscripciones`      | Suscripciones recurrentes (`dia_cobro` 1-31, `activa` bool)                      |
+| `grupos_presupuesto` | Grupos de presupuesto mensual con categorías N:M (`repeticion_id` igual)         |
+| `grupo_categorias`   | Tabla join N:M entre `grupos_presupuesto` y `categorias`                         |
 
-Invariante global: `importe > 0` en ingresos, gastos y suscripciones.
+Invariante global: `importe > 0` en ingresos, gastos, presupuestos, grupos y suscripciones.
+
+**Patrón `repeticion_id`**: UUID que vincula copias del mismo registro en distintos meses. Al crear con `meses_extra`, se genera un UUID compartido. Al editar, `meses_eliminar` borra hermanos por mes; si no quedan hermanos, se limpia `repeticion_id`.
 
 ---
 

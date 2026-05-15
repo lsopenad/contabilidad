@@ -18,7 +18,8 @@ export default function PaginaInformes() {
     (item, c) => {
       if (c === "ingresos") return Number(item.total_ingresos)
       if (c === "gastos") return Number(item.total_gastos)
-      if (c === "balance") return Number(item.total_ingresos) - Number(item.total_gastos)
+      if (c === "suscripciones") return Number(item.total_suscripciones)
+      if (c === "balance") return Number(item.total_ingresos) - Number(item.total_gastos) - Number(item.total_suscripciones)
       return item.mes
     },
   )
@@ -57,9 +58,10 @@ export default function PaginaInformes() {
       {informe && (
         <div style={{ display: "flex", gap: "2rem", marginBottom: "1.5rem" }}>
           {[
-            { label: "ingresos", valor: informe.total_ingresos, color: "#00ED64" },
-            { label: "gastos",   valor: informe.total_gastos,   color: "#FF6B35" },
-            { label: "balance",  valor: informe.balance,
+            { label: "ingresos",       valor: informe.total_ingresos,       color: "#00ED64" },
+            { label: "gastos",         valor: informe.total_gastos,         color: "#FF6B35" },
+            { label: "suscripciones",  valor: informe.total_suscripciones,  color: "#FFB020" },
+            { label: "balance",        valor: informe.balance,
               color: Number(informe.balance) >= 0 ? "#00ED64" : "#FF6B35" },
           ].map(({ label, valor, color }) => (
             <div key={label} style={{ borderLeft: `2px solid ${color}`, paddingLeft: "0.75rem" }}>
@@ -73,16 +75,17 @@ export default function PaginaInformes() {
       <table style={{ width: "100%", borderCollapse: "collapse" }}>
         <thead>
           <tr style={{ borderBottom: "1px solid #112B3A" }}>
-            <ThSort label="mes"      campo="mes"      actual={campo} dir={dir} onClick={ordenarPor} color="#5C8097" />
-            <ThSort label="ingresos" campo="ingresos" actual={campo} dir={dir} onClick={ordenarPor} color="#5C8097" />
-            <ThSort label="gastos"   campo="gastos"   actual={campo} dir={dir} onClick={ordenarPor} color="#5C8097" />
-            <ThSort label="balance"  campo="balance"  actual={campo} dir={dir} onClick={ordenarPor} color="#5C8097" />
+            <ThSort label="mes"           campo="mes"           actual={campo} dir={dir} onClick={ordenarPor} color="#5C8097" />
+            <ThSort label="ingresos"      campo="ingresos"      actual={campo} dir={dir} onClick={ordenarPor} color="#5C8097" />
+            <ThSort label="gastos"        campo="gastos"        actual={campo} dir={dir} onClick={ordenarPor} color="#5C8097" />
+            <ThSort label="suscripciones" campo="suscripciones" actual={campo} dir={dir} onClick={ordenarPor} color="#5C8097" />
+            <ThSort label="balance"       campo="balance"       actual={campo} dir={dir} onClick={ordenarPor} color="#5C8097" />
             <th style={{ padding: "4px 12px" }} />
           </tr>
         </thead>
         <tbody>
           {mesesOrdenados.map((m) => {
-            const balance = Number(m.total_ingresos) - Number(m.total_gastos)
+            const balance = Number(m.total_ingresos) - Number(m.total_gastos) - Number(m.total_suscripciones)
             return (
               <tr
                 key={m.mes}
@@ -93,6 +96,7 @@ export default function PaginaInformes() {
                 <td style={{ padding: "4px 12px", color: "#3D6676" }}>{MESES_ABREV[m.mes - 1]}</td>
                 <td style={{ padding: "4px 12px", color: "#00ED64" }}>{formatearEuros(m.total_ingresos)}</td>
                 <td style={{ padding: "4px 12px", color: "#FF6B35" }}>{formatearEuros(m.total_gastos)}</td>
+                <td style={{ padding: "4px 12px", color: "#FFB020" }}>{formatearEuros(m.total_suscripciones)}</td>
                 <td style={{ padding: "4px 12px", color: balance >= 0 ? "#00ED64" : "#FF6B35" }}>{formatearEuros(balance)}</td>
                 <td style={{ padding: "4px 12px" }}>
                   <button

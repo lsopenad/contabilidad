@@ -2,12 +2,13 @@ import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { SelectorCategoria } from "@/components/selector-categoria"
 import { useDialogoCrud } from "@/lib/crud"
 import { esquemaImporte } from "@/lib/esquemas"
 import { api } from "@/lib/api"
 import { ThSort, useSorte } from "@/lib/tabla"
-import { type Suscripcion } from "@/lib/tipos"
+import { FACTOR_MENSUAL, FRECUENCIAS, type FrecuenciaSuscripcion, type Suscripcion } from "@/lib/tipos"
 import { formatearEuros, normalizarImporte } from "@/lib/utils"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
@@ -20,6 +21,7 @@ const esquema = z.object({
   importe: esquemaImporte,
   categoria_id: z.string().optional(),
   dia_cobro: z.string().optional(),
+  frecuencia: z.enum(FRECUENCIAS).default("mensual"),
   notas: z.string().optional(),
 })
 
@@ -40,20 +42,33 @@ export default function PaginaSuscripciones() {
       importe: normalizarImporte(d.importe),
       categoria_id: d.categoria_id ? Number(d.categoria_id) : null,
       dia_cobro: d.dia_cobro ? Number(d.dia_cobro) : null,
+      frecuencia: d.frecuencia,
       notas: d.notas || null,
     }),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ["suscripciones"] }); setAbierto(false); toast.success("suscripción creada") },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["suscripciones"] })
+      qc.invalidateQueries({ queryKey: ["informes"] })
+      setAbierto(false)
+      toast.success("suscripción creada")
+    },
   })
 
   const toggleActiva = useMutation({
     mutationFn: ({ id, activa }: { id: number; activa: boolean }) =>
       api.patch(`/suscripciones/${id}`, { activa }),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["suscripciones"] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["suscripciones"] })
+      qc.invalidateQueries({ queryKey: ["informes"] })
+    },
   })
 
   const eliminar = useMutation({
     mutationFn: (id: number) => api.delete(`/suscripciones/${id}`),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ["suscripciones"] }); toast.success("suscripción eliminada") },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["suscripciones"] })
+      qc.invalidateQueries({ queryKey: ["informes"] })
+      toast.success("suscripción eliminada")
+    },
   })
 
   const editar = useMutation({
@@ -62,20 +77,30 @@ export default function PaginaSuscripciones() {
       importe: normalizarImporte(d.importe),
       categoria_id: d.categoria_id ? Number(d.categoria_id) : null,
       dia_cobro: d.dia_cobro ? Number(d.dia_cobro) : null,
+      frecuencia: d.frecuencia,
       notas: d.notas || null,
     }),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ["suscripciones"] }); setAbierto(false); setEditando(null); toast.success("suscripción actualizada") },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["suscripciones"] })
+      qc.invalidateQueries({ queryKey: ["informes"] })
+      setAbierto(false)
+      setEditando(null)
+      toast.success("suscripción actualizada")
+    },
   })
 
   const form = useForm<Campos>({ resolver: zodResolver(esquema) })
 
-  const totalActivas = suscripciones.filter((s) => s.activa).reduce((acc, s) => acc + Number(s.importe), 0)
+  const totalMensual = suscripciones
+    .filter((s) => s.activa)
+    .reduce((acc, s) => acc + Number(s.importe) / FACTOR_MENSUAL[s.frecuencia ?? "mensual"], 0)
 
   const { ordenados, campo, dir, ordenarPor } = useSorte(
     suscripciones, "nombre", "asc",
     (item, c) => {
       if (c === "importe") return Number(item.importe)
       if (c === "dia_cobro") return item.dia_cobro ?? 999
+      if (c === "frecuencia") return FACTOR_MENSUAL[item.frecuencia ?? "mensual"]
       if (c === "categoria") return item.categoria?.nombre ?? ""
       if (c === "notas") return item.notas ?? ""
       if (c === "estado") return item.activa ? 0 : 1
@@ -92,7 +117,7 @@ export default function PaginaSuscripciones() {
         </div>
         <div className="flex items-center gap-4">
           <span style={{ color: "#5C8097", fontSize: "1.00rem", fontWeight: 600 }}>
-            {formatearEuros(totalActivas)}<span style={{ color: "#1F4A5E", fontSize: "0.70rem" }}>/mes</span>
+            {formatearEuros(totalMensual)}<span style={{ color: "#1F4A5E", fontSize: "0.70rem" }}>/mes equiv.</span>
           </span>
           <Button
             onClick={() => { setEditando(null); form.reset(); setAbierto(true) }}
@@ -106,18 +131,19 @@ export default function PaginaSuscripciones() {
       <table style={{ width: "100%", borderCollapse: "collapse" }}>
         <thead>
           <tr style={{ borderBottom: "1px solid #112B3A" }}>
-            <ThSort label="nombre"    campo="nombre"    actual={campo} dir={dir} onClick={ordenarPor} color="#5C8097" />
-            <ThSort label="importe"   campo="importe"   actual={campo} dir={dir} onClick={ordenarPor} color="#5C8097" />
-            <ThSort label="día cobro" campo="dia_cobro" actual={campo} dir={dir} onClick={ordenarPor} color="#5C8097" />
-            <ThSort label="categoría" campo="categoria" actual={campo} dir={dir} onClick={ordenarPor} color="#5C8097" />
-            <ThSort label="notas"     campo="notas"     actual={campo} dir={dir} onClick={ordenarPor} color="#5C8097" />
-            <ThSort label="estado"    campo="estado"    actual={campo} dir={dir} onClick={ordenarPor} color="#5C8097" />
+            <ThSort label="nombre"      campo="nombre"      actual={campo} dir={dir} onClick={ordenarPor} color="#5C8097" />
+            <ThSort label="importe"     campo="importe"     actual={campo} dir={dir} onClick={ordenarPor} color="#5C8097" />
+            <ThSort label="frecuencia"  campo="frecuencia"  actual={campo} dir={dir} onClick={ordenarPor} color="#5C8097" />
+            <ThSort label="día cobro"   campo="dia_cobro"   actual={campo} dir={dir} onClick={ordenarPor} color="#5C8097" />
+            <ThSort label="categoría"   campo="categoria"   actual={campo} dir={dir} onClick={ordenarPor} color="#5C8097" />
+            <ThSort label="notas"       campo="notas"       actual={campo} dir={dir} onClick={ordenarPor} color="#5C8097" />
+            <ThSort label="estado"      campo="estado"      actual={campo} dir={dir} onClick={ordenarPor} color="#5C8097" />
             <th style={{ padding: "4px 12px" }} />
           </tr>
         </thead>
         <tbody>
           {ordenados.length === 0 && (
-            <tr><td colSpan={7} style={{ padding: "2rem 12px", color: "#1A3F54", textAlign: "center" }}>
+            <tr><td colSpan={8} style={{ padding: "2rem 12px", color: "#1A3F54", textAlign: "center" }}>
               — sin suscripciones —
             </td></tr>
           )}
@@ -130,6 +156,7 @@ export default function PaginaSuscripciones() {
             >
               <td style={{ padding: "4px 12px", color: "#9BB7C4" }}>{s.nombre}</td>
               <td style={{ padding: "4px 12px", color: "#5C8097" }}>{formatearEuros(s.importe)}</td>
+              <td style={{ padding: "4px 12px", color: "#3D6676" }}>{s.frecuencia ?? "mensual"}</td>
               <td style={{ padding: "4px 12px", color: "#3D6676" }}>{s.dia_cobro ? `día ${s.dia_cobro}` : "—"}</td>
               <td style={{ padding: "4px 12px", color: "#3D6676" }}>{s.categoria?.nombre ?? "—"}</td>
               <td style={{ padding: "4px 12px", color: "#2A5A6E", maxWidth: "10rem", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
@@ -154,6 +181,7 @@ export default function PaginaSuscripciones() {
                       importe: String(s.importe),
                       categoria_id: s.categoria ? String(s.categoria.id) : undefined,
                       dia_cobro: s.dia_cobro ? String(s.dia_cobro) : undefined,
+                      frecuencia: s.frecuencia ?? "mensual",
                       notas: s.notas ?? undefined,
                     })
                     setAbierto(true)
@@ -214,17 +242,29 @@ export default function PaginaSuscripciones() {
               )} />
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
                 <FormField control={form.control} name="importe" render={({ field }) => (
-                  <FormItem><FormLabel>importe (€/mes)</FormLabel>
+                  <FormItem><FormLabel>importe (€)</FormLabel>
                     <FormControl><Input placeholder="9.99" {...field} /></FormControl>
                     <FormMessage />
                   </FormItem>
                 )} />
-                <FormField control={form.control} name="dia_cobro" render={({ field }) => (
-                  <FormItem><FormLabel>día de cobro</FormLabel>
-                    <FormControl><Input placeholder="1-31" {...field} /></FormControl>
+                <FormField control={form.control} name="frecuencia" render={({ field }) => (
+                  <FormItem><FormLabel>frecuencia</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value ?? "mensual"}>
+                      <FormControl><SelectTrigger><SelectValue /></SelectTrigger></FormControl>
+                      <SelectContent>
+                        {FRECUENCIAS.map((f) => (
+                          <SelectItem key={f} value={f}>{f}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </FormItem>
                 )} />
               </div>
+              <FormField control={form.control} name="dia_cobro" render={({ field }) => (
+                <FormItem><FormLabel>día de cobro</FormLabel>
+                  <FormControl><Input placeholder="1-31" {...field} /></FormControl>
+                </FormItem>
+              )} />
               <FormField control={form.control} name="categoria_id" render={({ field }) => (
                 <FormItem><FormLabel>categoría</FormLabel>
                   <SelectorCategoria tipo="gasto" value={field.value} onChange={field.onChange} />
