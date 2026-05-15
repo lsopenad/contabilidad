@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { api } from "@/lib/api"
 import { SelectorMes, useMes } from "@/lib/mes-context"
+import { ThSort, useSorte } from "@/lib/tabla"
 import { formatearEuros } from "@/lib/utils"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
@@ -57,16 +58,21 @@ export default function PaginaPresupuestos() {
     defaultValues: { mes: String(mes), anio: String(anio) },
   })
 
+  const { ordenados, campo, dir, ordenarPor } = useSorte(
+    presupuestos, "categoria", "asc",
+    (item, c) => c === "importe" ? Number(item.importe) : item.categoria.nombre,
+  )
+
   return (
     <div className="p-6">
       <div className="flex items-center justify-between mb-4" style={{ borderBottom: "1px solid #1e1e1e", paddingBottom: "0.75rem" }}>
         <div>
-          <div style={{ color: "#aaa", fontSize: "0.70rem", letterSpacing: "0.12em" }}>PRESUPUESTOS</div>
+          <div style={{ color: "#569cd6", fontSize: "0.70rem", letterSpacing: "0.12em" }}>PRESUPUESTOS</div>
           <SelectorMes />
         </div>
         <Button
           onClick={() => { form.reset({ mes: String(mes), anio: String(anio) }); setAbierto(true) }}
-          style={{ background: "#0d2420", color: "#4ec9b0", border: "1px solid #1a4035" }}
+          style={{ background: "#0a1525", color: "#569cd6", border: "1px solid #1a3050" }}
         >
           + nuevo
         </Button>
@@ -75,26 +81,26 @@ export default function PaginaPresupuestos() {
       <table style={{ width: "100%", borderCollapse: "collapse" }}>
         <thead>
           <tr style={{ borderBottom: "1px solid #1a1a1a" }}>
-            {["categoría", "presupuesto", ""].map((h) => (
-              <th key={h} style={{ textAlign: "left", padding: "4px 12px", color: "#333" }}>{h}</th>
-            ))}
+            <ThSort label="categoría"   campo="categoria" actual={campo} dir={dir} onClick={ordenarPor} color="#569cd6" />
+            <ThSort label="presupuesto" campo="importe"   actual={campo} dir={dir} onClick={ordenarPor} color="#569cd6" />
+            <th style={{ padding: "4px 12px" }} />
           </tr>
         </thead>
         <tbody>
-          {presupuestos.length === 0 && (
+          {ordenados.length === 0 && (
             <tr><td colSpan={3} style={{ padding: "2rem 12px", color: "#2a2a2a", textAlign: "center" }}>
               — sin presupuestos —
             </td></tr>
           )}
-          {presupuestos.map((p) => (
+          {ordenados.map((p) => (
             <tr
               key={p.id}
               style={{ borderBottom: "1px solid #141414" }}
               onMouseEnter={(e) => (e.currentTarget.style.background = "#111")}
               onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
             >
-              <td style={{ padding: "4px 12px", color: "#aaa" }}>{p.categoria.nombre}</td>
-              <td style={{ padding: "4px 12px", color: "#4ec9b0" }}>{formatearEuros(p.importe)}</td>
+              <td style={{ padding: "4px 12px", color: "#569cd6" }}>{p.categoria.nombre}</td>
+              <td style={{ padding: "4px 12px", color: "#569cd6" }}>{formatearEuros(p.importe)}</td>
               <td style={{ padding: "4px 12px" }}>
                 <button
                   onClick={() => eliminar.mutate(p.id)}
@@ -113,7 +119,7 @@ export default function PaginaPresupuestos() {
       <Dialog open={abierto} onOpenChange={setAbierto}>
         <DialogContent style={{ background: "#111", border: "1px solid #2a2a2a" }}>
           <DialogHeader>
-            <DialogTitle style={{ color: "#aaa", fontSize: "0.80rem", letterSpacing: "0.1em" }}>
+            <DialogTitle style={{ color: "#569cd6", fontSize: "0.80rem", letterSpacing: "0.1em" }}>
               NUEVO PRESUPUESTO
             </DialogTitle>
           </DialogHeader>
@@ -159,7 +165,7 @@ export default function PaginaPresupuestos() {
                   cancelar
                 </Button>
                 <Button type="submit" disabled={guardar.isPending}
-                  style={{ background: "#0d2420", color: "#4ec9b0", border: "1px solid #1a4035" }}>
+                  style={{ background: "#0a1525", color: "#569cd6", border: "1px solid #1a3050" }}>
                   {guardar.isPending ? "..." : "guardar"}
                 </Button>
               </div>

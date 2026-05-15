@@ -4,6 +4,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { api } from "@/lib/api"
+import { ThSort, useSorte } from "@/lib/tabla"
 import { formatearEuros } from "@/lib/utils"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
@@ -66,6 +67,18 @@ export default function PaginaSuscripciones() {
 
   const totalActivas = suscripciones.filter((s) => s.activa).reduce((acc, s) => acc + Number(s.importe), 0)
 
+  const { ordenados, campo, dir, ordenarPor } = useSorte(
+    suscripciones, "nombre", "asc",
+    (item, c) => {
+      if (c === "importe") return Number(item.importe)
+      if (c === "dia_cobro") return item.dia_cobro ?? 999
+      if (c === "categoria") return item.categoria?.nombre ?? ""
+      if (c === "notas") return item.notas ?? ""
+      if (c === "estado") return item.activa ? 0 : 1
+      return item.nombre
+    },
+  )
+
   return (
     <div className="p-6">
       <div className="flex items-center justify-between mb-4" style={{ borderBottom: "1px solid #1e1e1e", paddingBottom: "0.75rem" }}>
@@ -89,18 +102,22 @@ export default function PaginaSuscripciones() {
       <table style={{ width: "100%", borderCollapse: "collapse" }}>
         <thead>
           <tr style={{ borderBottom: "1px solid #1a1a1a" }}>
-            {["nombre", "importe", "día cobro", "categoría", "notas", "estado", ""].map((h) => (
-              <th key={h} style={{ textAlign: "left", padding: "4px 12px", color: "#333" }}>{h}</th>
-            ))}
+            <ThSort label="nombre"    campo="nombre"    actual={campo} dir={dir} onClick={ordenarPor} color="#ce9178" />
+            <ThSort label="importe"   campo="importe"   actual={campo} dir={dir} onClick={ordenarPor} color="#ce9178" />
+            <ThSort label="día cobro" campo="dia_cobro" actual={campo} dir={dir} onClick={ordenarPor} color="#ce9178" />
+            <ThSort label="categoría" campo="categoria" actual={campo} dir={dir} onClick={ordenarPor} color="#ce9178" />
+            <ThSort label="notas"     campo="notas"     actual={campo} dir={dir} onClick={ordenarPor} color="#ce9178" />
+            <ThSort label="estado"    campo="estado"    actual={campo} dir={dir} onClick={ordenarPor} color="#ce9178" />
+            <th style={{ padding: "4px 12px" }} />
           </tr>
         </thead>
         <tbody>
-          {suscripciones.length === 0 && (
+          {ordenados.length === 0 && (
             <tr><td colSpan={7} style={{ padding: "2rem 12px", color: "#2a2a2a", textAlign: "center" }}>
               — sin suscripciones —
             </td></tr>
           )}
-          {suscripciones.map((s) => (
+          {ordenados.map((s) => (
             <tr
               key={s.id}
               style={{ borderBottom: "1px solid #141414", opacity: s.activa ? 1 : 0.4 }}

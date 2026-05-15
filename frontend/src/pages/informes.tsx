@@ -1,4 +1,5 @@
 import { api } from "@/lib/api"
+import { ThSort, useSorte } from "@/lib/tabla"
 import { formatearEuros } from "@/lib/utils"
 import { useQuery } from "@tanstack/react-query"
 
@@ -21,6 +22,16 @@ export default function PaginaInformes() {
     queryFn: async () => (await api.get(`/informes/anual/${anio}`)).data,
   })
 
+  const { ordenados: mesesOrdenados, campo, dir, ordenarPor } = useSorte(
+    informe?.meses ?? [], "mes", "asc",
+    (item, c) => {
+      if (c === "ingresos") return Number(item.total_ingresos)
+      if (c === "gastos") return Number(item.total_gastos)
+      if (c === "balance") return Number(item.total_ingresos) - Number(item.total_gastos)
+      return item.mes
+    },
+  )
+
   const exportar = async (mes: number) => {
     const response = await api.get(`/excel/mes?mes=${mes}&anio=${anio}`, { responseType: "blob" })
     const url = URL.createObjectURL(new Blob([response.data]))
@@ -34,7 +45,7 @@ export default function PaginaInformes() {
   return (
     <div className="p-6">
       <div className="mb-4" style={{ borderBottom: "1px solid #1e1e1e", paddingBottom: "0.75rem" }}>
-        <span style={{ color: "#aaa", fontSize: "0.70rem", letterSpacing: "0.12em" }}>INFORMES {anio}</span>
+        <span style={{ color: "#b5cea8", fontSize: "0.70rem", letterSpacing: "0.12em" }}>INFORMES {anio}</span>
       </div>
 
       {informe && (
@@ -56,13 +67,15 @@ export default function PaginaInformes() {
       <table style={{ width: "100%", borderCollapse: "collapse" }}>
         <thead>
           <tr style={{ borderBottom: "1px solid #1a1a1a" }}>
-            {["mes", "ingresos", "gastos", "balance", ""].map((h) => (
-              <th key={h} style={{ textAlign: "left", padding: "4px 12px", color: "#333" }}>{h}</th>
-            ))}
+            <ThSort label="mes"      campo="mes"      actual={campo} dir={dir} onClick={ordenarPor} color="#b5cea8" />
+            <ThSort label="ingresos" campo="ingresos" actual={campo} dir={dir} onClick={ordenarPor} color="#b5cea8" />
+            <ThSort label="gastos"   campo="gastos"   actual={campo} dir={dir} onClick={ordenarPor} color="#b5cea8" />
+            <ThSort label="balance"  campo="balance"  actual={campo} dir={dir} onClick={ordenarPor} color="#b5cea8" />
+            <th style={{ padding: "4px 12px" }} />
           </tr>
         </thead>
         <tbody>
-          {informe?.meses.map((m) => {
+          {mesesOrdenados.map((m) => {
             const balance = Number(m.total_ingresos) - Number(m.total_gastos)
             return (
               <tr

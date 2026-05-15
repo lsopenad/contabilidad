@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { api } from "@/lib/api"
 import { SelectorMes, useMes } from "@/lib/mes-context"
+import { ThSort, useSorte } from "@/lib/tabla"
 import { formatearEuros, formatearFecha } from "@/lib/utils"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
@@ -59,6 +60,16 @@ export default function PaginaGastos() {
 
   const total = gastos.reduce((s, g) => s + Number(g.importe), 0)
 
+  const { ordenados, campo, dir, ordenarPor } = useSorte(
+    gastos, "fecha", "desc",
+    (item, c) => {
+      if (c === "fecha") return item.fecha
+      if (c === "importe") return Number(item.importe)
+      if (c === "categoria") return item.categoria?.nombre ?? ""
+      return item.descripcion ?? ""
+    },
+  )
+
   return (
     <div className="p-6">
       <div className="flex items-center justify-between mb-4" style={{ borderBottom: "1px solid #1e1e1e", paddingBottom: "0.75rem" }}>
@@ -82,18 +93,20 @@ export default function PaginaGastos() {
       <table style={{ width: "100%", borderCollapse: "collapse" }}>
         <thead>
           <tr style={{ borderBottom: "1px solid #1a1a1a" }}>
-            {["fecha", "importe", "categoría", "descripción", ""].map((h) => (
-              <th key={h} style={{ textAlign: "left", padding: "4px 12px", color: "#333" }}>{h}</th>
-            ))}
+            <ThSort label="fecha"       campo="fecha"       actual={campo} dir={dir} onClick={ordenarPor} color="#f48771" />
+            <ThSort label="importe"     campo="importe"     actual={campo} dir={dir} onClick={ordenarPor} color="#f48771" />
+            <ThSort label="categoría"   campo="categoria"   actual={campo} dir={dir} onClick={ordenarPor} color="#f48771" />
+            <ThSort label="descripción" campo="descripcion" actual={campo} dir={dir} onClick={ordenarPor} color="#f48771" />
+            <th style={{ padding: "4px 12px" }} />
           </tr>
         </thead>
         <tbody>
-          {gastos.length === 0 && (
+          {ordenados.length === 0 && (
             <tr><td colSpan={5} style={{ padding: "2rem 12px", color: "#2a2a2a", textAlign: "center" }}>
               — sin registros —
             </td></tr>
           )}
-          {gastos.map((g) => (
+          {ordenados.map((g) => (
             <tr
               key={g.id}
               style={{ borderBottom: "1px solid #141414" }}
