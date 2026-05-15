@@ -68,12 +68,12 @@ export default function PaginaPresupuestos() {
     <div className="p-6">
       <div className="flex items-center justify-between mb-4" style={{ borderBottom: "1px solid #1e1e1e", paddingBottom: "0.75rem" }}>
         <div>
-          <div style={{ color: "#569cd6", fontSize: "0.70rem", letterSpacing: "0.12em" }}>PRESUPUESTOS</div>
+          <div style={{ color: "#5AC4F8", fontSize: "0.70rem", letterSpacing: "0.12em" }}>PRESUPUESTOS</div>
           <SelectorMes />
         </div>
         <Button
           onClick={() => { setEditando(null); form.reset({ mes: String(mes), anio: String(anio) }); setAbierto(true) }}
-          style={{ background: "#0a1525", color: "#569cd6", border: "1px solid #1a3050" }}
+          style={{ background: "#051525", color: "#5AC4F8", border: "1px solid #0A2B49" }}
         >
           + nuevo
         </Button>
@@ -81,27 +81,27 @@ export default function PaginaPresupuestos() {
 
       <table style={{ width: "100%", borderCollapse: "collapse" }}>
         <thead>
-          <tr style={{ borderBottom: "1px solid #1a1a1a" }}>
-            <ThSort label="categoría"   campo="categoria" actual={campo} dir={dir} onClick={ordenarPor} color="#569cd6" />
-            <ThSort label="presupuesto" campo="importe"   actual={campo} dir={dir} onClick={ordenarPor} color="#569cd6" />
+          <tr style={{ borderBottom: "1px solid #112B3A" }}>
+            <ThSort label="categoría"   campo="categoria" actual={campo} dir={dir} onClick={ordenarPor} color="#5AC4F8" />
+            <ThSort label="presupuesto" campo="importe"   actual={campo} dir={dir} onClick={ordenarPor} color="#5AC4F8" />
             <th style={{ padding: "4px 12px" }} />
           </tr>
         </thead>
         <tbody>
           {ordenados.length === 0 && (
-            <tr><td colSpan={3} style={{ padding: "2rem 12px", color: "#2a2a2a", textAlign: "center" }}>
+            <tr><td colSpan={3} style={{ padding: "2rem 12px", color: "#1A3F54", textAlign: "center" }}>
               — sin presupuestos —
             </td></tr>
           )}
           {ordenados.map((p) => (
             <tr
               key={p.id}
-              style={{ borderBottom: "1px solid #141414" }}
-              onMouseEnter={(e) => (e.currentTarget.style.background = "#111")}
+              style={{ borderBottom: "1px solid #0A2233" }}
+              onMouseEnter={(e) => (e.currentTarget.style.background = "#012030")}
               onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
             >
-              <td style={{ padding: "4px 12px", color: "#569cd6" }}>{p.categoria.nombre}</td>
-              <td style={{ padding: "4px 12px", color: "#569cd6" }}>{formatearEuros(p.importe)}</td>
+              <td style={{ padding: "4px 12px", color: "#5AC4F8" }}>{p.categoria.nombre}</td>
+              <td style={{ padding: "4px 12px", color: "#5AC4F8" }}>{formatearEuros(p.importe)}</td>
               <td style={{ padding: "4px 12px", whiteSpace: "nowrap" }}>
                 <button
                   onClick={() => {
@@ -114,17 +114,17 @@ export default function PaginaPresupuestos() {
                     })
                     setAbierto(true)
                   }}
-                  style={{ color: "#333", background: "none", border: "none", cursor: "pointer", fontSize: "0.80rem", marginRight: "0.5rem" }}
-                  onMouseEnter={(e) => (e.currentTarget.style.color = "#569cd6")}
-                  onMouseLeave={(e) => (e.currentTarget.style.color = "#333")}
+                  style={{ color: "#1F4A5E", background: "none", border: "none", cursor: "pointer", fontSize: "0.80rem", marginRight: "0.5rem" }}
+                  onMouseEnter={(e) => (e.currentTarget.style.color = "#5AC4F8")}
+                  onMouseLeave={(e) => (e.currentTarget.style.color = "#1F4A5E")}
                 >
                   [e]
                 </button>
                 <button
                   onClick={() => eliminar.mutate(p.id)}
-                  style={{ color: "#333", background: "none", border: "none", cursor: "pointer", fontSize: "0.80rem" }}
-                  onMouseEnter={(e) => (e.currentTarget.style.color = "#f48771")}
-                  onMouseLeave={(e) => (e.currentTarget.style.color = "#333")}
+                  style={{ color: "#1F4A5E", background: "none", border: "none", cursor: "pointer", fontSize: "0.80rem" }}
+                  onMouseEnter={(e) => (e.currentTarget.style.color = "#FF6B35")}
+                  onMouseLeave={(e) => (e.currentTarget.style.color = "#1F4A5E")}
                 >
                   [x]
                 </button>
@@ -135,9 +135,9 @@ export default function PaginaPresupuestos() {
       </table>
 
       <Dialog open={abierto} onOpenChange={(v) => { setAbierto(v); if (!v) setEditando(null) }}>
-        <DialogContent style={{ background: "#111", border: "1px solid #2a2a2a" }}>
+        <DialogContent style={{ background: "#012030", border: "1px solid #2a2a2a" }}>
           <DialogHeader>
-            <DialogTitle style={{ color: "#569cd6", fontSize: "0.80rem", letterSpacing: "0.1em" }}>
+            <DialogTitle style={{ color: "#5AC4F8", fontSize: "0.80rem", letterSpacing: "0.1em" }}>
               {editando ? "EDITAR PRESUPUESTO" : "NUEVO PRESUPUESTO"}
             </DialogTitle>
           </DialogHeader>
@@ -179,11 +179,11 @@ export default function PaginaPresupuestos() {
               </div>
               <div className="flex justify-end gap-2 pt-1">
                 <Button type="button" variant="outline" onClick={() => setAbierto(false)}
-                  style={{ background: "none", border: "1px solid #2a2a2a", color: "#555" }}>
+                  style={{ background: "none", border: "1px solid #2a2a2a", color: "#3D6676" }}>
                   cancelar
                 </Button>
                 <Button type="submit" disabled={guardar.isPending}
-                  style={{ background: "#0a1525", color: "#569cd6", border: "1px solid #1a3050" }}>
+                  style={{ background: "#051525", color: "#5AC4F8", border: "1px solid #0A2B49" }}>
                   {guardar.isPending ? "..." : "guardar"}
                 </Button>
               </div>

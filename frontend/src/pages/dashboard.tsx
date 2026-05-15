@@ -63,22 +63,22 @@ export default function PaginaDashboard() {
     <div className="p-6 space-y-6">
       {/* Cabecera */}
       <div style={{ borderBottom: "1px solid #1e1e1e", paddingBottom: "0.75rem" }}>
-        <span style={{ color: "#4ec9b0", fontSize: "0.70rem", letterSpacing: "0.12em" }}>
+        <span style={{ color: "#00ED64", fontSize: "0.70rem", letterSpacing: "0.12em" }}>
           DASHBOARD
         </span>
         <SelectorMes />
       </div>
 
       {/* KPIs */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "1px", background: "#1e1e1e" }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "1px", background: "#0F3244" }}>
         {[
-          { label: "ingresos",      valor: resumen?.total_ingresos ?? "0", color: "#4ec9b0" },
-          { label: "gastos",        valor: resumen?.total_gastos   ?? "0", color: "#f48771" },
-          { label: "balance",       valor: String(balance),                color: balance >= 0 ? "#4ec9b0" : "#f48771" },
-          { label: "suscripciones", valor: String(totalSus),               color: "#ce9178" },
+          { label: "ingresos",      valor: resumen?.total_ingresos ?? "0", color: "#00ED64" },
+          { label: "gastos",        valor: resumen?.total_gastos   ?? "0", color: "#FF6B35" },
+          { label: "balance",       valor: String(balance),                color: balance >= 0 ? "#00ED64" : "#FF6B35" },
+          { label: "suscripciones", valor: String(totalSus),               color: "#FFB020" },
         ].map(({ label, valor, color }) => (
-          <div key={label} style={{ background: "#0c0c0c", padding: "1rem 1.25rem" }}>
-            <div style={{ color: "#333", fontSize: "0.70rem", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "0.3rem" }}>
+          <div key={label} style={{ background: "#001E2B", padding: "1rem 1.25rem" }}>
+            <div style={{ color: "#1F4A5E", fontSize: "0.70rem", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "0.3rem" }}>
               {label}
             </div>
             <div style={{ color, fontSize: "1.15rem", fontWeight: 600 }}>
@@ -91,23 +91,23 @@ export default function PaginaDashboard() {
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "2rem" }}>
         {/* Últimos movimientos */}
         <div>
-          <div style={{ color: "#333", fontSize: "0.70rem", letterSpacing: "0.12em", marginBottom: "0.5rem" }}>
+          <div style={{ color: "#1F4A5E", fontSize: "0.70rem", letterSpacing: "0.12em", marginBottom: "0.5rem" }}>
             ÚLTIMOS MOVIMIENTOS
           </div>
           <table style={{ width: "100%", borderCollapse: "collapse" }}>
             <tbody>
               {movimientos.length === 0 && (
-                <tr><td style={{ color: "#2a2a2a", fontSize: "0.80rem", padding: "0.5rem 0" }}>— sin movimientos —</td></tr>
+                <tr><td style={{ color: "#1A3F54", fontSize: "0.80rem", padding: "0.5rem 0" }}>— sin movimientos —</td></tr>
               )}
               {movimientos.map((m) => (
-                <tr key={`${m.tipo}-${m.id}`} style={{ borderBottom: "1px solid #141414" }}>
-                  <td style={{ padding: "3px 0", color: "#444", fontSize: "0.80rem", width: "5rem" }}>
+                <tr key={`${m.tipo}-${m.id}`} style={{ borderBottom: "1px solid #0A2233" }}>
+                  <td style={{ padding: "3px 0", color: "#2A5A6E", fontSize: "0.80rem", width: "5rem" }}>
                     {formatearFecha(m.fecha)}
                   </td>
-                  <td style={{ padding: "3px 8px", color: "#555", fontSize: "0.80rem" }}>
+                  <td style={{ padding: "3px 8px", color: "#3D6676", fontSize: "0.80rem" }}>
                     {m.categoria?.nombre ?? m.descripcion ?? "—"}
                   </td>
-                  <td style={{ padding: "3px 0", textAlign: "right", color: m.tipo === "ingreso" ? "#4ec9b0" : "#f48771", fontSize: "0.80rem" }}>
+                  <td style={{ padding: "3px 0", textAlign: "right", color: m.tipo === "ingreso" ? "#00ED64" : "#FF6B35", fontSize: "0.80rem" }}>
                     {m.tipo === "ingreso" ? "+" : "-"}{formatearEuros(m.importe)}
                   </td>
                 </tr>
@@ -118,29 +118,29 @@ export default function PaginaDashboard() {
 
         {/* Gastos por categoría */}
         <div>
-          <div style={{ color: "#333", fontSize: "0.70rem", letterSpacing: "0.12em", marginBottom: "0.5rem" }}>
+          <div style={{ color: "#1F4A5E", fontSize: "0.70rem", letterSpacing: "0.12em", marginBottom: "0.5rem" }}>
             GASTOS POR CATEGORÍA
           </div>
           <div className="space-y-2">
             {categorias.length === 0 && (
-              <div style={{ color: "#2a2a2a", fontSize: "0.80rem" }}>— sin gastos —</div>
+              <div style={{ color: "#1A3F54", fontSize: "0.80rem" }}>— sin gastos —</div>
             )}
             {categorias.map((c) => {
               const presupuesto = presupuestoPorCategoria[c.categoria_id ?? 0]
               const pct = presupuesto
                 ? Math.min(100, (Number(c.total) / presupuesto) * 100)
                 : (Number(c.total) / maxCategoria) * 100
-              const colorBarra = presupuesto && Number(c.total) > presupuesto ? "#f48771" : "#4ec9b0"
+              const colorBarra = presupuesto && Number(c.total) > presupuesto ? "#FF6B35" : "#00ED64"
               return (
                 <div key={c.categoria_id}>
                   <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "2px" }}>
-                    <span style={{ color: "#666", fontSize: "0.77rem" }}>{c.categoria_nombre}</span>
-                    <span style={{ color: "#555", fontSize: "0.77rem" }}>
+                    <span style={{ color: "#4E7A8A", fontSize: "0.77rem" }}>{c.categoria_nombre}</span>
+                    <span style={{ color: "#3D6676", fontSize: "0.77rem" }}>
                       {formatearEuros(c.total)}
-                      {presupuesto ? <span style={{ color: "#333" }}> / {formatearEuros(presupuesto)}</span> : null}
+                      {presupuesto ? <span style={{ color: "#1F4A5E" }}> / {formatearEuros(presupuesto)}</span> : null}
                     </span>
                   </div>
-                  <div style={{ height: "2px", background: "#1a1a1a" }}>
+                  <div style={{ height: "2px", background: "#112B3A" }}>
                     <div style={{ height: "100%", width: `${pct}%`, background: colorBarra, transition: "width 0.3s" }} />
                   </div>
                 </div>
@@ -153,7 +153,7 @@ export default function PaginaDashboard() {
       {/* Suscripciones activas */}
       {suscripcionesActivas.length > 0 && (
         <div>
-          <div style={{ color: "#333", fontSize: "0.70rem", letterSpacing: "0.12em", marginBottom: "0.5rem" }}>
+          <div style={{ color: "#1F4A5E", fontSize: "0.70rem", letterSpacing: "0.12em", marginBottom: "0.5rem" }}>
             SUSCRIPCIONES ACTIVAS
           </div>
           <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem" }}>
@@ -162,8 +162,8 @@ export default function PaginaDashboard() {
                 key={s.id}
                 style={{ border: "1px solid #1e1e1e", padding: "0.25rem 0.75rem", fontSize: "0.77rem" }}
               >
-                <span style={{ color: "#555" }}>{s.nombre}</span>
-                <span style={{ color: "#ce9178", marginLeft: "0.5rem" }}>{formatearEuros(s.importe)}</span>
+                <span style={{ color: "#3D6676" }}>{s.nombre}</span>
+                <span style={{ color: "#FFB020", marginLeft: "0.5rem" }}>{formatearEuros(s.importe)}</span>
               </div>
             ))}
           </div>

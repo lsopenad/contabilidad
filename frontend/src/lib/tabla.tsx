@@ -32,7 +32,7 @@ export function useSorte<T>(
   return { ordenados, campo, dir, ordenarPor }
 }
 
-export function ThSort({ label, campo, actual, dir, onClick, color = "#4ec9b0" }: {
+export function ThSort({ label, campo, actual, dir, onClick, color = "#00ED64" }: {
   label: string
   campo: string
   actual: string
@@ -47,7 +47,7 @@ export function ThSort({ label, campo, actual, dir, onClick, color = "#4ec9b0" }
       style={{
         textAlign: "left",
         padding: "4px 12px",
-        color: activo ? "#888" : "#333",
+        color: activo ? "#5C8097" : "#1F4A5E",
         cursor: "pointer",
         userSelect: "none",
         whiteSpace: "nowrap",

@@ -44,20 +44,20 @@ export default function PaginaInformes() {
 
   return (
     <div className="p-6">
-      <div className="mb-4" style={{ borderBottom: "1px solid #1e1e1e", paddingBottom: "0.75rem" }}>
-        <span style={{ color: "#b5cea8", fontSize: "0.70rem", letterSpacing: "0.12em" }}>INFORMES {anio}</span>
+      <div className="mb-4" style={{ borderBottom: "1px solid #0F3244", paddingBottom: "0.75rem" }}>
+        <span style={{ color: "#84B8C9", fontSize: "0.70rem", letterSpacing: "0.12em" }}>INFORMES {anio}</span>
       </div>
 
       {informe && (
         <div style={{ display: "flex", gap: "2rem", marginBottom: "1.5rem" }}>
           {[
-            { label: "ingresos", valor: informe.total_ingresos, color: "#4ec9b0" },
-            { label: "gastos",   valor: informe.total_gastos,   color: "#f48771" },
+            { label: "ingresos", valor: informe.total_ingresos, color: "#00ED64" },
+            { label: "gastos",   valor: informe.total_gastos,   color: "#FF6B35" },
             { label: "balance",  valor: informe.balance,
-              color: Number(informe.balance) >= 0 ? "#4ec9b0" : "#f48771" },
+              color: Number(informe.balance) >= 0 ? "#00ED64" : "#FF6B35" },
           ].map(({ label, valor, color }) => (
             <div key={label} style={{ borderLeft: `2px solid ${color}`, paddingLeft: "0.75rem" }}>
-              <div style={{ color: "#333", fontSize: "0.70rem", letterSpacing: "0.1em", textTransform: "uppercase" }}>{label}</div>
+              <div style={{ color: "#1F4A5E", fontSize: "0.70rem", letterSpacing: "0.1em", textTransform: "uppercase" }}>{label}</div>
               <div style={{ color, fontSize: "1.15rem", fontWeight: 600 }}>{formatearEuros(valor)}</div>
             </div>
           ))}
@@ -66,11 +66,11 @@ export default function PaginaInformes() {
 
       <table style={{ width: "100%", borderCollapse: "collapse" }}>
         <thead>
-          <tr style={{ borderBottom: "1px solid #1a1a1a" }}>
-            <ThSort label="mes"      campo="mes"      actual={campo} dir={dir} onClick={ordenarPor} color="#b5cea8" />
-            <ThSort label="ingresos" campo="ingresos" actual={campo} dir={dir} onClick={ordenarPor} color="#b5cea8" />
-            <ThSort label="gastos"   campo="gastos"   actual={campo} dir={dir} onClick={ordenarPor} color="#b5cea8" />
-            <ThSort label="balance"  campo="balance"  actual={campo} dir={dir} onClick={ordenarPor} color="#b5cea8" />
+          <tr style={{ borderBottom: "1px solid #112B3A" }}>
+            <ThSort label="mes"      campo="mes"      actual={campo} dir={dir} onClick={ordenarPor} color="#84B8C9" />
+            <ThSort label="ingresos" campo="ingresos" actual={campo} dir={dir} onClick={ordenarPor} color="#84B8C9" />
+            <ThSort label="gastos"   campo="gastos"   actual={campo} dir={dir} onClick={ordenarPor} color="#84B8C9" />
+            <ThSort label="balance"  campo="balance"  actual={campo} dir={dir} onClick={ordenarPor} color="#84B8C9" />
             <th style={{ padding: "4px 12px" }} />
           </tr>
         </thead>
@@ -80,20 +80,20 @@ export default function PaginaInformes() {
             return (
               <tr
                 key={m.mes}
-                style={{ borderBottom: "1px solid #141414" }}
-                onMouseEnter={(e) => (e.currentTarget.style.background = "#111")}
+                style={{ borderBottom: "1px solid #0A2233" }}
+                onMouseEnter={(e) => (e.currentTarget.style.background = "#012030")}
                 onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
               >
-                <td style={{ padding: "4px 12px", color: "#555" }}>{MESES[m.mes - 1]}</td>
-                <td style={{ padding: "4px 12px", color: "#4ec9b0" }}>{formatearEuros(m.total_ingresos)}</td>
-                <td style={{ padding: "4px 12px", color: "#f48771" }}>{formatearEuros(m.total_gastos)}</td>
-                <td style={{ padding: "4px 12px", color: balance >= 0 ? "#4ec9b0" : "#f48771" }}>{formatearEuros(balance)}</td>
+                <td style={{ padding: "4px 12px", color: "#3D6676" }}>{MESES[m.mes - 1]}</td>
+                <td style={{ padding: "4px 12px", color: "#00ED64" }}>{formatearEuros(m.total_ingresos)}</td>
+                <td style={{ padding: "4px 12px", color: "#FF6B35" }}>{formatearEuros(m.total_gastos)}</td>
+                <td style={{ padding: "4px 12px", color: balance >= 0 ? "#00ED64" : "#FF6B35" }}>{formatearEuros(balance)}</td>
                 <td style={{ padding: "4px 12px" }}>
                   <button
                     onClick={() => exportar(m.mes)}
-                    style={{ color: "#333", background: "none", border: "none", cursor: "pointer", fontSize: "0.80rem" }}
-                    onMouseEnter={(e) => (e.currentTarget.style.color = "#4ec9b0")}
-                    onMouseLeave={(e) => (e.currentTarget.style.color = "#333")}
+                    style={{ color: "#1F4A5E", background: "none", border: "none", cursor: "pointer", fontSize: "0.80rem" }}
+                    onMouseEnter={(e) => (e.currentTarget.style.color = "#00ED64")}
+                    onMouseLeave={(e) => (e.currentTarget.style.color = "#1F4A5E")}
                     title="exportar xlsx"
                   >
                     [↓]

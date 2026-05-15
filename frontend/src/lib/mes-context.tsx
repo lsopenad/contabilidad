@@ -54,26 +54,26 @@ export function SelectorMes() {
 
   const btn = {
     background: "none", border: "none", cursor: "pointer",
-    color: "#444", fontSize: "0.70rem", padding: "0 2px", lineHeight: 1,
+    color: "#2A5A6E", fontSize: "0.70rem", padding: "0 2px", lineHeight: 1,
   }
 
   return (
     <div style={{ display: "flex", alignItems: "center", gap: "0.25rem" }}>
       <button style={btn} onClick={irAnterior}
-        onMouseEnter={(e) => (e.currentTarget.style.color = "#888")}
-        onMouseLeave={(e) => (e.currentTarget.style.color = "#444")}
+        onMouseEnter={(e) => (e.currentTarget.style.color = "#5C8097")}
+        onMouseLeave={(e) => (e.currentTarget.style.color = "#2A5A6E")}
       >[&lt;]</button>
-      <span style={{ color: "#555", fontSize: "0.70rem", minWidth: "5.5rem", textAlign: "center" }}>
+      <span style={{ color: "#3D6676", fontSize: "0.70rem", minWidth: "5.5rem", textAlign: "center" }}>
         {etiqueta}
       </span>
       <button style={btn} onClick={irSiguiente}
-        onMouseEnter={(e) => (e.currentTarget.style.color = "#888")}
-        onMouseLeave={(e) => (e.currentTarget.style.color = "#444")}
+        onMouseEnter={(e) => (e.currentTarget.style.color = "#5C8097")}
+        onMouseLeave={(e) => (e.currentTarget.style.color = "#2A5A6E")}
       >[&gt;]</button>
       {!esHoy && (
-        <button style={{ ...btn, color: "#4ec9b0", marginLeft: "0.25rem" }} onClick={irHoy}
-          onMouseEnter={(e) => (e.currentTarget.style.color = "#7eddd0")}
-          onMouseLeave={(e) => (e.currentTarget.style.color = "#4ec9b0")}
+        <button style={{ ...btn, color: "#00ED64", marginLeft: "0.25rem" }} onClick={irHoy}
+          onMouseEnter={(e) => (e.currentTarget.style.color = "#7EFFC0")}
+          onMouseLeave={(e) => (e.currentTarget.style.color = "#00ED64")}
         >[hoy]</button>
       )}
     </div>

@@ -15,10 +15,10 @@ const navegacion = [
 export default function Layout() {
   return (
     <MesProvider>
-      <div className="flex h-screen" style={{ background: "#0c0c0c" }}>
-        <aside className="w-48 flex flex-col" style={{ borderRight: "1px solid #1e1e1e" }}>
-          <div className="p-4" style={{ borderBottom: "1px solid #1e1e1e" }}>
-            <span style={{ color: "#4ec9b0", fontSize: "0.77rem", letterSpacing: "0.1em" }}>
+      <div className="flex h-screen" style={{ background: "#001E2B" }}>
+        <aside className="w-48 flex flex-col" style={{ borderRight: "1px solid #0F3244" }}>
+          <div className="p-4" style={{ borderBottom: "1px solid #0F3244" }}>
+            <span style={{ color: "#00ED64", fontSize: "0.77rem", letterSpacing: "0.1em" }}>
               CONTABILIDAD
             </span>
           </div>
@@ -32,13 +32,13 @@ export default function Layout() {
                 className={({ isActive }) =>
                   cn(
                     "flex items-center px-3 py-1.5 text-xs transition-colors",
-                    isActive ? "text-[#4ec9b0]" : "text-[#555] hover:text-[#888]",
+                    isActive ? "text-[#00ED64]" : "text-[#3D6676] hover:text-[#5C8097]",
                   )
                 }
               >
                 {({ isActive }) => (
                   <>
-                    <span className="mr-2 w-3 inline-block" style={{ color: "#4ec9b0" }}>
+                    <span className="mr-2 w-3 inline-block" style={{ color: "#00ED64" }}>
                       {isActive ? ">" : " "}
                     </span>
                     {etiqueta}
@@ -48,8 +48,8 @@ export default function Layout() {
             ))}
           </nav>
 
-          <div className="p-3" style={{ borderTop: "1px solid #1e1e1e" }}>
-            <span style={{ color: "#2a2a2a", fontSize: "0.70rem" }}>v2.0.0</span>
+          <div className="p-3" style={{ borderTop: "1px solid #0F3244" }}>
+            <span style={{ color: "#1A3F54", fontSize: "0.70rem" }}>v2.0.0</span>
           </div>
         </aside>
 

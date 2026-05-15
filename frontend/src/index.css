@@ -38,38 +38,36 @@
 :root {
   --radius: 1px;
 
-  /* Terminal dark palette */
-  --background:           #0c0c0c;
-  --foreground:           #aaaaaa;
-  --card:                 #111111;
-  --card-foreground:      #aaaaaa;
-  --popover:              #161616;
-  --popover-foreground:   #aaaaaa;
+  --background:           #001E2B;
+  --foreground:           #C8DEE8;
+  --card:                 #012030;
+  --card-foreground:      #C8DEE8;
+  --popover:              #012535;
+  --popover-foreground:   #C8DEE8;
 
-  /* Primary = teal terminal */
-  --primary:              #4ec9b0;
-  --primary-foreground:   #000000;
+  --primary:              #00ED64;
+  --primary-foreground:   #001E2B;
 
-  --secondary:            #1a1a1a;
-  --secondary-foreground: #666666;
+  --secondary:            #0A2535;
+  --secondary-foreground: #6B95A7;
 
-  --muted:                #111111;
-  --muted-foreground:     #555555;
+  --muted:                #012030;
+  --muted-foreground:     #4E7A8A;
 
-  --accent:               #1a1a1a;
-  --accent-foreground:    #888888;
+  --accent:               #0A2535;
+  --accent-foreground:    #7AAABB;
 
-  --destructive:          #f48771;
-  --destructive-foreground: #000000;
+  --destructive:          #FF6B35;
+  --destructive-foreground: #001E2B;
 
-  --border:               #1e1e1e;
-  --input:                #0f0f0f;
-  --ring:                 #4ec9b0;
+  --border:               #0F3244;
+  --input:                #011825;
+  --ring:                 #00ED64;
 
   /* Semantic */
-  --positive:             #4ec9b0;
-  --negative:             #f48771;
-  --warning:              #ce9178;
+  --positive:             #00ED64;
+  --negative:             #FF6B35;
+  --warning:              #FFB020;
 }
 
 /* ── Base ────────────────────────────────────────────────────────────────── */
@@ -91,9 +89,9 @@
 
   /* Scrollbars */
   ::-webkit-scrollbar       { width: 4px; height: 4px; }
-  ::-webkit-scrollbar-track { background: #080808; }
-  ::-webkit-scrollbar-thumb { background: #222; border-radius: 0; }
-  ::-webkit-scrollbar-thumb:hover { background: #333; }
+  ::-webkit-scrollbar-track { background: #001525; }
+  ::-webkit-scrollbar-thumb { background: #0F3244; border-radius: 0; }
+  ::-webkit-scrollbar-thumb:hover { background: #1A4A62; }
 
   /* Table headers — uppercase tracked */
   th {
@@ -108,13 +106,13 @@
     background: var(--input) !important;
     color: var(--foreground) !important;
     font-size: 0.87rem !important;
-    border-color: #222 !important;
+    border-color: #1A3F54 !important;
   }
   input:focus, select:focus, textarea:focus {
     border-color: var(--primary) !important;
     outline: none !important;
   }
-  input::placeholder { color: #333 !important; }
+  input::placeholder { color: #1A3D50 !important; }
 
   /* Buttons — squared, tracked */
   button {
@@ -137,9 +135,9 @@
   .text-negative { color: var(--negative) !important; }
   .text-warning  { color: var(--warning)  !important; }
 
-  .bg-positive-subtle { background: #0d3028 !important; }
-  .bg-negative-subtle { background: #3b1010 !important; }
-  .bg-warning-subtle  { background: #38260e !important; }
+  .bg-positive-subtle { background: #001E14 !important; }
+  .bg-negative-subtle { background: #1F0D05 !important; }
+  .bg-warning-subtle  { background: #1F1400 !important; }
 
   /* Terminal cursor blink for active nav */
   .nav-active::before {

@@ -85,16 +85,16 @@ export default function PaginaIngresos() {
       {/* Cabecera */}
       <div className="flex items-center justify-between mb-4" style={{ borderBottom: "1px solid #1e1e1e", paddingBottom: "0.75rem" }}>
         <div>
-          <div style={{ color: "#4ec9b0", fontSize: "0.70rem", letterSpacing: "0.12em" }}>INGRESOS</div>
+          <div style={{ color: "#00ED64", fontSize: "0.70rem", letterSpacing: "0.12em" }}>INGRESOS</div>
           <SelectorMes />
         </div>
         <div className="flex items-center gap-4">
-          <span style={{ color: "#4ec9b0", fontSize: "1.00rem", fontWeight: 600 }}>
+          <span style={{ color: "#00ED64", fontSize: "1.00rem", fontWeight: 600 }}>
             {formatearEuros(total)}
           </span>
           <Button
             onClick={() => { setEditando(null); form.reset({ fecha: new Date().toISOString().slice(0, 10) }); setAbierto(true) }}
-            style={{ background: "#0d2420", color: "#4ec9b0", border: "1px solid #1a4035" }}
+            style={{ background: "#001E14", color: "#00ED64", border: "1px solid #003D28" }}
           >
             + nuevo
           </Button>
@@ -104,31 +104,31 @@ export default function PaginaIngresos() {
       {/* Tabla */}
       <table style={{ width: "100%", borderCollapse: "collapse" }}>
         <thead>
-          <tr style={{ borderBottom: "1px solid #1a1a1a" }}>
-            <ThSort label="fecha"       campo="fecha"       actual={campo} dir={dir} onClick={ordenarPor} color="#4ec9b0" />
-            <ThSort label="importe"     campo="importe"     actual={campo} dir={dir} onClick={ordenarPor} color="#4ec9b0" />
-            <ThSort label="categoría"   campo="categoria"   actual={campo} dir={dir} onClick={ordenarPor} color="#4ec9b0" />
-            <ThSort label="descripción" campo="descripcion" actual={campo} dir={dir} onClick={ordenarPor} color="#4ec9b0" />
+          <tr style={{ borderBottom: "1px solid #112B3A" }}>
+            <ThSort label="fecha"       campo="fecha"       actual={campo} dir={dir} onClick={ordenarPor} color="#00ED64" />
+            <ThSort label="importe"     campo="importe"     actual={campo} dir={dir} onClick={ordenarPor} color="#00ED64" />
+            <ThSort label="categoría"   campo="categoria"   actual={campo} dir={dir} onClick={ordenarPor} color="#00ED64" />
+            <ThSort label="descripción" campo="descripcion" actual={campo} dir={dir} onClick={ordenarPor} color="#00ED64" />
             <th style={{ padding: "4px 12px" }} />
           </tr>
         </thead>
         <tbody>
           {ordenados.length === 0 && (
-            <tr><td colSpan={5} style={{ padding: "2rem 12px", color: "#2a2a2a", textAlign: "center" }}>
+            <tr><td colSpan={5} style={{ padding: "2rem 12px", color: "#1A3F54", textAlign: "center" }}>
               — sin registros —
             </td></tr>
           )}
           {ordenados.map((ing) => (
             <tr
               key={ing.id}
-              style={{ borderBottom: "1px solid #141414", cursor: "default" }}
-              onMouseEnter={(e) => (e.currentTarget.style.background = "#111")}
+              style={{ borderBottom: "1px solid #0A2233", cursor: "default" }}
+              onMouseEnter={(e) => (e.currentTarget.style.background = "#012030")}
               onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
             >
-              <td style={{ padding: "4px 12px", color: "#666" }}>{formatearFecha(ing.fecha)}</td>
-              <td style={{ padding: "4px 12px", color: "#4ec9b0" }}>{formatearEuros(ing.importe)}</td>
-              <td style={{ padding: "4px 12px", color: "#555" }}>{ing.categoria?.nombre ?? "—"}</td>
-              <td style={{ padding: "4px 12px", color: "#444" }}>{ing.descripcion ?? "—"}</td>
+              <td style={{ padding: "4px 12px", color: "#4E7A8A" }}>{formatearFecha(ing.fecha)}</td>
+              <td style={{ padding: "4px 12px", color: "#00ED64" }}>{formatearEuros(ing.importe)}</td>
+              <td style={{ padding: "4px 12px", color: "#3D6676" }}>{ing.categoria?.nombre ?? "—"}</td>
+              <td style={{ padding: "4px 12px", color: "#2A5A6E" }}>{ing.descripcion ?? "—"}</td>
               <td style={{ padding: "4px 12px", whiteSpace: "nowrap" }}>
                 <button
                   onClick={() => {
@@ -141,17 +141,17 @@ export default function PaginaIngresos() {
                     })
                     setAbierto(true)
                   }}
-                  style={{ color: "#333", background: "none", border: "none", cursor: "pointer", fontSize: "0.80rem", marginRight: "0.5rem" }}
-                  onMouseEnter={(e) => (e.currentTarget.style.color = "#4ec9b0")}
-                  onMouseLeave={(e) => (e.currentTarget.style.color = "#333")}
+                  style={{ color: "#1F4A5E", background: "none", border: "none", cursor: "pointer", fontSize: "0.80rem", marginRight: "0.5rem" }}
+                  onMouseEnter={(e) => (e.currentTarget.style.color = "#00ED64")}
+                  onMouseLeave={(e) => (e.currentTarget.style.color = "#1F4A5E")}
                 >
                   [e]
                 </button>
                 <button
                   onClick={() => eliminar.mutate(ing.id)}
-                  style={{ color: "#333", background: "none", border: "none", cursor: "pointer", fontSize: "0.80rem" }}
-                  onMouseEnter={(e) => (e.currentTarget.style.color = "#f48771")}
-                  onMouseLeave={(e) => (e.currentTarget.style.color = "#333")}
+                  style={{ color: "#1F4A5E", background: "none", border: "none", cursor: "pointer", fontSize: "0.80rem" }}
+                  onMouseEnter={(e) => (e.currentTarget.style.color = "#FF6B35")}
+                  onMouseLeave={(e) => (e.currentTarget.style.color = "#1F4A5E")}
                 >
                   [x]
                 </button>
@@ -162,9 +162,9 @@ export default function PaginaIngresos() {
       </table>
 
       <Dialog open={abierto} onOpenChange={(v) => { setAbierto(v); if (!v) setEditando(null) }}>
-        <DialogContent style={{ background: "#111", border: "1px solid #2a2a2a" }}>
+        <DialogContent style={{ background: "#012030", border: "1px solid #2a2a2a" }}>
           <DialogHeader>
-            <DialogTitle style={{ color: "#4ec9b0", fontSize: "0.80rem", letterSpacing: "0.1em" }}>
+            <DialogTitle style={{ color: "#00ED64", fontSize: "0.80rem", letterSpacing: "0.1em" }}>
               {editando ? "EDITAR INGRESO" : "NUEVO INGRESO"}
             </DialogTitle>
           </DialogHeader>
@@ -209,11 +209,11 @@ export default function PaginaIngresos() {
               )} />
               <div className="flex justify-end gap-2 pt-1">
                 <Button type="button" variant="outline" onClick={() => setAbierto(false)}
-                  style={{ background: "none", border: "1px solid #2a2a2a", color: "#555" }}>
+                  style={{ background: "none", border: "1px solid #2a2a2a", color: "#3D6676" }}>
                   cancelar
                 </Button>
                 <Button type="submit" disabled={crear.isPending || editar.isPending}
-                  style={{ background: "#0d2420", color: "#4ec9b0", border: "1px solid #1a4035" }}>
+                  style={{ background: "#001E14", color: "#00ED64", border: "1px solid #003D28" }}>
                   {crear.isPending || editar.isPending ? "..." : "guardar"}
                 </Button>
               </div>
