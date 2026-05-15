@@ -1,4 +1,5 @@
 import { api } from "@/lib/api"
+import { SelectorMes, useMes } from "@/lib/mes-context"
 import { formatearEuros, formatearFecha } from "@/lib/utils"
 import { useQuery } from "@tanstack/react-query"
 
@@ -11,9 +12,7 @@ interface Suscripcion { id: number; nombre: string; importe: string; activa: boo
 const MESES = ["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"]
 
 export default function PaginaDashboard() {
-  const hoy = new Date()
-  const mes = hoy.getMonth() + 1
-  const anio = hoy.getFullYear()
+  const { mes, anio } = useMes()
 
   const { data: resumen } = useQuery<ResumenMes>({
     queryKey: ["informes", "mes", mes, anio],
@@ -67,9 +66,7 @@ export default function PaginaDashboard() {
         <span style={{ color: "#4ec9b0", fontSize: "0.65rem", letterSpacing: "0.12em" }}>
           DASHBOARD
         </span>
-        <span style={{ color: "#2a2a2a", fontSize: "0.65rem", marginLeft: "1rem" }}>
-          {MESES[mes - 1]} {anio}
-        </span>
+        <SelectorMes />
       </div>
 
       {/* KPIs */}

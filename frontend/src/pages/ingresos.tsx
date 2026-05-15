@@ -4,6 +4,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { api } from "@/lib/api"
+import { SelectorMes, useMes } from "@/lib/mes-context"
 import { formatearEuros, formatearFecha } from "@/lib/utils"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
@@ -25,8 +26,7 @@ interface Ingreso { id: number; importe: string; fecha: string; descripcion?: st
 export default function PaginaIngresos() {
   const qc = useQueryClient()
   const [abierto, setAbierto] = useState(false)
-  const mes = new Date().getMonth() + 1
-  const anio = new Date().getFullYear()
+  const { mes, anio } = useMes()
 
   const { data: ingresos = [] } = useQuery<Ingreso[]>({
     queryKey: ["ingresos", mes, anio],
@@ -65,9 +65,7 @@ export default function PaginaIngresos() {
       <div className="flex items-center justify-between mb-4" style={{ borderBottom: "1px solid #1e1e1e", paddingBottom: "0.75rem" }}>
         <div>
           <div style={{ color: "#4ec9b0", fontSize: "0.65rem", letterSpacing: "0.12em" }}>INGRESOS</div>
-          <div style={{ color: "#333", fontSize: "0.65rem" }}>
-            {new Date().toLocaleDateString("es-ES", { month: "long", year: "numeric" })}
-          </div>
+          <SelectorMes />
         </div>
         <div className="flex items-center gap-4">
           <span style={{ color: "#4ec9b0", fontSize: "0.95rem", fontWeight: 600 }}>

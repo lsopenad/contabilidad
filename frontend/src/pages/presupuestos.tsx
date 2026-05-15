@@ -4,6 +4,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { api } from "@/lib/api"
+import { SelectorMes, useMes } from "@/lib/mes-context"
 import { formatearEuros } from "@/lib/utils"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
@@ -27,12 +28,11 @@ const MESES = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto"
 export default function PaginaPresupuestos() {
   const qc = useQueryClient()
   const [abierto, setAbierto] = useState(false)
-  const mesActual = new Date().getMonth() + 1
-  const anioActual = new Date().getFullYear()
+  const { mes, anio } = useMes()
 
   const { data: presupuestos = [] } = useQuery<Presupuesto[]>({
-    queryKey: ["presupuestos", mesActual, anioActual],
-    queryFn: async () => (await api.get(`/presupuestos/?mes=${mesActual}&anio=${anioActual}`)).data,
+    queryKey: ["presupuestos", mes, anio],
+    queryFn: async () => (await api.get(`/presupuestos/?mes=${mes}&anio=${anio}`)).data,
   })
   const { data: categorias = [] } = useQuery<Categoria[]>({
     queryKey: ["categorias", "gasto"],
@@ -54,7 +54,7 @@ export default function PaginaPresupuestos() {
 
   const form = useForm<Campos>({
     resolver: zodResolver(esquema),
-    defaultValues: { mes: String(mesActual), anio: String(anioActual) },
+    defaultValues: { mes: String(mes), anio: String(anio) },
   })
 
   return (
@@ -62,10 +62,10 @@ export default function PaginaPresupuestos() {
       <div className="flex items-center justify-between mb-4" style={{ borderBottom: "1px solid #1e1e1e", paddingBottom: "0.75rem" }}>
         <div>
           <div style={{ color: "#aaa", fontSize: "0.65rem", letterSpacing: "0.12em" }}>PRESUPUESTOS</div>
-          <div style={{ color: "#333", fontSize: "0.65rem" }}>{MESES[mesActual - 1].toLowerCase()} {anioActual}</div>
+          <SelectorMes />
         </div>
         <Button
-          onClick={() => { form.reset({ mes: String(mesActual), anio: String(anioActual) }); setAbierto(true) }}
+          onClick={() => { form.reset({ mes: String(mes), anio: String(anio) }); setAbierto(true) }}
           style={{ background: "#0d2420", color: "#4ec9b0", border: "1px solid #1a4035" }}
         >
           + nuevo
