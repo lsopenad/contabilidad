@@ -1,6 +1,5 @@
+import { MESES_ABREV } from "@/lib/utils"
 import { createContext, useContext, useState } from "react"
-
-const MESES = ["ene","feb","mar","abr","may","jun","jul","ago","sep","oct","nov","dic"]
 
 interface MesContextValue {
   mes: number
@@ -35,7 +34,7 @@ export function MesProvider({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <MesContext.Provider value={{ mes, anio, etiqueta: `${MESES[mes - 1]} ${anio}`, irAnterior, irSiguiente, irHoy }}>
+    <MesContext.Provider value={{ mes, anio, etiqueta: `${MESES_ABREV[mes - 1]} ${anio}`, irAnterior, irSiguiente, irHoy }}>
       {children}
     </MesContext.Provider>
   )
@@ -50,7 +49,7 @@ export function useMes() {
 export function SelectorMes() {
   const { etiqueta, irAnterior, irSiguiente, irHoy } = useMes()
   const hoy = new Date()
-  const esHoy = etiqueta === `${MESES[hoy.getMonth()]} ${hoy.getFullYear()}`
+  const esHoy = etiqueta === `${MESES_ABREV[hoy.getMonth()]} ${hoy.getFullYear()}`
 
   const btn = {
     background: "none", border: "none", cursor: "pointer",

@@ -4,11 +4,12 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useDialogoCrud } from "@/lib/crud"
+import { esquemaImporte } from "@/lib/esquemas"
 import { api } from "@/lib/api"
 import { SelectorMes, useMes } from "@/lib/mes-context"
 import { ThSort, useSorte } from "@/lib/tabla"
 import { type CategoriaResumen, type Presupuesto } from "@/lib/tipos"
-import { formatearEuros } from "@/lib/utils"
+import { MESES_NOMBRE, formatearEuros, normalizarImporte } from "@/lib/utils"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { useForm } from "react-hook-form"
@@ -17,14 +18,12 @@ import { z } from "zod"
 
 const esquema = z.object({
   categoria_id: z.string().min(1, "obligatorio"),
-  importe: z.string().min(1).refine((v) => Number(v.replace(",", ".")) > 0, "debe ser > 0"),
+  importe: esquemaImporte,
   mes: z.string().min(1),
   anio: z.string().min(1),
 })
 
 type Campos = z.infer<typeof esquema>
-
-const MESES = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"]
 
 export default function PaginaPresupuestos() {
   const qc = useQueryClient()
@@ -42,7 +41,7 @@ export default function PaginaPresupuestos() {
 
   const guardar = useMutation({
     mutationFn: (d: Campos) => api.put("/presupuestos/", {
-      categoria_id: Number(d.categoria_id), importe: d.importe.replace(",", "."),
+      categoria_id: Number(d.categoria_id), importe: normalizarImporte(d.importe),
       mes: Number(d.mes), anio: Number(d.anio),
     }),
     onSuccess: () => { qc.invalidateQueries({ queryKey: ["presupuestos"] }); setAbierto(false); toast.success("presupuesto guardado") },
@@ -182,7 +181,7 @@ export default function PaginaPresupuestos() {
                     <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl><SelectTrigger><SelectValue /></SelectTrigger></FormControl>
                       <SelectContent>
-                        {MESES.map((m, i) => <SelectItem key={i + 1} value={String(i + 1)}>{m.toLowerCase()}</SelectItem>)}
+                        {MESES_NOMBRE.map((m, i) => <SelectItem key={i + 1} value={String(i + 1)}>{m.toLowerCase()}</SelectItem>)}
                       </SelectContent>
                     </Select>
                   </FormItem>

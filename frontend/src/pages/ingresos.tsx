@@ -4,11 +4,12 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useDialogoCrud } from "@/lib/crud"
+import { esquemaImporte } from "@/lib/esquemas"
 import { api } from "@/lib/api"
 import { SelectorMes, useMes } from "@/lib/mes-context"
 import { ThSort, useSorte } from "@/lib/tabla"
 import { type CategoriaResumen, type Ingreso } from "@/lib/tipos"
-import { formatearEuros, formatearFecha } from "@/lib/utils"
+import { fechaHoy, formatearEuros, formatearFecha, normalizarImporte } from "@/lib/utils"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { useForm } from "react-hook-form"
@@ -16,7 +17,7 @@ import { toast } from "sonner"
 import { z } from "zod"
 
 const esquema = z.object({
-  importe: z.string().min(1).refine((v) => Number(v.replace(",", ".")) > 0, "debe ser > 0"),
+  importe: esquemaImporte,
   fecha: z.string().min(1, "obligatorio"),
   categoria_id: z.string().optional(),
   descripcion: z.string().optional(),
@@ -41,7 +42,7 @@ export default function PaginaIngresos() {
 
   const crear = useMutation({
     mutationFn: (d: Campos) => api.post("/ingresos/", {
-      importe: d.importe.replace(",", "."), fecha: d.fecha,
+      importe: normalizarImporte(d.importe), fecha: d.fecha,
       categoria_id: d.categoria_id ? Number(d.categoria_id) : null,
       descripcion: d.descripcion || null,
     }),
@@ -55,7 +56,7 @@ export default function PaginaIngresos() {
 
   const editar = useMutation({
     mutationFn: ({ id, d }: { id: number; d: Campos }) => api.patch(`/ingresos/${id}`, {
-      importe: d.importe.replace(",", "."), fecha: d.fecha,
+      importe: normalizarImporte(d.importe), fecha: d.fecha,
       categoria_id: d.categoria_id ? Number(d.categoria_id) : null,
       descripcion: d.descripcion || null,
     }),
@@ -64,7 +65,7 @@ export default function PaginaIngresos() {
 
   const form = useForm<Campos>({
     resolver: zodResolver(esquema),
-    defaultValues: { fecha: new Date().toISOString().slice(0, 10) },
+    defaultValues: { fecha: fechaHoy() },
   })
 
   const total = ingresos.reduce((s, i) => s + Number(i.importe), 0)
@@ -91,7 +92,7 @@ export default function PaginaIngresos() {
             {formatearEuros(total)}
           </span>
           <Button
-            onClick={() => { setEditando(null); form.reset({ fecha: new Date().toISOString().slice(0, 10) }); setAbierto(true) }}
+            onClick={() => { setEditando(null); form.reset({ fecha: fechaHoy() }); setAbierto(true) }}
             style={{ background: "#011829", color: "#5C8097", border: "1px solid #2A5A6E" }}
           >
             + nuevo

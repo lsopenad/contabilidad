@@ -1,11 +1,9 @@
 import { api } from "@/lib/api"
 import { ThSort, useSorte } from "@/lib/tabla"
 import { type InformeAnual } from "@/lib/tipos"
-import { formatearEuros } from "@/lib/utils"
+import { MESES_ABREV, formatearEuros } from "@/lib/utils"
 import { useQuery } from "@tanstack/react-query"
 import { useState } from "react"
-
-const MESES = ["ene","feb","mar","abr","may","jun","jul","ago","sep","oct","nov","dic"]
 
 export default function PaginaInformes() {
   const [anio, setAnio] = useState(new Date().getFullYear())
@@ -92,7 +90,7 @@ export default function PaginaInformes() {
                 onMouseEnter={(e) => (e.currentTarget.style.background = "#012030")}
                 onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
               >
-                <td style={{ padding: "4px 12px", color: "#3D6676" }}>{MESES[m.mes - 1]}</td>
+                <td style={{ padding: "4px 12px", color: "#3D6676" }}>{MESES_ABREV[m.mes - 1]}</td>
                 <td style={{ padding: "4px 12px", color: "#00ED64" }}>{formatearEuros(m.total_ingresos)}</td>
                 <td style={{ padding: "4px 12px", color: "#FF6B35" }}>{formatearEuros(m.total_gastos)}</td>
                 <td style={{ padding: "4px 12px", color: balance >= 0 ? "#00ED64" : "#FF6B35" }}>{formatearEuros(balance)}</td>

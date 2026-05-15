@@ -4,8 +4,6 @@ import { type GastoCategoria, type Movimiento, type Presupuesto, type ResumenMes
 import { formatearEuros, formatearFecha } from "@/lib/utils"
 import { useQuery } from "@tanstack/react-query"
 
-const MESES = ["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"]
-
 export default function PaginaDashboard() {
   const { mes, anio } = useMes()
 

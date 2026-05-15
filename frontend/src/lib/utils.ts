@@ -15,3 +15,14 @@ export function formatearEuros(valor: number | string): string {
 export function formatearFecha(fecha: string): string {
   return formatadorFecha.format(new Date(fecha + "T00:00:00"))
 }
+
+export function normalizarImporte(v: string): string {
+  return v.replace(",", ".")
+}
+
+export function fechaHoy(): string {
+  return new Date().toISOString().slice(0, 10)
+}
+
+export const MESES_ABREV = ["ene","feb","mar","abr","may","jun","jul","ago","sep","oct","nov","dic"]
+export const MESES_NOMBRE = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"]

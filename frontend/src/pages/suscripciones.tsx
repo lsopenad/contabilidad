@@ -4,10 +4,11 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useDialogoCrud } from "@/lib/crud"
+import { esquemaImporte } from "@/lib/esquemas"
 import { api } from "@/lib/api"
 import { ThSort, useSorte } from "@/lib/tabla"
 import { type CategoriaResumen, type Suscripcion } from "@/lib/tipos"
-import { formatearEuros } from "@/lib/utils"
+import { formatearEuros, normalizarImporte } from "@/lib/utils"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { useForm } from "react-hook-form"
@@ -16,7 +17,7 @@ import { z } from "zod"
 
 const esquema = z.object({
   nombre: z.string().min(1, "obligatorio"),
-  importe: z.string().min(1).refine((v) => Number(v.replace(",", ".")) > 0, "debe ser > 0"),
+  importe: esquemaImporte,
   categoria_id: z.string().optional(),
   dia_cobro: z.string().optional(),
   notas: z.string().optional(),
@@ -41,7 +42,7 @@ export default function PaginaSuscripciones() {
   const crear = useMutation({
     mutationFn: (d: Campos) => api.post("/suscripciones/", {
       nombre: d.nombre,
-      importe: d.importe.replace(",", "."),
+      importe: normalizarImporte(d.importe),
       categoria_id: d.categoria_id ? Number(d.categoria_id) : null,
       dia_cobro: d.dia_cobro ? Number(d.dia_cobro) : null,
       notas: d.notas || null,
@@ -63,7 +64,7 @@ export default function PaginaSuscripciones() {
   const editar = useMutation({
     mutationFn: ({ id, d }: { id: number; d: Campos }) => api.patch(`/suscripciones/${id}`, {
       nombre: d.nombre,
-      importe: d.importe.replace(",", "."),
+      importe: normalizarImporte(d.importe),
       categoria_id: d.categoria_id ? Number(d.categoria_id) : null,
       dia_cobro: d.dia_cobro ? Number(d.dia_cobro) : null,
       notas: d.notas || null,
