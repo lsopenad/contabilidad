@@ -46,9 +46,7 @@ export default function PaginaDashboard() {
   const suscripcionesActivas = suscripciones.filter((s) => s.activa)
   const totalSus = suscripcionesActivas.reduce((acc, s) => acc + Number(s.importe), 0)
   const balance = resumen ? Number(resumen.total_ingresos) - Number(resumen.total_gastos) - totalSus : 0
-  const maxCategoria = categorias.length ? Math.max(...categorias.map((c) => Number(c.total))) : 1
-
-  const presupuestoPorCategoria = Object.fromEntries(
+const presupuestoPorCategoria = Object.fromEntries(
     presupuestos.map((p) => [p.categoria.id, Number(p.importe)])
   )
 
@@ -116,9 +114,7 @@ export default function PaginaDashboard() {
             )}
             {categorias.map((c) => {
               const presupuesto = presupuestoPorCategoria[c.categoria_id ?? 0]
-              const pct = presupuesto
-                ? Math.min(100, (Number(c.total) / presupuesto) * 100)
-                : (Number(c.total) / maxCategoria) * 100
+              const pct = presupuesto ? Math.min(100, (Number(c.total) / presupuesto) * 100) : null
               const colorBarra = presupuesto && Number(c.total) > presupuesto ? "#FF6B35" : "#00ED64"
               return (
                 <div key={c.categoria_id}>
@@ -129,9 +125,11 @@ export default function PaginaDashboard() {
                       {presupuesto ? <span style={{ color: "#1F4A5E" }}> / {formatearEuros(presupuesto)}</span> : null}
                     </span>
                   </div>
+                  {pct !== null && (
                   <div style={{ height: "2px", background: "#112B3A" }}>
                     <div style={{ height: "100%", width: `${pct}%`, background: colorBarra, transition: "width 0.3s" }} />
                   </div>
+                  )}
                 </div>
               )
             })}
