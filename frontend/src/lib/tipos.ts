@@ -66,6 +66,16 @@ export interface GastoCategoria {
   total: string
 }
 
+export interface GrupoPresupuesto {
+  id: number
+  nombre: string
+  importe: string
+  mes: number
+  anio: number
+  categorias: CategoriaResumen[]
+  total_gastado: string
+}
+
 export interface Movimiento {
   id: number
   importe: string

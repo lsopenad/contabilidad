@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from .routers import categorias, ingresos, gastos, presupuestos, suscripciones, informes, excel
+from .routers import categorias, ingresos, gastos, presupuestos, suscripciones, informes, excel, grupos_presupuesto
 
 app = FastAPI(title="Contabilidad API", version="2.0.0")
 
@@ -20,6 +20,7 @@ app.include_router(presupuestos.router,  prefix="/api/presupuestos",  tags=["pre
 app.include_router(suscripciones.router, prefix="/api/suscripciones", tags=["suscripciones"])
 app.include_router(informes.router,      prefix="/api/informes",      tags=["informes"])
 app.include_router(excel.router,         prefix="/api/excel",         tags=["excel"])
+app.include_router(grupos_presupuesto.router, prefix="/api/grupos-presupuesto", tags=["grupos-presupuesto"])
 
 
 @app.get("/api/health")

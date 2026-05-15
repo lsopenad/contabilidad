@@ -1,6 +1,6 @@
 import { api } from "@/lib/api"
 import { SelectorMes, useMes } from "@/lib/mes-context"
-import { type GastoCategoria, type Movimiento, type Presupuesto, type ResumenMes, type Suscripcion } from "@/lib/tipos"
+import { type GastoCategoria, type GrupoPresupuesto, type Movimiento, type Presupuesto, type ResumenMes, type Suscripcion } from "@/lib/tipos"
 import { formatearEuros, formatearFecha } from "@/lib/utils"
 import { useQuery } from "@tanstack/react-query"
 
@@ -37,6 +37,11 @@ export default function PaginaDashboard() {
   const { data: suscripciones = [] } = useQuery<Suscripcion[]>({
     queryKey: ["suscripciones"],
     queryFn: async () => (await api.get("/suscripciones/")).data,
+  })
+
+  const { data: grupos = [] } = useQuery<GrupoPresupuesto[]>({
+    queryKey: ["grupos-presupuesto", mes, anio],
+    queryFn: async () => (await api.get(`/grupos-presupuesto/?mes=${mes}&anio=${anio}`)).data,
   })
 
   const movimientos = [...ingresosRaw, ...gastosRaw]
@@ -152,6 +157,39 @@ const presupuestoPorCategoria = Object.fromEntries(
                 <span style={{ color: "#FFB020", marginLeft: "0.5rem" }}>{formatearEuros(s.importe)}</span>
               </div>
             ))}
+          </div>
+        </div>
+      )}
+
+      {grupos.length > 0 && (
+        <div>
+          <div style={{ color: "#1F4A5E", fontSize: "0.70rem", letterSpacing: "0.12em", marginBottom: "0.5rem" }}>
+            GRUPOS DE PRESUPUESTO
+          </div>
+          <div className="space-y-2">
+            {grupos.map((g) => {
+              const pct = Math.min(100, (Number(g.total_gastado) / Number(g.importe)) * 100)
+              const colorBarra = Number(g.total_gastado) > Number(g.importe) ? "#FF6B35" : "#00ED64"
+              return (
+                <div key={g.id}>
+                  <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "2px" }}>
+                    <span style={{ color: "#4E7A8A", fontSize: "0.77rem" }}>{g.nombre}</span>
+                    <span style={{ color: "#3D6676", fontSize: "0.77rem" }}>
+                      {formatearEuros(g.total_gastado)}
+                      <span style={{ color: "#1F4A5E" }}> / {formatearEuros(g.importe)}</span>
+                    </span>
+                  </div>
+                  <div style={{ height: "2px", background: "#112B3A" }}>
+                    <div style={{ height: "100%", width: `${pct}%`, background: colorBarra, transition: "width 0.3s" }} />
+                  </div>
+                  {g.categorias.length > 0 && (
+                    <div style={{ marginTop: "3px", fontSize: "0.68rem", color: "#1F4A5E" }}>
+                      {g.categorias.map((c) => c.nombre).join(" · ")}
+                    </div>
+                  )}
+                </div>
+              )
+            })}
           </div>
         </div>
       )}
