@@ -98,7 +98,7 @@
     font-size: 0.70rem !important;
     letter-spacing: 0.12em !important;
     text-transform: uppercase !important;
-    color: var(--muted-foreground) !important;
+    color: var(--muted-foreground);
   }
 
   /* Inputs */
@@ -119,6 +119,12 @@
     letter-spacing: 0.06em !important;
     font-size: 0.80rem !important;
     border-radius: 1px !important;
+  }
+
+  /* Hover feedback para botones shadcn (inline style overrides Tailwind hover:bg) */
+  button.inline-flex:hover:not(:disabled) {
+    filter: brightness(1.25);
+    transition: filter 0.12s;
   }
 
   /* Labels */

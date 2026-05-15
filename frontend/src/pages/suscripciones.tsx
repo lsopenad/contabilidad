@@ -149,6 +149,8 @@ export default function PaginaSuscripciones() {
                 <button
                   onClick={() => toggleActiva.mutate({ id: s.id, activa: !s.activa })}
                   style={{ color: s.activa ? "#00ED64" : "#1F4A5E", background: "none", border: "none", cursor: "pointer", fontSize: "0.80rem" }}
+                  onMouseEnter={(e) => (e.currentTarget.style.color = s.activa ? "#7EFFC0" : "#3D6676")}
+                  onMouseLeave={(e) => (e.currentTarget.style.color = s.activa ? "#00ED64" : "#1F4A5E")}
                 >
                   {s.activa ? "[activa]" : "[inactiva]"}
                 </button>

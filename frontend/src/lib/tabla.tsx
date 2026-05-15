@@ -44,6 +44,8 @@ export function ThSort({ label, campo, actual, dir, onClick, color = "#00ED64" }
   return (
     <th
       onClick={() => onClick(campo)}
+      onMouseEnter={(e) => { if (!activo) e.currentTarget.style.color = "#3D6676" }}
+      onMouseLeave={(e) => { if (!activo) e.currentTarget.style.color = "#1F4A5E" }}
       style={{
         textAlign: "left",
         padding: "4px 12px",
