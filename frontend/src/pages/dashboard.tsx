@@ -66,7 +66,7 @@ export default function PaginaDashboard() {
           { label: "ingresos",      valor: resumen?.total_ingresos ?? "0", color: "#00ED64" },
           { label: "gastos",        valor: resumen?.total_gastos   ?? "0", color: "#FF6B35" },
           { label: "balance",       valor: String(balance),                color: balance >= 0 ? "#00ED64" : "#FF6B35" },
-          { label: "suscripciones", valor: String(totalSus),               color: "#5C8097" },
+          { label: "suscripciones", valor: String(totalSus),               color: "#FFB020" },
         ].map(({ label, valor, color }) => (
           <div key={label} style={{ background: "#001E2B", padding: "1rem 1.25rem" }}>
             <div style={{ color: "#1F4A5E", fontSize: "0.70rem", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "0.3rem" }}>
@@ -151,7 +151,7 @@ export default function PaginaDashboard() {
                 style={{ border: "1px solid #0F3244", padding: "0.25rem 0.75rem", fontSize: "0.77rem" }}
               >
                 <span style={{ color: "#3D6676" }}>{s.nombre}</span>
-                <span style={{ color: "#5C8097", marginLeft: "0.5rem" }}>{formatearEuros(s.importe)}</span>
+                <span style={{ color: "#FFB020", marginLeft: "0.5rem" }}>{formatearEuros(s.importe)}</span>
               </div>
             ))}
           </div>
