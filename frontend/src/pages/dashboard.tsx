@@ -52,7 +52,8 @@ export default function PaginaDashboard() {
     .slice(0, 8)
 
   const balance = resumen ? Number(resumen.total_ingresos) - Number(resumen.total_gastos) : 0
-  const totalSus = suscripciones.filter((s) => s.activa).reduce((acc, s) => acc + Number(s.importe), 0)
+  const suscripcionesActivas = suscripciones.filter((s) => s.activa)
+  const totalSus = suscripcionesActivas.reduce((acc, s) => acc + Number(s.importe), 0)
   const maxCategoria = categorias.length ? Math.max(...categorias.map((c) => Number(c.total))) : 1
 
   const presupuestoPorCategoria = Object.fromEntries(
@@ -153,13 +154,13 @@ export default function PaginaDashboard() {
       </div>
 
       {/* Suscripciones activas */}
-      {suscripciones.filter((s) => s.activa).length > 0 && (
+      {suscripcionesActivas.length > 0 && (
         <div>
           <div style={{ color: "#333", fontSize: "0.6rem", letterSpacing: "0.12em", marginBottom: "0.5rem" }}>
             SUSCRIPCIONES ACTIVAS
           </div>
           <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem" }}>
-            {suscripciones.filter((s) => s.activa).map((s) => (
+            {suscripcionesActivas.map((s) => (
               <div
                 key={s.id}
                 style={{ border: "1px solid #1e1e1e", padding: "0.25rem 0.75rem", fontSize: "0.72rem" }}
