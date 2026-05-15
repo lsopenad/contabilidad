@@ -43,9 +43,9 @@ export default function PaginaDashboard() {
     .sort((a, b) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime())
     .slice(0, 8)
 
-  const balance = resumen ? Number(resumen.total_ingresos) - Number(resumen.total_gastos) : 0
   const suscripcionesActivas = suscripciones.filter((s) => s.activa)
   const totalSus = suscripcionesActivas.reduce((acc, s) => acc + Number(s.importe), 0)
+  const balance = resumen ? Number(resumen.total_ingresos) - Number(resumen.total_gastos) - totalSus : 0
   const maxCategoria = categorias.length ? Math.max(...categorias.map((c) => Number(c.total))) : 1
 
   const presupuestoPorCategoria = Object.fromEntries(
