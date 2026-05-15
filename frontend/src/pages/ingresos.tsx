@@ -11,6 +11,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { useState } from "react"
 import { useForm } from "react-hook-form"
+import { toast } from "sonner"
 import { z } from "zod"
 
 const esquema = z.object({
@@ -28,6 +29,7 @@ export default function PaginaIngresos() {
   const qc = useQueryClient()
   const [abierto, setAbierto] = useState(false)
   const [editando, setEditando] = useState<Ingreso | null>(null)
+  const [confirmandoId, setConfirmandoId] = useState<number | null>(null)
   const { mes, anio } = useMes()
 
   const { data: ingresos = [] } = useQuery<Ingreso[]>({
@@ -46,12 +48,12 @@ export default function PaginaIngresos() {
       categoria_id: d.categoria_id ? Number(d.categoria_id) : null,
       descripcion: d.descripcion || null,
     }),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ["ingresos"] }); qc.invalidateQueries({ queryKey: ["informes"] }); setAbierto(false) },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ["ingresos"] }); qc.invalidateQueries({ queryKey: ["informes"] }); setAbierto(false); toast.success("ingreso creado") },
   })
 
   const eliminar = useMutation({
     mutationFn: (id: number) => api.delete(`/ingresos/${id}`),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ["ingresos"] }); qc.invalidateQueries({ queryKey: ["informes"] }) },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ["ingresos"] }); qc.invalidateQueries({ queryKey: ["informes"] }); toast.success("ingreso eliminado") },
   })
 
   const editar = useMutation({
@@ -60,7 +62,7 @@ export default function PaginaIngresos() {
       categoria_id: d.categoria_id ? Number(d.categoria_id) : null,
       descripcion: d.descripcion || null,
     }),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ["ingresos"] }); qc.invalidateQueries({ queryKey: ["informes"] }); setAbierto(false); setEditando(null) },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ["ingresos"] }); qc.invalidateQueries({ queryKey: ["informes"] }); setAbierto(false); setEditando(null); toast.success("ingreso actualizado") },
   })
 
   const form = useForm<Campos>({
@@ -147,14 +149,31 @@ export default function PaginaIngresos() {
                 >
                   [e]
                 </button>
-                <button
-                  onClick={() => eliminar.mutate(ing.id)}
-                  style={{ color: "#1F4A5E", background: "none", border: "none", cursor: "pointer", fontSize: "0.80rem" }}
-                  onMouseEnter={(e) => (e.currentTarget.style.color = "#FF6B35")}
-                  onMouseLeave={(e) => (e.currentTarget.style.color = "#1F4A5E")}
-                >
-                  [x]
-                </button>
+                {confirmandoId === ing.id ? (
+                  <>
+                    <button
+                      onClick={() => { eliminar.mutate(ing.id); setConfirmandoId(null) }}
+                      style={{ color: "#FF6B35", background: "none", border: "none", cursor: "pointer", fontSize: "0.80rem", marginRight: "0.25rem" }}
+                    >
+                      [¿borrar?]
+                    </button>
+                    <button
+                      onClick={() => setConfirmandoId(null)}
+                      style={{ color: "#1F4A5E", background: "none", border: "none", cursor: "pointer", fontSize: "0.80rem" }}
+                    >
+                      [no]
+                    </button>
+                  </>
+                ) : (
+                  <button
+                    onClick={() => setConfirmandoId(ing.id)}
+                    style={{ color: "#1F4A5E", background: "none", border: "none", cursor: "pointer", fontSize: "0.80rem" }}
+                    onMouseEnter={(e) => (e.currentTarget.style.color = "#FF6B35")}
+                    onMouseLeave={(e) => (e.currentTarget.style.color = "#1F4A5E")}
+                  >
+                    [x]
+                  </button>
+                )}
               </td>
             </tr>
           ))}

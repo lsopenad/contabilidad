@@ -9,6 +9,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { useState } from "react"
 import { useForm } from "react-hook-form"
+import { toast } from "sonner"
 import { z } from "zod"
 
 const TIPOS = ["ingreso", "gasto", "ambos"] as const
@@ -32,6 +33,7 @@ export default function PaginaCategorias() {
   const qc = useQueryClient()
   const [abierto, setAbierto] = useState(false)
   const [editando, setEditando] = useState<Categoria | null>(null)
+  const [confirmandoId, setConfirmandoId] = useState<number | null>(null)
 
   const { data: categorias = [] } = useQuery<Categoria[]>({
     queryKey: ["categorias"],
@@ -40,17 +42,17 @@ export default function PaginaCategorias() {
 
   const crear = useMutation({
     mutationFn: (d: Campos) => api.post("/categorias/", d),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ["categorias"] }); setAbierto(false) },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ["categorias"] }); setAbierto(false); toast.success("categoría creada") },
   })
 
   const eliminar = useMutation({
     mutationFn: (id: number) => api.delete(`/categorias/${id}`),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["categorias"] }),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ["categorias"] }); toast.success("categoría eliminada") },
   })
 
   const editar = useMutation({
     mutationFn: ({ id, d }: { id: number; d: Campos }) => api.patch(`/categorias/${id}`, { nombre: d.nombre, tipo: d.tipo }),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ["categorias"] }); setAbierto(false); setEditando(null) },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ["categorias"] }); setAbierto(false); setEditando(null); toast.success("categoría actualizada") },
   })
 
   const form = useForm<Campos>({
@@ -113,14 +115,31 @@ export default function PaginaCategorias() {
                 >
                   [e]
                 </button>
-                <button
-                  onClick={() => eliminar.mutate(c.id)}
-                  style={{ color: "#1F4A5E", background: "none", border: "none", cursor: "pointer", fontSize: "0.75rem" }}
-                  onMouseEnter={(e) => (e.currentTarget.style.color = "#FF6B35")}
-                  onMouseLeave={(e) => (e.currentTarget.style.color = "#1F4A5E")}
-                >
-                  [x]
-                </button>
+                {confirmandoId === c.id ? (
+                  <>
+                    <button
+                      onClick={() => { eliminar.mutate(c.id); setConfirmandoId(null) }}
+                      style={{ color: "#FF6B35", background: "none", border: "none", cursor: "pointer", fontSize: "0.75rem", marginRight: "0.25rem" }}
+                    >
+                      [¿borrar?]
+                    </button>
+                    <button
+                      onClick={() => setConfirmandoId(null)}
+                      style={{ color: "#1F4A5E", background: "none", border: "none", cursor: "pointer", fontSize: "0.75rem" }}
+                    >
+                      [no]
+                    </button>
+                  </>
+                ) : (
+                  <button
+                    onClick={() => setConfirmandoId(c.id)}
+                    style={{ color: "#1F4A5E", background: "none", border: "none", cursor: "pointer", fontSize: "0.75rem" }}
+                    onMouseEnter={(e) => (e.currentTarget.style.color = "#FF6B35")}
+                    onMouseLeave={(e) => (e.currentTarget.style.color = "#1F4A5E")}
+                  >
+                    [x]
+                  </button>
+                )}
               </td>
             </tr>
           ))}

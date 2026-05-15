@@ -10,6 +10,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { useState } from "react"
 import { useForm } from "react-hook-form"
+import { toast } from "sonner"
 import { z } from "zod"
 
 const esquema = z.object({
@@ -31,6 +32,7 @@ export default function PaginaSuscripciones() {
   const qc = useQueryClient()
   const [abierto, setAbierto] = useState(false)
   const [editando, setEditando] = useState<Suscripcion | null>(null)
+  const [confirmandoId, setConfirmandoId] = useState<number | null>(null)
 
   const { data: suscripciones = [] } = useQuery<Suscripcion[]>({
     queryKey: ["suscripciones"],
@@ -50,7 +52,7 @@ export default function PaginaSuscripciones() {
       dia_cobro: d.dia_cobro ? Number(d.dia_cobro) : null,
       notas: d.notas || null,
     }),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ["suscripciones"] }); setAbierto(false) },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ["suscripciones"] }); setAbierto(false); toast.success("suscripción creada") },
   })
 
   const toggleActiva = useMutation({
@@ -61,7 +63,7 @@ export default function PaginaSuscripciones() {
 
   const eliminar = useMutation({
     mutationFn: (id: number) => api.delete(`/suscripciones/${id}`),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["suscripciones"] }),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ["suscripciones"] }); toast.success("suscripción eliminada") },
   })
 
   const editar = useMutation({
@@ -72,7 +74,7 @@ export default function PaginaSuscripciones() {
       dia_cobro: d.dia_cobro ? Number(d.dia_cobro) : null,
       notas: d.notas || null,
     }),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ["suscripciones"] }); setAbierto(false); setEditando(null) },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ["suscripciones"] }); setAbierto(false); setEditando(null); toast.success("suscripción actualizada") },
   })
 
   const form = useForm<Campos>({ resolver: zodResolver(esquema) })
@@ -170,14 +172,31 @@ export default function PaginaSuscripciones() {
                 >
                   [e]
                 </button>
-                <button
-                  onClick={() => eliminar.mutate(s.id)}
-                  style={{ color: "#1F4A5E", background: "none", border: "none", cursor: "pointer", fontSize: "0.80rem" }}
-                  onMouseEnter={(e) => (e.currentTarget.style.color = "#FF6B35")}
-                  onMouseLeave={(e) => (e.currentTarget.style.color = "#1F4A5E")}
-                >
-                  [x]
-                </button>
+                {confirmandoId === s.id ? (
+                  <>
+                    <button
+                      onClick={() => { eliminar.mutate(s.id); setConfirmandoId(null) }}
+                      style={{ color: "#FF6B35", background: "none", border: "none", cursor: "pointer", fontSize: "0.80rem", marginRight: "0.25rem" }}
+                    >
+                      [¿borrar?]
+                    </button>
+                    <button
+                      onClick={() => setConfirmandoId(null)}
+                      style={{ color: "#1F4A5E", background: "none", border: "none", cursor: "pointer", fontSize: "0.80rem" }}
+                    >
+                      [no]
+                    </button>
+                  </>
+                ) : (
+                  <button
+                    onClick={() => setConfirmandoId(s.id)}
+                    style={{ color: "#1F4A5E", background: "none", border: "none", cursor: "pointer", fontSize: "0.80rem" }}
+                    onMouseEnter={(e) => (e.currentTarget.style.color = "#FF6B35")}
+                    onMouseLeave={(e) => (e.currentTarget.style.color = "#1F4A5E")}
+                  >
+                    [x]
+                  </button>
+                )}
               </td>
             </tr>
           ))}

@@ -1,6 +1,7 @@
 import { cn } from "@/lib/utils"
 import { MesProvider } from "@/lib/mes-context"
 import { NavLink, Outlet } from "react-router-dom"
+import { Toaster } from "sonner"
 
 const navegacion = [
   { ruta: "/",              etiqueta: "dashboard" },
@@ -57,6 +58,20 @@ export default function Layout() {
           <Outlet />
         </main>
       </div>
+      <Toaster
+        position="bottom-right"
+        theme="dark"
+        toastOptions={{
+          style: {
+            background: "#012030",
+            border: "1px solid #0F3244",
+            color: "#C8DEE8",
+            fontFamily: "inherit",
+            fontSize: "0.80rem",
+            borderRadius: "1px",
+          },
+        }}
+      />
     </MesProvider>
   )
 }
