@@ -5,7 +5,6 @@ import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useDialogoCrud } from "@/lib/crud"
 import { api } from "@/lib/api"
-import { ThSort, useSorte } from "@/lib/tabla"
 import { TIPOS_CATEGORIA, type Categoria, type TipoCategoria } from "@/lib/tipos"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
@@ -19,12 +18,85 @@ const colorTipo: Record<TipoCategoria, string> = {
   ambos:   "#5C8097",
 }
 
+const etiquetaTipo: Record<TipoCategoria, string> = {
+  ingreso: "INGRESOS",
+  gasto:   "GASTOS",
+  ambos:   "AMBOS",
+}
+
 const esquema = z.object({
   nombre: z.string().min(1, "obligatorio"),
   tipo: z.enum(TIPOS_CATEGORIA),
 })
 
 type Campos = z.infer<typeof esquema>
+
+function TablaGrupo({
+  tipo, categorias, onEditar, confirmandoId, setConfirmandoId, onEliminar,
+}: {
+  tipo: TipoCategoria
+  categorias: Categoria[]
+  onEditar: (c: Categoria) => void
+  confirmandoId: number | null
+  setConfirmandoId: (id: number | null) => void
+  onEliminar: (id: number) => void
+}) {
+  const color = colorTipo[tipo]
+  const filas = [...categorias].sort((a, b) => a.nombre.localeCompare(b.nombre))
+  return (
+    <div style={{ marginBottom: "2rem" }}>
+      <div style={{ color, fontSize: "0.70rem", letterSpacing: "0.12em", marginBottom: "0.5rem", borderBottom: `1px solid ${color}22`, paddingBottom: "0.25rem" }}>
+        {etiquetaTipo[tipo]}
+        <span style={{ color: "#1F4A5E", marginLeft: "0.5rem" }}>({filas.length})</span>
+      </div>
+      {filas.length === 0 ? (
+        <div style={{ color: "#1A3F54", fontSize: "0.80rem", padding: "0.5rem 0" }}>— sin categorías —</div>
+      ) : (
+        <table style={{ width: "100%", borderCollapse: "collapse" }}>
+          <tbody>
+            {filas.map((c) => (
+              <tr
+                key={c.id}
+                style={{ borderBottom: "1px solid #0A2233" }}
+                onMouseEnter={(e) => (e.currentTarget.style.background = "#012030")}
+                onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
+              >
+                <td style={{ padding: "4px 12px", color: "#9BB7C4" }}>{c.nombre}</td>
+                <td style={{ padding: "4px 12px", whiteSpace: "nowrap", textAlign: "right" }}>
+                  <button
+                    onClick={() => onEditar(c)}
+                    style={{ color: "#1F4A5E", background: "none", border: "none", cursor: "pointer", fontSize: "0.75rem", marginRight: "0.5rem" }}
+                    onMouseEnter={(e) => (e.currentTarget.style.color = "#5C8097")}
+                    onMouseLeave={(e) => (e.currentTarget.style.color = "#1F4A5E")}
+                  >[e]</button>
+                  {confirmandoId === c.id ? (
+                    <>
+                      <button
+                        onClick={() => { onEliminar(c.id); setConfirmandoId(null) }}
+                        style={{ color: "#FF6B35", background: "none", border: "none", cursor: "pointer", fontSize: "0.75rem", marginRight: "0.25rem" }}
+                      >[¿borrar?]</button>
+                      <button
+                        onClick={() => setConfirmandoId(null)}
+                        style={{ color: "#1F4A5E", background: "none", border: "none", cursor: "pointer", fontSize: "0.75rem" }}
+                      >[no]</button>
+                    </>
+                  ) : (
+                    <button
+                      onClick={() => setConfirmandoId(c.id)}
+                      style={{ color: "#1F4A5E", background: "none", border: "none", cursor: "pointer", fontSize: "0.75rem" }}
+                      onMouseEnter={(e) => (e.currentTarget.style.color = "#FF6B35")}
+                      onMouseLeave={(e) => (e.currentTarget.style.color = "#1F4A5E")}
+                    >[x]</button>
+                  )}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+    </div>
+  )
+}
 
 export default function PaginaCategorias() {
   const qc = useQueryClient()
@@ -55,14 +127,17 @@ export default function PaginaCategorias() {
     defaultValues: { nombre: "", tipo: "gasto" },
   })
 
-  const { ordenados, campo, dir, ordenarPor } = useSorte(
-    categorias, "nombre", "asc",
-    (item, c) => c === "tipo" ? item.tipo : item.nombre,
-  )
+  const porTipo = (tipo: TipoCategoria) => categorias.filter((c) => c.tipo === tipo)
+
+  const abrirEditar = (c: Categoria) => {
+    setEditando(c)
+    form.reset({ nombre: c.nombre, tipo: c.tipo })
+    setAbierto(true)
+  }
 
   return (
     <div className="p-6">
-      <div className="flex items-center justify-between mb-4" style={{ borderBottom: "1px solid #0F3244", paddingBottom: "0.75rem" }}>
+      <div className="flex items-center justify-between mb-6" style={{ borderBottom: "1px solid #0F3244", paddingBottom: "0.75rem" }}>
         <div style={{ color: "#A5B4FC", fontSize: "0.70rem", letterSpacing: "0.12em" }}>CATEGORÍAS</div>
         <Button
           onClick={() => { setEditando(null); form.reset({ nombre: "", tipo: "gasto" }); setAbierto(true) }}
@@ -72,74 +147,17 @@ export default function PaginaCategorias() {
         </Button>
       </div>
 
-      <table style={{ width: "100%", borderCollapse: "collapse" }}>
-        <thead>
-          <tr style={{ borderBottom: "1px solid #112B3A" }}>
-            <ThSort label="nombre" campo="nombre" actual={campo} dir={dir} onClick={ordenarPor} color="#5C8097" />
-            <ThSort label="tipo"   campo="tipo"   actual={campo} dir={dir} onClick={ordenarPor} color="#5C8097" />
-            <th style={{ padding: "4px 12px" }} />
-          </tr>
-        </thead>
-        <tbody>
-          {ordenados.length === 0 && (
-            <tr><td colSpan={3} style={{ padding: "2rem 12px", color: "#1A3F54", textAlign: "center" }}>
-              — sin categorías —
-            </td></tr>
-          )}
-          {ordenados.map((c) => (
-            <tr
-              key={c.id}
-              style={{ borderBottom: "1px solid #0A2233" }}
-              onMouseEnter={(e) => (e.currentTarget.style.background = "#012030")}
-              onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
-            >
-              <td style={{ padding: "4px 12px", color: "#9BB7C4" }}>{c.nombre}</td>
-              <td style={{ padding: "4px 12px" }}>
-                <span style={{ color: colorTipo[c.tipo], fontSize: "0.70rem" }}>{c.tipo}</span>
-              </td>
-              <td style={{ padding: "4px 12px", whiteSpace: "nowrap" }}>
-                <button
-                  onClick={() => {
-                    setEditando(c)
-                    form.reset({ nombre: c.nombre, tipo: c.tipo })
-                    setAbierto(true)
-                  }}
-                  style={{ color: "#1F4A5E", background: "none", border: "none", cursor: "pointer", fontSize: "0.75rem", marginRight: "0.5rem" }}
-                  onMouseEnter={(e) => (e.currentTarget.style.color = "#5C8097")}
-                  onMouseLeave={(e) => (e.currentTarget.style.color = "#1F4A5E")}
-                >
-                  [e]
-                </button>
-                {confirmandoId === c.id ? (
-                  <>
-                    <button
-                      onClick={() => { eliminar.mutate(c.id); setConfirmandoId(null) }}
-                      style={{ color: "#FF6B35", background: "none", border: "none", cursor: "pointer", fontSize: "0.75rem", marginRight: "0.25rem" }}
-                    >
-                      [¿borrar?]
-                    </button>
-                    <button
-                      onClick={() => setConfirmandoId(null)}
-                      style={{ color: "#1F4A5E", background: "none", border: "none", cursor: "pointer", fontSize: "0.75rem" }}
-                    >
-                      [no]
-                    </button>
-                  </>
-                ) : (
-                  <button
-                    onClick={() => setConfirmandoId(c.id)}
-                    style={{ color: "#1F4A5E", background: "none", border: "none", cursor: "pointer", fontSize: "0.75rem" }}
-                    onMouseEnter={(e) => (e.currentTarget.style.color = "#FF6B35")}
-                    onMouseLeave={(e) => (e.currentTarget.style.color = "#1F4A5E")}
-                  >
-                    [x]
-                  </button>
-                )}
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      {TIPOS_CATEGORIA.map((tipo) => (
+        <TablaGrupo
+          key={tipo}
+          tipo={tipo}
+          categorias={porTipo(tipo)}
+          onEditar={abrirEditar}
+          confirmandoId={confirmandoId}
+          setConfirmandoId={setConfirmandoId}
+          onEliminar={(id) => eliminar.mutate(id)}
+        />
+      ))}
 
       <Dialog open={abierto} onOpenChange={(v) => { setAbierto(v); if (!v) setEditando(null) }}>
         <DialogContent style={{ background: "#012030", border: "1px solid #1A3F54" }}>
