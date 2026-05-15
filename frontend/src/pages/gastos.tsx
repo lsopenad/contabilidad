@@ -46,12 +46,12 @@ export default function PaginaGastos() {
       categoria_id: d.categoria_id ? Number(d.categoria_id) : null,
       descripcion: d.descripcion || null,
     }),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ["gastos"] }); setAbierto(false) },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ["gastos"] }); qc.invalidateQueries({ queryKey: ["informes"] }); setAbierto(false) },
   })
 
   const eliminar = useMutation({
     mutationFn: (id: number) => api.delete(`/gastos/${id}`),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["gastos"] }),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ["gastos"] }); qc.invalidateQueries({ queryKey: ["informes"] }) },
   })
 
   const editar = useMutation({
@@ -60,7 +60,7 @@ export default function PaginaGastos() {
       categoria_id: d.categoria_id ? Number(d.categoria_id) : null,
       descripcion: d.descripcion || null,
     }),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ["gastos"] }); setAbierto(false); setEditando(null) },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ["gastos"] }); qc.invalidateQueries({ queryKey: ["informes"] }); setAbierto(false); setEditando(null) },
   })
 
   const form = useForm<Campos>({
