@@ -8,7 +8,8 @@ import { esquemaImporte } from "@/lib/esquemas"
 import { api } from "@/lib/api"
 import { SelectorMes, useMes } from "@/lib/mes-context"
 import { ThSort, useSorte } from "@/lib/tabla"
-import { type CategoriaResumen, type Presupuesto } from "@/lib/tipos"
+import { type Presupuesto } from "@/lib/tipos"
+import { SelectorCategoria } from "@/components/selector-categoria"
 import { MESES_NOMBRE, formatearEuros, normalizarImporte } from "@/lib/utils"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
@@ -34,11 +35,6 @@ export default function PaginaPresupuestos() {
     queryKey: ["presupuestos", mes, anio],
     queryFn: async () => (await api.get(`/presupuestos/?mes=${mes}&anio=${anio}`)).data,
   })
-  const { data: categorias = [] } = useQuery<CategoriaResumen[]>({
-    queryKey: ["categorias", "gasto"],
-    queryFn: async () => (await api.get("/categorias/?tipo=gasto")).data,
-  })
-
   const guardar = useMutation({
     mutationFn: (d: Campos) => api.put("/presupuestos/", {
       categoria_id: Number(d.categoria_id), importe: normalizarImporte(d.importe),
@@ -160,12 +156,7 @@ export default function PaginaPresupuestos() {
             <form onSubmit={form.handleSubmit((d) => guardar.mutate(d))} className="space-y-3">
               <FormField control={form.control} name="categoria_id" render={({ field }) => (
                 <FormItem><FormLabel>categoría</FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value}>
-                    <FormControl><SelectTrigger><SelectValue placeholder="— seleccionar —" /></SelectTrigger></FormControl>
-                    <SelectContent>
-                      {categorias.map((c) => <SelectItem key={c.id} value={String(c.id)}>{c.nombre}</SelectItem>)}
-                    </SelectContent>
-                  </Select>
+                  <SelectorCategoria tipo="gasto" value={field.value} onChange={field.onChange} />
                   <FormMessage />
                 </FormItem>
               )} />

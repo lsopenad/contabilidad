@@ -2,13 +2,13 @@ import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { SelectorCategoria } from "@/components/selector-categoria"
 import { useDialogoCrud } from "@/lib/crud"
 import { esquemaImporte } from "@/lib/esquemas"
 import { api } from "@/lib/api"
 import { SelectorMes, useMes } from "@/lib/mes-context"
 import { ThSort, useSorte } from "@/lib/tabla"
-import { type CategoriaResumen, type Gasto } from "@/lib/tipos"
+import { type Gasto } from "@/lib/tipos"
 import { fechaHoy, formatearEuros, formatearFecha, normalizarImporte } from "@/lib/utils"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
@@ -33,11 +33,6 @@ export default function PaginaGastos() {
   const { data: gastos = [] } = useQuery<Gasto[]>({
     queryKey: ["gastos", mes, anio],
     queryFn: async () => (await api.get(`/gastos/?mes=${mes}&anio=${anio}`)).data,
-  })
-
-  const { data: categorias = [] } = useQuery<CategoriaResumen[]>({
-    queryKey: ["categorias", "gasto"],
-    queryFn: async () => (await api.get("/categorias/?tipo=gasto")).data,
   })
 
   const crear = useMutation({
@@ -199,16 +194,7 @@ export default function PaginaGastos() {
               )} />
               <FormField control={form.control} name="categoria_id" render={({ field }) => (
                 <FormItem><FormLabel>categoría</FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value}>
-                    <FormControl>
-                      <SelectTrigger><SelectValue placeholder="— sin categoría —" /></SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {categorias.map((c) => (
-                        <SelectItem key={c.id} value={String(c.id)}>{c.nombre}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <SelectorCategoria tipo="gasto" value={field.value} onChange={field.onChange} />
                 </FormItem>
               )} />
               <FormField control={form.control} name="descripcion" render={({ field }) => (
