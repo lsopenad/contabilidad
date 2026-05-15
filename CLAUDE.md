@@ -48,6 +48,7 @@ frontend/src/
   lib/utils.ts         # cn(), formatearEuros(), formatearFecha(), MESES_ABREV, MESES_NOMBRE
   lib/mes-context.tsx  # MesProvider + SelectorMes + useMes
   lib/tabla.tsx        # ThSort + useSorte (ordenación de tablas)
+  lib/tipos.ts         # Interfaces TypeScript del dominio (Ingreso, Gasto, Suscripcion, etc.)
   lib/crud.ts          # useDialogoCrud<T>() — estado compartido de diálogos CRUD
   lib/esquemas.ts      # esquemaImporte (Zod) compartido
 ```
@@ -58,15 +59,15 @@ frontend/src/
 
 Tablas activas — esquema exacto en `backend/alembic/versions/`.
 
-| Tabla                | Propósito                                                                        |
-| -------------------- | -------------------------------------------------------------------------------- |
-| `categorias`         | Categorías de ingresos/gastos (`tipo`: ingreso/gasto/ambos)                      |
-| `ingresos`           | Entradas de ingresos (`repeticion_id` UUID vincula copias mensuales)             |
-| `gastos`             | Entradas de gastos, FK categoría (`repeticion_id` igual)                         |
-| `presupuestos`       | Presupuesto mensual por categoría, unique (categoria_id, mes, anio)              |
-| `suscripciones`      | Suscripciones recurrentes (`dia_cobro` 1-31, `activa` bool)                      |
-| `grupos_presupuesto` | Grupos de presupuesto mensual con categorías N:M (`repeticion_id` igual)         |
-| `grupo_categorias`   | Tabla join N:M entre `grupos_presupuesto` y `categorias`                         |
+| Tabla | Propósito |
+| --- | --- |
+| `categorias` | Categorías de ingresos/gastos (`tipo`: ingreso/gasto/ambos) |
+| `ingresos` | Entradas de ingresos (`repeticion_id` UUID vincula copias mensuales) |
+| `gastos` | Entradas de gastos, FK categoría (`repeticion_id` igual) |
+| `presupuestos` | Presupuesto mensual por categoría, unique (categoria_id, mes, anio) |
+| `suscripciones` | Suscripciones recurrentes (`dia_cobro` 1-31, `activa` bool, `frecuencia`: mensual/bimestral/trimestral/semestral/anual) |
+| `grupos_presupuesto` | Grupos de presupuesto mensual con categorías N:M (`repeticion_id` igual) |
+| `grupo_categorias` | Tabla join N:M entre `grupos_presupuesto` y `categorias` |
 
 Invariante global: `importe > 0` en ingresos, gastos, presupuestos, grupos y suscripciones.
 
