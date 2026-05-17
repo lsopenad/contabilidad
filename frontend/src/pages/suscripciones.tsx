@@ -9,7 +9,7 @@ import { esquemaImporte } from "@/lib/esquemas"
 import { api } from "@/lib/api"
 import { ThSort, useSorte } from "@/lib/tabla"
 import { FACTOR_MENSUAL, FRECUENCIAS, type FrecuenciaSuscripcion, type Suscripcion } from "@/lib/tipos"
-import { formatearEuros, normalizarImporte } from "@/lib/utils"
+import { formatearEuros, formatearFecha, normalizarImporte } from "@/lib/utils"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { useForm } from "react-hook-form"
@@ -22,6 +22,7 @@ const esquema = z.object({
   categoria_id: z.string().optional(),
   dia_cobro: z.string().optional(),
   frecuencia: z.enum(FRECUENCIAS).default("mensual"),
+  fecha_inicio: z.string().min(1, "obligatorio"),
   notas: z.string().optional(),
 })
 
@@ -43,6 +44,7 @@ export default function PaginaSuscripciones() {
       categoria_id: d.categoria_id ? Number(d.categoria_id) : null,
       dia_cobro: d.dia_cobro ? Number(d.dia_cobro) : null,
       frecuencia: d.frecuencia,
+      fecha_inicio: d.fecha_inicio || null,
       notas: d.notas || null,
     }),
     onSuccess: () => {
@@ -78,6 +80,7 @@ export default function PaginaSuscripciones() {
       categoria_id: d.categoria_id ? Number(d.categoria_id) : null,
       dia_cobro: d.dia_cobro ? Number(d.dia_cobro) : null,
       frecuencia: d.frecuencia,
+      fecha_inicio: d.fecha_inicio || null,
       notas: d.notas || null,
     }),
     onSuccess: () => {
@@ -101,6 +104,7 @@ export default function PaginaSuscripciones() {
       if (c === "importe") return Number(item.importe)
       if (c === "dia_cobro") return item.dia_cobro ?? 999
       if (c === "frecuencia") return FACTOR_MENSUAL[item.frecuencia ?? "mensual"]
+      if (c === "fecha_inicio") return item.fecha_inicio ?? ""
       if (c === "categoria") return item.categoria?.nombre ?? ""
       if (c === "notas") return item.notas ?? ""
       if (c === "estado") return item.activa ? 0 : 1
@@ -131,19 +135,20 @@ export default function PaginaSuscripciones() {
       <table style={{ width: "100%", borderCollapse: "collapse" }}>
         <thead>
           <tr style={{ borderBottom: "1px solid #112B3A" }}>
-            <ThSort label="nombre"      campo="nombre"      actual={campo} dir={dir} onClick={ordenarPor} color="#5C8097" />
-            <ThSort label="importe"     campo="importe"     actual={campo} dir={dir} onClick={ordenarPor} color="#5C8097" />
-            <ThSort label="frecuencia"  campo="frecuencia"  actual={campo} dir={dir} onClick={ordenarPor} color="#5C8097" />
-            <ThSort label="día cobro"   campo="dia_cobro"   actual={campo} dir={dir} onClick={ordenarPor} color="#5C8097" />
-            <ThSort label="categoría"   campo="categoria"   actual={campo} dir={dir} onClick={ordenarPor} color="#5C8097" />
-            <ThSort label="notas"       campo="notas"       actual={campo} dir={dir} onClick={ordenarPor} color="#5C8097" />
-            <ThSort label="estado"      campo="estado"      actual={campo} dir={dir} onClick={ordenarPor} color="#5C8097" />
+            <ThSort label="nombre"       campo="nombre"       actual={campo} dir={dir} onClick={ordenarPor} color="#5C8097" />
+            <ThSort label="importe"      campo="importe"      actual={campo} dir={dir} onClick={ordenarPor} color="#5C8097" />
+            <ThSort label="frecuencia"   campo="frecuencia"   actual={campo} dir={dir} onClick={ordenarPor} color="#5C8097" />
+            <ThSort label="desde"        campo="fecha_inicio" actual={campo} dir={dir} onClick={ordenarPor} color="#5C8097" />
+            <ThSort label="día cobro"    campo="dia_cobro"    actual={campo} dir={dir} onClick={ordenarPor} color="#5C8097" />
+            <ThSort label="categoría"    campo="categoria"    actual={campo} dir={dir} onClick={ordenarPor} color="#5C8097" />
+            <ThSort label="notas"        campo="notas"        actual={campo} dir={dir} onClick={ordenarPor} color="#5C8097" />
+            <ThSort label="estado"       campo="estado"       actual={campo} dir={dir} onClick={ordenarPor} color="#5C8097" />
             <th style={{ padding: "4px 12px" }} />
           </tr>
         </thead>
         <tbody>
           {ordenados.length === 0 && (
-            <tr><td colSpan={8} style={{ padding: "2rem 12px", color: "#1A3F54", textAlign: "center" }}>
+            <tr><td colSpan={9} style={{ padding: "2rem 12px", color: "#1A3F54", textAlign: "center" }}>
               — sin suscripciones —
             </td></tr>
           )}
@@ -157,6 +162,7 @@ export default function PaginaSuscripciones() {
               <td style={{ padding: "4px 12px", color: "#9BB7C4" }}>{s.nombre}</td>
               <td style={{ padding: "4px 12px", color: "#5C8097" }}>{formatearEuros(s.importe)}</td>
               <td style={{ padding: "4px 12px", color: "#3D6676" }}>{s.frecuencia ?? "mensual"}</td>
+              <td style={{ padding: "4px 12px", color: "#4E7A8A" }}>{s.fecha_inicio ? formatearFecha(s.fecha_inicio) : "—"}</td>
               <td style={{ padding: "4px 12px", color: "#3D6676" }}>{s.dia_cobro ? `día ${s.dia_cobro}` : "—"}</td>
               <td style={{ padding: "4px 12px", color: "#3D6676" }}>{s.categoria?.nombre ?? "—"}</td>
               <td style={{ padding: "4px 12px", color: "#2A5A6E", maxWidth: "10rem", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
@@ -182,6 +188,7 @@ export default function PaginaSuscripciones() {
                       categoria_id: s.categoria ? String(s.categoria.id) : undefined,
                       dia_cobro: s.dia_cobro ? String(s.dia_cobro) : undefined,
                       frecuencia: s.frecuencia ?? "mensual",
+                      fecha_inicio: s.fecha_inicio ?? undefined,
                       notas: s.notas ?? undefined,
                     })
                     setAbierto(true)
@@ -260,11 +267,19 @@ export default function PaginaSuscripciones() {
                   </FormItem>
                 )} />
               </div>
-              <FormField control={form.control} name="dia_cobro" render={({ field }) => (
-                <FormItem><FormLabel>día de cobro</FormLabel>
-                  <FormControl><Input placeholder="1-31" {...field} /></FormControl>
-                </FormItem>
-              )} />
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
+                <FormField control={form.control} name="fecha_inicio" render={({ field }) => (
+                  <FormItem><FormLabel>fecha inicio</FormLabel>
+                    <FormControl><Input type="date" {...field} /></FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )} />
+                <FormField control={form.control} name="dia_cobro" render={({ field }) => (
+                  <FormItem><FormLabel>día de cobro</FormLabel>
+                    <FormControl><Input placeholder="1-31" {...field} /></FormControl>
+                  </FormItem>
+                )} />
+              </div>
               <FormField control={form.control} name="categoria_id" render={({ field }) => (
                 <FormItem><FormLabel>categoría</FormLabel>
                   <SelectorCategoria tipo="gasto" value={field.value} onChange={field.onChange} />

@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import date, datetime
 from decimal import Decimal
 from typing import Literal, Optional
 
@@ -15,6 +15,7 @@ class SuscripcionCrear(BaseModel):
     categoria_id: Optional[int] = None
     dia_cobro: Optional[int] = None
     frecuencia: FrecuenciaSuscripcion = "mensual"
+    fecha_inicio: Optional[date] = None
     activa: bool = True
     notas: Optional[str] = None
 
@@ -39,6 +40,7 @@ class SuscripcionActualizar(BaseModel):
     categoria_id: Optional[int] = None
     dia_cobro: Optional[int] = None
     frecuencia: Optional[FrecuenciaSuscripcion] = None
+    fecha_inicio: Optional[date] = None
     activa: Optional[bool] = None
     notas: Optional[str] = None
 
@@ -57,6 +59,7 @@ class SuscripcionRespuesta(BaseModel):
     categoria_id: Optional[int] = None
     dia_cobro: Optional[int] = None
     frecuencia: FrecuenciaSuscripcion = "mensual"
+    fecha_inicio: Optional[date] = None
     activa: bool
     notas: Optional[str] = None
     creado_en: Optional[datetime] = None

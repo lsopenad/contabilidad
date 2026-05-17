@@ -41,6 +41,7 @@ export interface Suscripcion {
   activa: boolean
   dia_cobro?: number
   frecuencia: FrecuenciaSuscripcion
+  fecha_inicio?: string
   notas?: string
   categoria?: CategoriaResumen
 }
