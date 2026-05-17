@@ -231,11 +231,6 @@ export default function PaginaPresupuestos() {
     setAbiertoGrupo(true)
   }
 
-  function toggleCategoria(id: number) {
-    setCatIdsSeleccionadas((prev) =>
-      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
-    )
-  }
 
   return (
     <div className="p-6">
@@ -497,19 +492,35 @@ export default function PaginaPresupuestos() {
               </div>
               <div>
                 <div style={{ color: "#5C8097", fontSize: "0.75rem", marginBottom: "0.5rem" }}>categorías</div>
-                <div style={{ maxHeight: "160px", overflowY: "auto", display: "flex", flexDirection: "column", gap: "4px" }}>
-                  {categoriasGasto.map((c) => (
-                    <label key={c.id} style={{ display: "flex", alignItems: "center", gap: "8px", cursor: "pointer", fontSize: "0.80rem", color: "#4E7A8A" }}>
-                      <input
-                        type="checkbox"
-                        checked={catIdsSeleccionadas.includes(c.id)}
-                        onChange={() => toggleCategoria(c.id)}
-                        style={{ accentColor: "#5C8097" }}
-                      />
-                      {c.nombre}
-                    </label>
-                  ))}
-                </div>
+                <Select
+                  value=""
+                  onValueChange={(v) => setCatIdsSeleccionadas((prev) => [...prev, Number(v)])}
+                >
+                  <SelectTrigger style={{ background: "#011829", border: "1px solid #1A3F54", color: "#6B95A7", fontSize: "0.80rem" }}>
+                    <SelectValue placeholder="añadir categoría..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {categoriasGasto
+                      .filter((c) => !catIdsSeleccionadas.includes(c.id))
+                      .map((c) => (
+                        <SelectItem key={c.id} value={String(c.id)}>{c.nombre}</SelectItem>
+                      ))}
+                  </SelectContent>
+                </Select>
+                {catIdsSeleccionadas.length > 0 && (
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: "6px", marginTop: "8px" }}>
+                    {catIdsSeleccionadas.map((id) => {
+                      const cat = categoriasGasto.find((c) => c.id === id)
+                      if (!cat) return null
+                      return (
+                        <span key={id} style={{ display: "inline-flex", alignItems: "center", gap: "4px", background: "#0A2535", border: "1px solid #1A3F54", borderRadius: "4px", padding: "2px 8px", fontSize: "0.75rem", color: "#6B95A7" }}>
+                          {cat.nombre}
+                          <button type="button" onClick={() => setCatIdsSeleccionadas((prev) => prev.filter((x) => x !== id))} style={{ background: "none", border: "none", cursor: "pointer", color: "#4E7A8A", lineHeight: 1, padding: 0 }}>×</button>
+                        </span>
+                      )
+                    })}
+                  </div>
+                )}
               </div>
               <ChipsMeses
                 mesesSeleccionados={mesesExtraGrupo}
