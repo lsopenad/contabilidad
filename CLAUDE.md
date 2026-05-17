@@ -45,12 +45,13 @@ frontend/src/
   components/ui/       # shadcn/ui
   components/selector-categoria.tsx  # Selector compartido de categorías (tipo: ingreso/gasto/ambos)
   lib/api.ts           # axios instance → /api (proxy Vite → :8000)
-  lib/utils.ts         # cn(), formatearEuros(), formatearFecha(), MESES_ABREV, MESES_NOMBRE
+  lib/utils.ts         # cn(), formatearEuros(), formatearFecha(), normalizarImporte(), fechaHoy(), MESES_ABREV, MESES_NOMBRE
   lib/mes-context.tsx  # MesProvider + SelectorMes + useMes
   lib/tabla.tsx        # ThSort + useSorte (ordenación de tablas)
   lib/tipos.ts         # Interfaces TypeScript del dominio (Ingreso, Gasto, Suscripcion, etc.)
   lib/crud.ts          # useDialogoCrud<T>() — estado compartido de diálogos CRUD
   lib/esquemas.ts      # esquemaImporte (Zod) compartido
+  pages/informes.tsx   # Informe anual mes a mes + descarga Excel mensual/anual
   pages/importar.tsx   # Importación de extractos PDF (Trade Republic) con previsualización
 ```
 
