@@ -66,7 +66,7 @@ Tablas activas — esquema exacto en `backend/alembic/versions/`.
 | `ingresos` | Entradas de ingresos (`repeticion_id` UUID vincula copias mensuales) |
 | `gastos` | Entradas de gastos, FK categoría (`repeticion_id` igual) |
 | `presupuestos` | Presupuesto mensual por categoría, unique (categoria_id, mes, anio) |
-| `suscripciones` | Suscripciones recurrentes (`dia_cobro` 1-31, `activa` bool, `frecuencia`: mensual/bimestral/trimestral/semestral/anual, `fecha_inicio` DATE obligatoria) |
+| `suscripciones` | Suscripciones recurrentes (`dia_cobro` 1-31, `activa` bool, `frecuencia`: mensual/bimestral/trimestral/semestral/anual, `fecha_inicio` DATE, `fecha_fin` DATE nullable — al desactivar se fija a hoy, al reactivar `fecha_inicio` = hoy y se limpia) |
 | `grupos_presupuesto` | Grupos de presupuesto mensual con categorías N:M (`repeticion_id` igual) |
 | `grupo_categorias` | Tabla join N:M entre `grupos_presupuesto` y `categorias` |
 

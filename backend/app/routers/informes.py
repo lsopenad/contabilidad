@@ -22,8 +22,10 @@ def _es_mes_pago(s: Suscripcion, mes: int, anio: int) -> bool:
     if (anio, mes) > (hoy.year, hoy.month):
         return False
     if s.fecha_inicio is None:
-        return periodo == 1
+        return False
     if (s.fecha_inicio.year, s.fecha_inicio.month) > (anio, mes):
+        return False
+    if s.fecha_fin is not None and (anio, mes) > (s.fecha_fin.year, s.fecha_fin.month):
         return False
     periodo = _FACTOR_MENSUAL.get(s.frecuencia or "mensual", 1)
     inicio_idx = s.fecha_inicio.year * 12 + s.fecha_inicio.month - 1
@@ -32,7 +34,7 @@ def _es_mes_pago(s: Suscripcion, mes: int, anio: int) -> bool:
 
 
 async def _total_mensual_suscripciones(db: AsyncSession, mes: int, anio: int) -> Decimal:
-    subs = (await db.execute(select(Suscripcion).where(Suscripcion.activa.is_(True)))).scalars().all()
+    subs = (await db.execute(select(Suscripcion))).scalars().all()
     return sum(
         Decimal(str(s.importe))
         for s in subs

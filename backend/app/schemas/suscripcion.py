@@ -6,13 +6,10 @@ from pydantic import BaseModel, field_validator
 
 FrecuenciaSuscripcion = Literal["mensual", "bimestral", "trimestral", "semestral", "anual"]
 
-from .categoria import CategoriaRespuesta
-
 
 class SuscripcionCrear(BaseModel):
     nombre: str
     importe: Decimal
-    categoria_id: Optional[int] = None
     dia_cobro: Optional[int] = None
     frecuencia: FrecuenciaSuscripcion = "mensual"
     fecha_inicio: Optional[date] = None
@@ -37,10 +34,10 @@ class SuscripcionCrear(BaseModel):
 class SuscripcionActualizar(BaseModel):
     nombre: Optional[str] = None
     importe: Optional[Decimal] = None
-    categoria_id: Optional[int] = None
     dia_cobro: Optional[int] = None
     frecuencia: Optional[FrecuenciaSuscripcion] = None
     fecha_inicio: Optional[date] = None
+    fecha_fin: Optional[date] = None
     activa: Optional[bool] = None
     notas: Optional[str] = None
 
@@ -63,13 +60,12 @@ class SuscripcionRespuesta(BaseModel):
     id: int
     nombre: str
     importe: Decimal
-    categoria_id: Optional[int] = None
     dia_cobro: Optional[int] = None
     frecuencia: FrecuenciaSuscripcion = "mensual"
     fecha_inicio: Optional[date] = None
     activa: bool
+    fecha_fin: Optional[date] = None
     notas: Optional[str] = None
     creado_en: Optional[datetime] = None
-    categoria: Optional[CategoriaRespuesta] = None
 
     model_config = {"from_attributes": True}

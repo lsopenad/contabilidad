@@ -42,8 +42,8 @@ export interface Suscripcion {
   dia_cobro?: number
   frecuencia: FrecuenciaSuscripcion
   fecha_inicio?: string
+  fecha_fin?: string
   notas?: string
-  categoria?: CategoriaResumen
 }
 
 export interface Presupuesto {

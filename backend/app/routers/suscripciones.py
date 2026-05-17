@@ -1,3 +1,5 @@
+from datetime import date
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -41,8 +43,15 @@ async def actualizar_suscripcion(
     sus = resultado.scalar_one_or_none()
     if not sus:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Suscripción no encontrada")
-    for campo, valor in datos.model_dump(exclude_unset=True).items():
+    campos = datos.model_dump(exclude_unset=True)
+    for campo, valor in campos.items():
         setattr(sus, campo, valor)
+    if "activa" in campos:
+        if not sus.activa:
+            sus.fecha_fin = date.today()
+        else:
+            sus.fecha_inicio = date.today()
+            sus.fecha_fin = None
     await db.commit()
     resultado = await db.execute(select(Suscripcion).where(Suscripcion.id == suscripcion_id))
     return resultado.scalar_one()

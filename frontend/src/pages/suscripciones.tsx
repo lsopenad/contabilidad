@@ -3,7 +3,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { SelectorCategoria } from "@/components/selector-categoria"
 import { useDialogoCrud } from "@/lib/crud"
 import { esquemaImporte } from "@/lib/esquemas"
 import { api } from "@/lib/api"
@@ -19,10 +18,10 @@ import { z } from "zod"
 const esquema = z.object({
   nombre: z.string().min(1, "obligatorio"),
   importe: esquemaImporte,
-  categoria_id: z.string().optional(),
   dia_cobro: z.string().optional(),
   frecuencia: z.enum(FRECUENCIAS).default("mensual"),
   fecha_inicio: z.string().min(1, "obligatorio"),
+  fecha_fin: z.string().optional(),
   notas: z.string().optional(),
 })
 
@@ -41,7 +40,6 @@ export default function PaginaSuscripciones() {
     mutationFn: (d: Campos) => api.post("/suscripciones/", {
       nombre: d.nombre,
       importe: normalizarImporte(d.importe),
-      categoria_id: d.categoria_id ? Number(d.categoria_id) : null,
       dia_cobro: d.dia_cobro ? Number(d.dia_cobro) : null,
       frecuencia: d.frecuencia,
       fecha_inicio: d.fecha_inicio || null,
@@ -77,10 +75,10 @@ export default function PaginaSuscripciones() {
     mutationFn: ({ id, d }: { id: number; d: Campos }) => api.patch(`/suscripciones/${id}`, {
       nombre: d.nombre,
       importe: normalizarImporte(d.importe),
-      categoria_id: d.categoria_id ? Number(d.categoria_id) : null,
       dia_cobro: d.dia_cobro ? Number(d.dia_cobro) : null,
       frecuencia: d.frecuencia,
       fecha_inicio: d.fecha_inicio || null,
+      fecha_fin: d.fecha_fin || null,
       notas: d.notas || null,
     }),
     onSuccess: () => {
@@ -106,7 +104,7 @@ export default function PaginaSuscripciones() {
       if (c === "dia_cobro") return item.dia_cobro ?? 999
       if (c === "frecuencia") return FACTOR_MENSUAL[item.frecuencia ?? "mensual"]
       if (c === "fecha_inicio") return item.fecha_inicio ?? ""
-      if (c === "categoria") return item.categoria?.nombre ?? ""
+      if (c === "fecha_fin") return item.fecha_fin ?? ""
       if (c === "notas") return item.notas ?? ""
       if (c === "estado") return item.activa ? 0 : 1
       return item.nombre
@@ -140,8 +138,8 @@ export default function PaginaSuscripciones() {
             <ThSort label="importe"      campo="importe"      actual={campo} dir={dir} onClick={ordenarPor} color="#5C8097" />
             <ThSort label="frecuencia"   campo="frecuencia"   actual={campo} dir={dir} onClick={ordenarPor} color="#5C8097" />
             <ThSort label="desde"        campo="fecha_inicio" actual={campo} dir={dir} onClick={ordenarPor} color="#5C8097" />
+            <ThSort label="hasta"        campo="fecha_fin"    actual={campo} dir={dir} onClick={ordenarPor} color="#5C8097" />
             <ThSort label="día cobro"    campo="dia_cobro"    actual={campo} dir={dir} onClick={ordenarPor} color="#5C8097" />
-            <ThSort label="categoría"    campo="categoria"    actual={campo} dir={dir} onClick={ordenarPor} color="#5C8097" />
             <ThSort label="notas"        campo="notas"        actual={campo} dir={dir} onClick={ordenarPor} color="#5C8097" />
             <ThSort label="estado"       campo="estado"       actual={campo} dir={dir} onClick={ordenarPor} color="#5C8097" />
             <th style={{ padding: "4px 12px" }} />
@@ -164,8 +162,8 @@ export default function PaginaSuscripciones() {
               <td style={{ padding: "4px 12px", color: "#5C8097" }}>{formatearEuros(s.importe)}</td>
               <td style={{ padding: "4px 12px", color: "#3D6676" }}>{s.frecuencia ?? "mensual"}</td>
               <td style={{ padding: "4px 12px", color: "#4E7A8A" }}>{s.fecha_inicio ? formatearFecha(s.fecha_inicio) : "—"}</td>
+              <td style={{ padding: "4px 12px", color: s.fecha_fin ? "#FF6B35" : "#1F4A5E" }}>{s.fecha_fin ? formatearFecha(s.fecha_fin) : "—"}</td>
               <td style={{ padding: "4px 12px", color: "#3D6676" }}>{s.dia_cobro ? `día ${s.dia_cobro}` : "—"}</td>
-              <td style={{ padding: "4px 12px", color: "#3D6676" }}>{s.categoria?.nombre ?? "—"}</td>
               <td style={{ padding: "4px 12px", color: "#2A5A6E", maxWidth: "10rem", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                 {s.notas ?? "—"}
               </td>
@@ -186,10 +184,10 @@ export default function PaginaSuscripciones() {
                     form.reset({
                       nombre: s.nombre,
                       importe: String(s.importe),
-                      categoria_id: s.categoria ? String(s.categoria.id) : undefined,
                       dia_cobro: s.dia_cobro ? String(s.dia_cobro) : undefined,
                       frecuencia: s.frecuencia ?? "mensual",
                       fecha_inicio: s.fecha_inicio ?? undefined,
+                      fecha_fin: s.fecha_fin ?? undefined,
                       notas: s.notas ?? undefined,
                     })
                     setAbierto(true)
@@ -268,11 +266,16 @@ export default function PaginaSuscripciones() {
                   </FormItem>
                 )} />
               </div>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "1rem" }}>
                 <FormField control={form.control} name="fecha_inicio" render={({ field }) => (
                   <FormItem><FormLabel>fecha inicio</FormLabel>
                     <FormControl><Input type="date" {...field} /></FormControl>
                     <FormMessage />
+                  </FormItem>
+                )} />
+                <FormField control={form.control} name="fecha_fin" render={({ field }) => (
+                  <FormItem><FormLabel>fecha fin</FormLabel>
+                    <FormControl><Input type="date" {...field} /></FormControl>
                   </FormItem>
                 )} />
                 <FormField control={form.control} name="dia_cobro" render={({ field }) => (
@@ -281,11 +284,6 @@ export default function PaginaSuscripciones() {
                   </FormItem>
                 )} />
               </div>
-              <FormField control={form.control} name="categoria_id" render={({ field }) => (
-                <FormItem><FormLabel>categoría</FormLabel>
-                  <SelectorCategoria tipo="gasto" value={field.value} onChange={field.onChange} />
-                </FormItem>
-              )} />
               <FormField control={form.control} name="notas" render={({ field }) => (
                 <FormItem><FormLabel>notas</FormLabel>
                   <FormControl><Input placeholder="plan familiar, compartida…" {...field} /></FormControl>
