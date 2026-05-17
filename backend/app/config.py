@@ -3,6 +3,8 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Configuracion(BaseSettings):
     database_url: str
+    salt_edge_app_id: str = ""
+    salt_edge_secret: str = ""
 
     model_config = SettingsConfigDict(
         env_file=".env",

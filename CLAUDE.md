@@ -51,7 +51,7 @@ frontend/src/
   lib/tipos.ts         # Interfaces TypeScript del dominio (Ingreso, Gasto, Suscripcion, etc.)
   lib/crud.ts          # useDialogoCrud<T>() — estado compartido de diálogos CRUD
   lib/esquemas.ts      # esquemaImporte (Zod) compartido
-  pages/importar.tsx   # Importación de extractos PDF (Trade Republic) con previsualización
+  pages/importar.tsx   # Importación: tab PDF (Trade Republic) + tab Banco (Open Banking GoCardless)
 ```
 
 ---
@@ -63,8 +63,9 @@ Tablas activas — esquema exacto en `backend/alembic/versions/`.
 | Tabla | Propósito |
 | --- | --- |
 | `categorias` | Categorías de ingresos/gastos (`tipo`: ingreso/gasto/ambos) |
-| `ingresos` | Entradas de ingresos (`repeticion_id` UUID vincula copias mensuales) |
-| `gastos` | Entradas de gastos, FK categoría (`repeticion_id` igual) |
+| `ingresos` | Entradas de ingresos (`repeticion_id` UUID vincula copias mensuales, `external_id` VARCHAR único de GoCardless) |
+| `gastos` | Entradas de gastos, FK categoría (`repeticion_id` igual, `external_id` igual) |
+| `cuentas_banco` | Bancos conectados vía GoCardless Open Banking (tokens, account_ids JSON, expires_at) |
 | `presupuestos` | Presupuesto mensual por categoría, unique (categoria_id, mes, anio) |
 | `suscripciones` | Suscripciones recurrentes (`dia_cobro` 1-31, `activa` bool, `frecuencia`: mensual/bimestral/trimestral/semestral/anual, `fecha_inicio` DATE obligatoria) |
 | `grupos_presupuesto` | Grupos de presupuesto mensual con categorías N:M (`repeticion_id` igual) |
@@ -92,8 +93,10 @@ Invariante global: `importe > 0` en ingresos, gastos, presupuestos, grupos y sus
 
 | Variable               | Uso                                                          |
 | ---------------------- | ------------------------------------------------------------ |
-| `DATABASE_URL`         | PostgreSQL asyncpg: `postgresql+asyncpg://user:pass@host/db` |
-| `ALEMBIC_DATABASE_URL` | Solo si la URL de migraciones difiere                        |
+| `DATABASE_URL`            | PostgreSQL asyncpg: `postgresql+asyncpg://user:pass@host/db` |
+| `ALEMBIC_DATABASE_URL`    | Solo si la URL de migraciones difiere                        |
+| `GOCARDLESS_SECRET_ID`    | Secret ID de GoCardless Bank Account Data (obtener en bankaccountdata.gocardless.com) |
+| `GOCARDLESS_SECRET_KEY`   | Secret Key correspondiente                                   |
 
 **Nunca** hardcodear credenciales. **Nunca** commitear `.env`.
 

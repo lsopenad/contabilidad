@@ -98,3 +98,20 @@ export interface Movimiento {
   categoria?: { nombre: string }
   tipo: "ingreso" | "gasto"
 }
+
+export interface Proveedor {
+  code: string
+  name: string
+  country_code: string
+  logo_url?: string
+}
+
+export interface CuentaBanco {
+  id: number
+  connection_id: string
+  provider_code: string
+  provider_name: string
+  status: string
+  expires_at?: string
+  creado_en?: string
+}

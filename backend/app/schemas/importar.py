@@ -14,6 +14,7 @@ class TransaccionPreview(BaseModel):
     categoria_id: Optional[int] = None
     es_duplicado: bool = False
     es_posible_suscripcion: bool = False
+    external_id: Optional[str] = None
 
 
 class PreviewResponse(BaseModel):
@@ -27,6 +28,7 @@ class TransaccionConfirmar(BaseModel):
     importe: Decimal
     tipo: Literal["ingreso", "gasto"]
     categoria_id: Optional[int] = None
+    external_id: Optional[str] = None
 
 
 class ConfirmarRequest(BaseModel):

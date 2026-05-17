@@ -18,5 +18,6 @@ class Ingreso(Base):
     fecha: Mapped[date] = mapped_column(Date, nullable=False, server_default=func.current_date())
     creado_en: Mapped[Optional[datetime]] = mapped_column(server_default=func.now())
     repeticion_id: Mapped[Optional[str]] = mapped_column(String(36), nullable=True, index=True)
+    external_id: Mapped[Optional[str]] = mapped_column(String(200), nullable=True, unique=True)
 
     categoria: Mapped[Optional["Categoria"]] = relationship("Categoria", lazy="joined")  # noqa: F821
