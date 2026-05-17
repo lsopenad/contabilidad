@@ -34,6 +34,16 @@ export default function PaginaInformes() {
     URL.revokeObjectURL(url)
   }
 
+  const exportarAnual = async () => {
+    const response = await api.get(`/excel/anual/${anio}`, { responseType: "blob" })
+    const url = URL.createObjectURL(new Blob([response.data]))
+    const a = document.createElement("a")
+    a.href = url
+    a.download = `contabilidad_${anio}.xlsx`
+    a.click()
+    URL.revokeObjectURL(url)
+  }
+
   return (
     <div className="p-6">
       <div className="flex items-center justify-between mb-4" style={{ borderBottom: "1px solid #0F3244", paddingBottom: "0.75rem" }}>
@@ -52,6 +62,13 @@ export default function PaginaInformes() {
             onMouseEnter={(e) => (e.currentTarget.style.color = "#5C8097")}
             onMouseLeave={(e) => (e.currentTarget.style.color = "#1F4A5E")}
           >›</button>
+          <button
+            onClick={exportarAnual}
+            style={{ color: "#1F4A5E", background: "none", border: "none", cursor: "pointer", fontSize: "0.80rem", marginLeft: "0.5rem" }}
+            onMouseEnter={(e) => (e.currentTarget.style.color = "#5C8097")}
+            onMouseLeave={(e) => (e.currentTarget.style.color = "#1F4A5E")}
+            title="exportar año xlsx"
+          >[↓ año]</button>
         </div>
       </div>
 
