@@ -68,8 +68,8 @@ const presupuestoPorCategoria = Object.fromEntries(
         {[
           { label: "ingresos",      valor: resumen?.total_ingresos ?? "0", color: "#00ED64" },
           { label: "gastos",        valor: resumen?.total_gastos   ?? "0", color: "#FF6B35" },
-          { label: "balance",       valor: String(balance),                color: balance >= 0 ? "#00ED64" : "#FF6B35" },
           { label: "suscripciones", valor: String(totalSus),               color: "#FFB020" },
+          { label: "balance",       valor: String(balance),                color: balance >= 0 ? "#00ED64" : "#FF6B35" },
         ].map(({ label, valor, color }) => (
           <div key={label} style={{ background: "#001E2B", padding: "1rem 1.25rem" }}>
             <div style={{ color: "#1F4A5E", fontSize: "0.70rem", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "0.3rem" }}>
