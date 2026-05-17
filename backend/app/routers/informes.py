@@ -22,7 +22,7 @@ def _es_mes_pago(s: Suscripcion, mes: int, anio: int) -> bool:
     if (anio, mes) > (hoy.year, hoy.month):
         return False
     if s.fecha_inicio is None:
-        return True
+        return periodo == 1
     if (s.fecha_inicio.year, s.fecha_inicio.month) > (anio, mes):
         return False
     periodo = _FACTOR_MENSUAL.get(s.frecuencia or "mensual", 1)

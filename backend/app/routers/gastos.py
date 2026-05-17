@@ -122,5 +122,14 @@ async def eliminar_gasto(
     gasto = await db.get(Gasto, gasto_id)
     if not gasto:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Gasto no encontrado")
+    rep_id = gasto.repeticion_id
     await db.delete(gasto)
+    if rep_id:
+        restantes = await db.scalar(
+            select(func.count(Gasto.id)).where(Gasto.repeticion_id == rep_id)
+        )
+        if restantes == 1:
+            ultimo = await db.scalar(select(Gasto).where(Gasto.repeticion_id == rep_id))
+            if ultimo:
+                ultimo.repeticion_id = None
     await db.commit()

@@ -122,5 +122,14 @@ async def eliminar_ingreso(
     ingreso = await db.get(Ingreso, ingreso_id)
     if not ingreso:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Ingreso no encontrado")
+    rep_id = ingreso.repeticion_id
     await db.delete(ingreso)
+    if rep_id:
+        restantes = await db.scalar(
+            select(func.count(Ingreso.id)).where(Ingreso.repeticion_id == rep_id)
+        )
+        if restantes == 1:
+            ultimo = await db.scalar(select(Ingreso).where(Ingreso.repeticion_id == rep_id))
+            if ultimo:
+                ultimo.repeticion_id = None
     await db.commit()

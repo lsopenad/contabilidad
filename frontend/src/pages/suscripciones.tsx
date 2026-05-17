@@ -94,8 +94,9 @@ export default function PaginaSuscripciones() {
 
   const form = useForm<Campos>({ resolver: zodResolver(esquema) })
 
+  const hoy = new Date()
   const totalMensual = suscripciones
-    .filter((s) => s.activa)
+    .filter((s) => s.activa && (!s.fecha_inicio || new Date(s.fecha_inicio) <= hoy))
     .reduce((acc, s) => acc + Number(s.importe) / FACTOR_MENSUAL[s.frecuencia ?? "mensual"], 0)
 
   const { ordenados, campo, dir, ordenarPor } = useSorte(
