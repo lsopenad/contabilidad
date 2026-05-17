@@ -1,21 +1,17 @@
 import io
 import re
-from datetime import date, timedelta
+from datetime import date
 from decimal import Decimal
 from typing import Optional
 
-import httpx
 import pdfplumber
-from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
+from fastapi import APIRouter, Depends, File, UploadFile
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from ..config import config
 from ..database import obtener_sesion
-from ..modelos.cuenta_banco import CuentaBanco
 from ..modelos.gasto import Gasto
 from ..modelos.ingreso import Ingreso
-from ..routers.cuentas_banco import _BASE_URL, _cabeceras
 from ..schemas.importar import (
     ConfirmarRequest,
     ConfirmarResponse,
@@ -305,7 +301,6 @@ async def confirmar(
                 importe=t.importe,
                 descripcion=t.descripcion or None,
                 categoria_id=t.categoria_id,
-                external_id=t.external_id or None,
             ))
             ingresos_n += 1
         else:
@@ -314,129 +309,8 @@ async def confirmar(
                 importe=t.importe,
                 descripcion=t.descripcion or None,
                 categoria_id=t.categoria_id,
-                external_id=t.external_id or None,
             ))
             gastos_n += 1
 
     await db.commit()
     return ConfirmarResponse(ingresos_creados=ingresos_n, gastos_creados=gastos_n)
-
-
-@router.post("/sincronizar/{cuenta_id}", response_model=PreviewResponse)
-async def sincronizar_banco(
-    cuenta_id: int,
-    db: AsyncSession = Depends(obtener_sesion),
-) -> PreviewResponse:
-    cuenta = await db.get(CuentaBanco, cuenta_id)
-    if not cuenta:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Cuenta no encontrada")
-
-    if cuenta.status == "expired":
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail="Conexión expirada. Reconecta el banco desde la interfaz.",
-        )
-
-    fecha_desde = (date.today() - timedelta(days=90)).isoformat()
-    transacciones: list[TransaccionPreview] = []
-    omitidas = 0
-    indice = 0
-    siguiente_id: str | None = None
-
-    # Salt Edge pagina con next_id
-    while True:
-        params: dict[str, str] = {
-            "connection_id": cuenta.connection_id,
-            "date_from": fecha_desde,
-        }
-        if siguiente_id:
-            params["from_id"] = siguiente_id
-
-        async with httpx.AsyncClient() as cliente:
-            resp = await cliente.get(
-                f"{_BASE_URL}/transactions",
-                params=params,
-                headers=_cabeceras(),
-            )
-
-        if not resp.is_success:
-            break
-
-        payload = resp.json()
-        movimientos = payload.get("data", [])
-        meta = payload.get("meta", {})
-
-        for mov in movimientos:
-            external_id = str(mov.get("id", "")) or None
-            try:
-                importe = Decimal(str(mov.get("amount", "0")))
-            except Exception:
-                omitidas += 1
-                continue
-
-            if importe == 0:
-                omitidas += 1
-                continue
-
-            direccion = "ingreso" if importe > 0 else "gasto"
-            importe_abs = abs(importe)
-
-            fecha_str = mov.get("made_on", "")
-            try:
-                fecha = date.fromisoformat(fecha_str)
-            except ValueError:
-                omitidas += 1
-                continue
-
-            desc = (
-                mov.get("extra", {}).get("payee")
-                or mov.get("description")
-                or ""
-            ).strip()
-
-            if external_id:
-                ya_existe_ingreso = await db.scalar(
-                    select(func.count(Ingreso.id)).where(Ingreso.external_id == external_id)
-                ) or 0
-                ya_existe_gasto = await db.scalar(
-                    select(func.count(Gasto.id)).where(Gasto.external_id == external_id)
-                ) or 0
-                es_duplicado = (ya_existe_ingreso + ya_existe_gasto) > 0
-            else:
-                if direccion == "ingreso":
-                    es_duplicado = (await db.scalar(
-                        select(func.count(Ingreso.id)).where(
-                            Ingreso.fecha == fecha,
-                            Ingreso.importe == importe_abs,
-                            Ingreso.descripcion == desc,
-                        )
-                    ) or 0) > 0
-                else:
-                    es_duplicado = (await db.scalar(
-                        select(func.count(Gasto.id)).where(
-                            Gasto.fecha == fecha,
-                            Gasto.importe == importe_abs,
-                            Gasto.descripcion == desc,
-                        )
-                    ) or 0) > 0
-
-            cat_id = _categoria_para(desc, importe_abs)
-
-            transacciones.append(TransaccionPreview(
-                indice=indice,
-                fecha=fecha,
-                descripcion=desc,
-                importe=importe_abs,
-                tipo=direccion,
-                categoria_id=cat_id,
-                es_duplicado=es_duplicado,
-                es_posible_suscripcion=_es_posible_suscripcion(desc),
-                external_id=external_id,
-            ))
-            indice += 1
-
-        siguiente_id = meta.get("next_id")
-        if not siguiente_id:
-            break
-
-    return PreviewResponse(transacciones=transacciones, omitidas=omitidas)
