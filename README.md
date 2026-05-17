@@ -82,6 +82,7 @@ pnpm dev
 - **Presupuestos** — límite mensual por categoría o por grupos de categorías.
 - **Informes** — balance mensual (ingresos − gastos − suscripciones) e informe anual mes a mes.
 - **Exportación Excel** — descarga de datos mensuales en formato `.xlsx`.
+- **Importación de extractos** — sube un PDF de Trade Republic, previsualiza las transacciones (con detección de duplicados y posibles suscripciones), excluye las que no quieras y confirma la importación.
 
 ---
 

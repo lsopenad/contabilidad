@@ -10,6 +10,7 @@ const navegacion = [
   { ruta: "/presupuestos",  etiqueta: "presupuestos",  end: false },
   { ruta: "/informes",      etiqueta: "informes",      end: false },
   { ruta: "/categorias",    etiqueta: "categorias",    end: false },
+  { ruta: "/importar",      etiqueta: "importar",      end: false },
 ]
 
 export default function Layout() {
