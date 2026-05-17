@@ -51,6 +51,13 @@ class SuscripcionActualizar(BaseModel):
             raise ValueError("El importe debe ser mayor que 0")
         return v
 
+    @field_validator("dia_cobro")
+    @classmethod
+    def dia_valido(cls, v: Optional[int]) -> Optional[int]:
+        if v is not None and not 1 <= v <= 31:
+            raise ValueError("El día debe estar entre 1 y 31")
+        return v
+
 
 class SuscripcionRespuesta(BaseModel):
     id: int

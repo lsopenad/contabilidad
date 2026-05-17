@@ -8,7 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from ..database import obtener_sesion
 from ..modelos.categoria import Categoria
 from ..modelos.gasto import Gasto
-from ..modelos.grupo_presupuesto import GrupoPresupuesto, tabla_grupo_categorias
+from ..modelos.grupo_presupuesto import GrupoPresupuesto
 from ..schemas.grupo_presupuesto import (
     CategoriaResumen,
     GrupoPresupuestoActualizar,
