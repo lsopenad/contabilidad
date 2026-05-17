@@ -117,6 +117,7 @@ export default function PaginaGastos() {
     }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["gastos"] })
+      qc.invalidateQueries({ queryKey: ["gastos-hermanos"] })
       qc.invalidateQueries({ queryKey: ["informes"] })
       setAbierto(false)
       setMesesExtra([])
@@ -140,6 +141,7 @@ export default function PaginaGastos() {
     }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["gastos"] })
+      qc.invalidateQueries({ queryKey: ["gastos-hermanos"] })
       qc.invalidateQueries({ queryKey: ["informes"] })
       setAbierto(false)
       setEditando(null)

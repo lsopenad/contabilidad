@@ -117,6 +117,7 @@ export default function PaginaIngresos() {
     }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["ingresos"] })
+      qc.invalidateQueries({ queryKey: ["ingresos-hermanos"] })
       qc.invalidateQueries({ queryKey: ["informes"] })
       setAbierto(false)
       setMesesExtra([])
@@ -140,6 +141,7 @@ export default function PaginaIngresos() {
     }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["ingresos"] })
+      qc.invalidateQueries({ queryKey: ["ingresos-hermanos"] })
       qc.invalidateQueries({ queryKey: ["informes"] })
       setAbierto(false)
       setEditando(null)

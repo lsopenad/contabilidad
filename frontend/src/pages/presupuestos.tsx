@@ -153,6 +153,7 @@ export default function PaginaPresupuestos() {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["presupuestos"] })
+      qc.invalidateQueries({ queryKey: ["presupuestos-hermanos"] })
       setAbierto(false)
       setMesesExtraPres([])
       setMesesEliminarPres([])
@@ -183,6 +184,7 @@ export default function PaginaPresupuestos() {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["grupos-presupuesto"] })
+      qc.invalidateQueries({ queryKey: ["grupos-hermanos"] })
       setAbiertoGrupo(false)
       setEditandoGrupo(null)
       setMesesExtraGrupo([])
