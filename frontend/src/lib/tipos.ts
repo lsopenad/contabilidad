@@ -73,6 +73,13 @@ export interface InformeAnual {
   balance: string
 }
 
+export interface BalanceTotal {
+  total_ingresos: string
+  total_gastos: string
+  total_suscripciones: string
+  balance: string
+}
+
 export interface GastoCategoria {
   categoria_id: number
   categoria_nombre: string

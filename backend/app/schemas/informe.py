@@ -25,3 +25,10 @@ class InformeAnual(BaseModel):
     total_gastos: Decimal
     total_suscripciones: Decimal
     balance: Decimal
+
+
+class BalanceTotal(BaseModel):
+    total_ingresos: Decimal
+    total_gastos: Decimal
+    total_suscripciones: Decimal
+    balance: Decimal

@@ -10,7 +10,7 @@ from ..modelos.categoria import Categoria
 from ..modelos.gasto import Gasto
 from ..modelos.ingreso import Ingreso
 from ..modelos.suscripcion import Suscripcion
-from ..schemas.informe import GastoCategoria, InformeAnual, ResumenMes
+from ..schemas.informe import BalanceTotal, GastoCategoria, InformeAnual, ResumenMes
 
 _FACTOR_MENSUAL: dict[str, int] = {
     "mensual": 1, "bimestral": 2, "trimestral": 3, "semestral": 6, "anual": 12,
@@ -120,6 +120,40 @@ async def informe_anual(
         total_gastos=total_gastos,
         total_suscripciones=total_suscripciones,
         balance=total_ingresos - total_gastos - total_suscripciones,
+    )
+
+
+@router.get("/balance-total", response_model=BalanceTotal)
+async def balance_total(
+    db: AsyncSession = Depends(obtener_sesion),
+) -> BalanceTotal:
+    hoy = date.today()
+    total_ingresos = await db.scalar(
+        select(func.coalesce(func.sum(Ingreso.importe), 0))
+    )
+    total_gastos = await db.scalar(
+        select(func.coalesce(func.sum(Gasto.importe), 0))
+    )
+    subs = (await db.execute(select(Suscripcion))).scalars().all()
+    total_suscripciones = Decimal("0")
+    for s in subs:
+        if s.fecha_inicio is None:
+            continue
+        fin = s.fecha_fin if s.fecha_fin is not None else hoy
+        periodo = _FACTOR_MENSUAL.get(s.frecuencia or "mensual", 1)
+        inicio_idx = s.fecha_inicio.year * 12 + s.fecha_inicio.month - 1
+        fin_idx = fin.year * 12 + fin.month - 1
+        if fin_idx < inicio_idx:
+            continue
+        num_pagos = (fin_idx - inicio_idx) // periodo + 1
+        total_suscripciones += Decimal(str(s.importe)) * num_pagos
+    ti = Decimal(str(total_ingresos))
+    tg = Decimal(str(total_gastos))
+    return BalanceTotal(
+        total_ingresos=ti,
+        total_gastos=tg,
+        total_suscripciones=total_suscripciones,
+        balance=ti - tg - total_suscripciones,
     )
 
 

@@ -1,6 +1,6 @@
 import { api } from "@/lib/api"
 import { SelectorMes, useMes } from "@/lib/mes-context"
-import { type GastoCategoria, type GrupoPresupuesto, type Movimiento, type Presupuesto, type ResumenMes, type Suscripcion } from "@/lib/tipos"
+import { type BalanceTotal, type GastoCategoria, type GrupoPresupuesto, type Movimiento, type Presupuesto, type ResumenMes, type Suscripcion } from "@/lib/tipos"
 import { formatearEuros, formatearFecha } from "@/lib/utils"
 import { useQuery } from "@tanstack/react-query"
 
@@ -39,6 +39,11 @@ export default function PaginaDashboard() {
     queryFn: async () => (await api.get("/suscripciones/")).data,
   })
 
+  const { data: balanceTotal } = useQuery<BalanceTotal>({
+    queryKey: ["informes", "balance-total"],
+    queryFn: async () => (await api.get("/informes/balance-total")).data,
+  })
+
   const { data: grupos = [] } = useQuery<GrupoPresupuesto[]>({
     queryKey: ["grupos-presupuesto", mes, anio],
     queryFn: async () => (await api.get(`/grupos-presupuesto/?mes=${mes}&anio=${anio}`)).data,
@@ -63,6 +68,31 @@ const presupuestoPorCategoria = Object.fromEntries(
         </span>
         <SelectorMes />
       </div>
+
+      {balanceTotal && (
+        <div style={{ background: "#001E2B", border: "1px solid #0F3244", padding: "0.75rem 1.25rem", display: "flex", alignItems: "baseline", gap: "1.5rem" }}>
+          <div style={{ color: "#1F4A5E", fontSize: "0.70rem", letterSpacing: "0.12em", textTransform: "uppercase", whiteSpace: "nowrap" }}>
+            balance total
+          </div>
+          <div style={{ color: Number(balanceTotal.balance) >= 0 ? "#00ED64" : "#FF6B35", fontSize: "1.4rem", fontWeight: 700 }}>
+            {formatearEuros(balanceTotal.balance)}
+          </div>
+          <div style={{ marginLeft: "auto", display: "flex", gap: "1.5rem" }}>
+            <div style={{ textAlign: "right" }}>
+              <div style={{ color: "#1F4A5E", fontSize: "0.65rem", letterSpacing: "0.1em" }}>INGRESOS</div>
+              <div style={{ color: "#00ED64", fontSize: "0.80rem" }}>{formatearEuros(balanceTotal.total_ingresos)}</div>
+            </div>
+            <div style={{ textAlign: "right" }}>
+              <div style={{ color: "#1F4A5E", fontSize: "0.65rem", letterSpacing: "0.1em" }}>GASTOS</div>
+              <div style={{ color: "#FF6B35", fontSize: "0.80rem" }}>{formatearEuros(balanceTotal.total_gastos)}</div>
+            </div>
+            <div style={{ textAlign: "right" }}>
+              <div style={{ color: "#1F4A5E", fontSize: "0.65rem", letterSpacing: "0.1em" }}>SUSCRIPCIONES</div>
+              <div style={{ color: "#FFB020", fontSize: "0.80rem" }}>{formatearEuros(balanceTotal.total_suscripciones)}</div>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "1px", background: "#0F3244" }}>
         {[

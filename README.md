@@ -80,6 +80,7 @@ pnpm dev
 - **Ingresos y gastos** — registro mensual con categorías y descripción. Soporte de repetición automática en múltiples meses.
 - **Suscripciones** — seguimiento de pagos recurrentes con frecuencia configurable (mensual, bimestral, trimestral, semestral, anual). Al desactivar se registra la fecha de baja (`fecha_fin`) y el historial se preserva en los informes. Al reactivar, empieza a contar desde la fecha de reactivación.
 - **Presupuestos** — límite mensual por categoría o por grupos de categorías.
+- **Dashboard** — KPIs mensuales (ingresos, gastos, suscripciones, balance) y balance total histórico acumulado.
 - **Informes** — balance mensual (ingresos − gastos − suscripciones) e informe anual mes a mes.
 - **Exportación Excel** — descarga de datos mensuales en formato `.xlsx`.
 - **Importación de extractos** — sube un PDF de Trade Republic, previsualiza las transacciones (con detección de duplicados y posibles suscripciones), excluye las que no quieras y confirma la importación.
