@@ -15,11 +15,13 @@ interface TransaccionPreview {
   categoria_id?: number
   es_duplicado: boolean
   es_posible_suscripcion: boolean
+  transaction_id?: string
 }
 
 interface PreviewResponse {
   transacciones: TransaccionPreview[]
   omitidas: number
+  groq_error?: string
 }
 
 export default function PaginaImportar() {
@@ -64,11 +66,14 @@ export default function PaginaImportar() {
         headers: { "Content-Type": "multipart/form-data" },
       })
       setPreview(data)
+      if (data.groq_error) {
+        toast.warning(`normalización desactivada: ${data.groq_error}`)
+      }
       if (data.omitidas > 0) {
         toast.info(`${data.omitidas} transacción(es) omitidas (operaciones de bolsa)`)
       }
     } catch {
-      toast.error("error al procesar el PDF")
+      toast.error("error al procesar el CSV")
     } finally {
       setCargando(false)
     }
@@ -78,8 +83,8 @@ export default function PaginaImportar() {
     if (!preview) return
     const seleccionadas = preview.transacciones
       .filter((t) => !excluidas.has(t.indice))
-      .map(({ fecha, descripcion, importe, tipo, categoria_id }) => ({
-        fecha, descripcion, importe, tipo, categoria_id,
+      .map(({ fecha, descripcion, importe, tipo, categoria_id, transaction_id }) => ({
+        fecha, descripcion, importe, tipo, categoria_id, transaction_id,
       }))
 
     if (seleccionadas.length === 0) {
@@ -115,7 +120,7 @@ export default function PaginaImportar() {
       <div className="flex items-center justify-between mb-4" style={{ borderBottom: "1px solid #0F3244", paddingBottom: "0.75rem" }}>
         <div>
           <div style={{ color: "#A5B4FC", fontSize: "0.70rem", letterSpacing: "0.12em" }}>IMPORTAR EXTRACTO</div>
-          <div style={{ color: "#1F4A5E", fontSize: "0.70rem" }}>Trade Republic · PDF</div>
+          <div style={{ color: "#1F4A5E", fontSize: "0.70rem" }}>Trade Republic · CSV</div>
         </div>
         <div className="flex items-center gap-3">
           {preview && (
@@ -126,7 +131,7 @@ export default function PaginaImportar() {
           <input
             ref={inputRef}
             type="file"
-            accept=".pdf"
+            accept=".csv"
             className="hidden"
             onChange={(e) => e.target.files?.[0] && handleArchivo(e.target.files[0])}
           />
@@ -135,7 +140,7 @@ export default function PaginaImportar() {
             disabled={cargando}
             style={{ background: "#011829", color: "#5C8097", border: "1px solid #2A5A6E" }}
           >
-            {cargando ? "procesando…" : "subir PDF"}
+            {cargando ? "procesando…" : "subir CSV"}
           </Button>
           {preview && (
             <>
@@ -159,7 +164,7 @@ export default function PaginaImportar() {
 
       {!preview && !cargando && (
         <div style={{ color: "#1A3F54", textAlign: "center", padding: "4rem 0", fontSize: "0.80rem" }}>
-          — sube un PDF de Trade Republic para empezar —
+          — sube un CSV de Trade Republic para empezar —
         </div>
       )}
 

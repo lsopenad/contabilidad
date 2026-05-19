@@ -1,14 +1,18 @@
+import asyncio
+import csv
 import io
+import json
 import re
 from datetime import date
 from decimal import Decimal
 from typing import Optional
 
-import pdfplumber
 from fastapi import APIRouter, Depends, File, UploadFile
+from groq import Groq
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from ..config import config
 from ..database import obtener_sesion
 from ..modelos.gasto import Gasto
 from ..modelos.ingreso import Ingreso
@@ -24,64 +28,38 @@ router = APIRouter()
 
 # ── Constantes ────────────────────────────────────────────────────────────────
 
-_TIPOS_OMITIR = {"operar", "impuestos"}
+_TIPOS_OMITIR = {"BUY", "SELL", "TAX_OPTIMIZATION", "BENEFITS_SAVEBACK"}
 
 _KEYWORDS_SUSCRIPCION = [
     "APPLE.COM/BILL", "CLAUDE.AI", "SUBSCRIPTION", "NETFLIX", "SPOTIFY",
-    "AMAZON PRIME", "DISNEY+", "HBO", "YOUTUBE PREMIUM", "GOOGLE ONE",
-    "MICROSOFT", "DROPBOX", "ICLOUD",
+    "AMAZON PRIME", "DISNEY+", "HBO", "YOUTUBE", "GOOGLE ONE",
+    "MICROSOFT", "DROPBOX", "ICLOUD", "PATREON",
 ]
-
-_MESES_ES = {
-    "ene": 1, "feb": 2, "mar": 3, "abr": 4, "may": 5, "jun": 6,
-    "jul": 7, "ago": 8, "sep": 9, "oct": 10, "nov": 11, "dic": 12,
-}
 
 # (patron_regex, categoria_id)
 _REGLAS_CATEGORIA: list[tuple[str, int]] = [
     (r"FEGIME", 1),
-    (r"INTER[EÉ]S|INTEREST|BONIFICACI[OÓ]N|CASH REWARD|RENTABILIDAD", 3),
-    (r"RENFE|TUEBICI|BOLT\.EU|MPASS|CABIFY|UBER\s*\*?\s*(?!EAT)", 5),
-    (r"UBER\s*\*?\s*EAT|JUST.?EAT|GLOVO|DELIVEROO", 13),
-    (r"MERCADONA|CARREFOUR|LIDL|ALDI\b|DIA\b|ALCAMPO|EROSKI|CONSUM", 4),
+    (r"INTER[EÉ]S|INTEREST|INTERESES|DIVIDENDO", 3),
+    (r"RENFE|TUEBICI|BOLT|MPASS|CABIFY|UBER\s*\*?\s*(?!EAT)|BLABLACAR", 5),
+    (r"UBER\s*\*?\s*EAT|JUST.?EAT|GLOVO|DELIVEROO|PAPA JOHNS", 13),
+    (r"MERCADONA|CARREFOUR|LIDL|ALDI\b|DIA\b|ALCAMPO|EROSKI|CONSUM|SUPERCOR|FRUTOS SECOS", 4),
     (r"FUNDACI[OÓ]N|JUEGATERAPIA|DONACI[OÓ]N|ONG\b", 10),
-    (r"MAPFRE|AXA|MUTUA|SEGUROS", 8),
-    (r"ZARA|H&M|MANGO\b|PRIMARK|BERSHKA|PULL.?BEAR|STRADIVARIUS", 14),
+    (r"MAPFRE|AXA|MUTUA|SEGUROS|ADESLAS", 8),
+    (r"ZARA|H&M|MANGO\b|PRIMARK|BERSHKA|PULL.?BEAR|STRADIVARIUS|KLARNA|BIRKENSTOCK", 14),
     (r"REVOLUT", 10),
 ]
 
-# ── Helpers de parseo ─────────────────────────────────────────────────────────
-
-def _parsear_fecha(texto: str) -> Optional[date]:
-    m = re.search(r"(\d{1,2})\s+(\w{3})\s+(\d{4})", texto)
-    if not m:
-        return None
-    mes = _MESES_ES.get(m.group(2).lower())
-    if not mes:
-        return None
-    try:
-        return date(int(m.group(3)), mes, int(m.group(1)))
-    except ValueError:
-        return None
+_IBAN_RE = re.compile(r"\s*\([A-Z]{2}\d{2}[A-Z0-9]{4,}\)\s*$")
+_NULL_SUFFIX_RE = re.compile(r"null\s*$", re.IGNORECASE)
 
 
-def _parsear_importe(texto: Optional[str]) -> Optional[Decimal]:
-    if not texto or not texto.strip():
-        return None
-    texto = texto.replace("€", "").strip()
-    # Formato europeo: 1.279,08 → 1279.08
-    if re.search(r"\d\.\d{3}[,\s]", texto):
-        texto = texto.replace(".", "")
-    texto = texto.replace(",", ".")
-    try:
-        val = Decimal(re.sub(r"[^\d.]", "", texto))
-        return val if val > 0 else None
-    except Exception:
-        return None
+# ── Helpers ────────────────────────────────────────────────────────────────────
 
-
-def _normalizar(texto: str) -> str:
-    return re.sub(r"\s+", " ", texto).strip()
+def _limpiar_descripcion_raw(nombre: str, descripcion: str) -> str:
+    texto = nombre.strip() if nombre.strip() else descripcion.strip()
+    texto = _NULL_SUFFIX_RE.sub("", texto).strip()
+    texto = _IBAN_RE.sub("", texto).strip()
+    return texto
 
 
 def _categoria_para(descripcion: str, importe: Decimal) -> Optional[int]:
@@ -99,130 +77,126 @@ def _es_posible_suscripcion(descripcion: str) -> bool:
     return any(kw in desc for kw in _KEYWORDS_SUSCRIPCION)
 
 
-# ── Parser PDF Trade Republic ──────────────────────────────────────────────────
+# ── Parser CSV Trade Republic ──────────────────────────────────────────────────
 
-_DIA_MES_RE = re.compile(
-    r"^\s*(\d{1,2})\s+(ene|feb|mar|abr|may|jun|jul|ago|sep|oct|nov|dic)\s*$",
-    re.IGNORECASE,
-)
-_ANIO_RE = re.compile(r"^\s*(\d{4})\s*(.*)", re.DOTALL)
-_IMPORTE_RE = re.compile(r"([\d]+(?:\.[\d]{3})*,[\d]{2})\s*€")
-_SALTAR_LINEA_RE = re.compile(
-    r"^(Trade Republic|C/\s*Vel|Creado en|P[áa]gina|NIF|www\.|Domicilio|Registrada|Director|Andreas|Gernot|Christian|Thomas|TRADE REPUBLIC)",
-    re.IGNORECASE,
-)
-_TIPOS_CONOCIDOS = [
-    "transacción con tarjeta", "recibos domiciliados",
-    "bonificación", "transferencia", "impuestos", "interés", "operar",
-]
-
-
-def _importe_de_str(s: str) -> Decimal:
-    return Decimal(s.replace(".", "").replace(",", "."))
-
-
-def _extraer_tipo(texto: str) -> tuple[str, str]:
-    tl = texto.lower()
-    for t in sorted(_TIPOS_CONOCIDOS, key=len, reverse=True):
-        if tl.startswith(t):
-            return t, texto[len(t):].strip()
-    return "", texto
-
-
-def _parsear_pdf_trade_republic(contenido: bytes) -> list[dict]:
-    """
-    Parser de texto para extractos Trade Republic.
-    Las transacciones se presentan con la fecha partida en dos líneas:
-      "DD MMM"
-      "YYYY [Tipo] [Descripción] [importe €] [balance €]"
-    El tipo puede aparecer también en una línea extra ("Transacción" / "con tarjeta").
-    Se usa delta de saldo para determinar dirección (ingreso/gasto).
-    """
-    lineas_raw: list[str] = []
-    with pdfplumber.open(io.BytesIO(contenido)) as pdf:
-        for pagina in pdf.pages:
-            texto = pagina.extract_text() or ""
-            lineas_raw.extend(texto.split("\n"))
-
+def _parsear_csv_trade_republic(contenido: bytes) -> list[dict]:
+    texto = contenido.decode("utf-8-sig")
+    lector = csv.DictReader(io.StringIO(texto))
     filas: list[dict] = []
-    saldo_anterior: Optional[Decimal] = None
 
-    # Estado de la máquina
-    dia: Optional[int] = None
-    mes: Optional[int] = None
-    fecha_pendiente: Optional[date] = None
-    acum: str = ""  # Acumulador de tipo+desc antes de encontrar importes
+    for fila in lector:
+        tipo = fila.get("type", "").strip()
+        categoria = fila.get("category", "").strip()
 
-    def _emitir(texto_con_importes: str) -> None:
-        nonlocal saldo_anterior, fecha_pendiente, acum
-        if fecha_pendiente is None:
-            return
-        importes_str = _IMPORTE_RE.findall(texto_con_importes)
-        if len(importes_str) < 2:
-            return
-        importes = [_importe_de_str(s) for s in importes_str]
-        nuevo_saldo = importes[-1]
-        pago = importes[-2]
-        texto_limpio = _normalizar(_IMPORTE_RE.sub("", texto_con_importes))
-        tipo, desc = _extraer_tipo(texto_limpio)
-        if saldo_anterior is not None:
-            direccion = "ingreso" if nuevo_saldo > saldo_anterior else "gasto"
-        else:
-            direccion = "gasto"
-        saldo_anterior = nuevo_saldo
+        if tipo in _TIPOS_OMITIR or categoria == "TRADING":
+            continue
+
+        amount_str = fila.get("amount", "").strip()
+        if not amount_str:
+            continue
+
+        try:
+            importe_raw = Decimal(amount_str)
+        except Exception:
+            continue
+
+        if importe_raw == 0:
+            continue
+
+        fecha_str = fila.get("date", "").strip()
+        try:
+            fecha = date.fromisoformat(fecha_str)
+        except ValueError:
+            continue
+
+        nombre = fila.get("name", "").strip()
+        descripcion = fila.get("description", "").strip()
+        descripcion_raw = _limpiar_descripcion_raw(nombre, descripcion)
+
+        transaction_id = fila.get("transaction_id", "").strip() or None
+        direccion = "ingreso" if importe_raw > 0 else "gasto"
+        importe = abs(importe_raw)
+
         filas.append({
-            "fecha": fecha_pendiente,
+            "fecha": fecha,
             "tipo": tipo,
-            "descripcion": desc,
-            "importe": pago,
+            "descripcion_raw": descripcion_raw,
+            "importe": importe,
             "direccion": direccion,
+            "transaction_id": transaction_id,
         })
-        fecha_pendiente = None
-        acum = ""
-
-    for linea in lineas_raw:
-        s = linea.strip()
-        if not s or _SALTAR_LINEA_RE.match(s):
-            continue
-
-        # ¿Línea "DD MMM"?
-        m_dia = _DIA_MES_RE.match(s)
-        if m_dia:
-            # Emitir la transacción pendiente si la teníamos acumulada
-            if fecha_pendiente and acum and _IMPORTE_RE.search(acum):
-                _emitir(acum)
-            dia = int(m_dia.group(1))
-            mes = _MESES_ES.get(m_dia.group(2).lower())
-            fecha_pendiente = None
-            acum = ""
-            continue
-
-        # ¿Línea "YYYY [resto]"?
-        if dia is not None and mes is not None:
-            m_anio = _ANIO_RE.match(s)
-            if m_anio:
-                try:
-                    fecha_pendiente = date(int(m_anio.group(1)), mes, dia)
-                except ValueError:
-                    fecha_pendiente = None
-                dia = mes = None
-                acum = m_anio.group(2).strip()
-                if _IMPORTE_RE.search(acum):
-                    _emitir(acum)
-                continue
-
-        # ¿Línea de continuación para la transacción pendiente?
-        if fecha_pendiente is not None:
-            if _IMPORTE_RE.search(s):
-                _emitir(acum + " " + s)
-            else:
-                acum = (acum + " " + s).strip()
-
-    # Emitir última pendiente
-    if fecha_pendiente and acum and _IMPORTE_RE.search(acum):
-        _emitir(acum)
 
     return filas
+
+
+# ── Normalización con Groq ─────────────────────────────────────────────────────
+
+_GROQ_MODEL = "llama-3.3-70b-versatile"
+_GROQ_SYSTEM = (
+    "Eres un asistente que normaliza descripciones de transacciones bancarias. "
+    "Recibes un array JSON de objetos con dos campos: 'desc' (descripción original) y 'dir' ('ingreso' o 'gasto'). "
+    "Devuelve ÚNICAMENTE un array JSON del mismo tamaño con los nombres normalizados en español (solo strings, sin objetos). "
+    "Reglas: "
+    "- Nombre corto sin verbo, sin IBAN, en español de España. "
+    "- Mantén nombres de comercios y personas tal cual (solo corrige acentos si faltan). "
+    "- Transferencias entrantes (dir='ingreso'): 'Incoming transfer from X' → 'Transferencia de X'. "
+    "- Transferencias salientes (dir='gasto'): 'Outgoing transfer to/for X' → 'Transferencia a X'. "
+    "- 'Interest payment' o similar → 'Intereses'. "
+    "- 'Cash Dividend' o similar → 'Dividendo'. "
+    "- Comercios y pagos con tarjeta: nombre limpio sin prefijo ('MERCADONA' → 'Mercadona', 'NETFLIX.COM' → 'Netflix'). "
+    "Sin explicaciones, sin markdown, solo el array JSON de strings."
+)
+_CHUNK_SIZE = 50
+
+_EntradaGroq = dict  # {"desc": str, "dir": "ingreso" | "gasto"}
+
+
+def _normalizar_chunk_sync(cliente: Groq, chunk: list[_EntradaGroq]) -> list[str]:
+    respuesta = cliente.chat.completions.create(
+        model=_GROQ_MODEL,
+        messages=[
+            {"role": "system", "content": _GROQ_SYSTEM},
+            {"role": "user", "content": json.dumps(chunk, ensure_ascii=False)},
+        ],
+        temperature=0,
+        max_tokens=4096,
+    )
+    contenido = respuesta.choices[0].message.content or ""
+    m = re.search(r"\[.*\]", contenido, re.DOTALL)
+    if not m:
+        raise ValueError(f"respuesta sin array JSON — {contenido[:200]}")
+    normalizadas = json.loads(m.group())
+    if not isinstance(normalizadas, list) or len(normalizadas) != len(chunk):
+        raise ValueError(f"tamaño de array incorrecto ({len(normalizadas)} vs {len(chunk)})")
+    return [str(n).strip() or e["desc"] for n, e in zip(normalizadas, chunk)]
+
+
+async def _normalizar_con_groq(entradas: list[_EntradaGroq]) -> tuple[list[str], str | None]:
+    if not config.groq_api_key or not entradas:
+        return [e["desc"] for e in entradas], None
+
+    chunks = [entradas[i:i + _CHUNK_SIZE] for i in range(0, len(entradas), _CHUNK_SIZE)]
+    cliente = Groq(api_key=config.groq_api_key)
+    loop = asyncio.get_event_loop()
+
+    async def _procesar_chunk(chunk: list[_EntradaGroq]) -> tuple[list[str], str | None]:
+        try:
+            resultado = await loop.run_in_executor(None, _normalizar_chunk_sync, cliente, chunk)
+            return resultado, None
+        except Exception as e:
+            return [e["desc"] for e in chunk], str(e)
+
+    resultados = await asyncio.gather(*[_procesar_chunk(c) for c in chunks])
+
+    normalizadas: list[str] = []
+    errores: list[str] = []
+    for datos, error in resultados:
+        normalizadas.extend(datos)
+        if error:
+            errores.append(error)
+
+    error_final = f"groq: {'; '.join(errores)}" if errores else None
+    return normalizadas, error_final
 
 
 # ── Endpoints ─────────────────────────────────────────────────────────────────
@@ -233,44 +207,53 @@ async def previsualizar(
     db: AsyncSession = Depends(obtener_sesion),
 ) -> PreviewResponse:
     contenido = await archivo.read()
-    filas_raw = _parsear_pdf_trade_republic(contenido)
+    filas_raw = _parsear_csv_trade_republic(contenido)
+
+    # Normalizar descripciones en batch con Groq
+    entradas_groq = [{"desc": f["descripcion_raw"], "dir": f["direccion"]} for f in filas_raw]
+    descripciones, groq_error = await _normalizar_con_groq(entradas_groq)
 
     transacciones: list[TransaccionPreview] = []
     omitidas = 0
 
-    for indice, fila in enumerate(filas_raw):
-        tipo_norm = fila["tipo"].lower()
-        if any(omitir in tipo_norm for omitir in _TIPOS_OMITIR):
-            omitidas += 1
-            continue
-
-        direccion: str = fila["direccion"]
+    for indice, (fila, desc) in enumerate(zip(filas_raw, descripciones)):
         importe: Decimal = fila["importe"]
-
         if not importe or importe <= 0:
             omitidas += 1
             continue
 
-        desc = fila["descripcion"]
+        direccion: str = fila["direccion"]
         fecha: date = fila["fecha"]
+        transaction_id: Optional[str] = fila["transaction_id"]
         cat_id = _categoria_para(desc, importe)
 
-        if direccion == "ingreso":
-            duplicado = await db.scalar(
-                select(func.count(Ingreso.id)).where(
-                    Ingreso.fecha == fecha,
-                    Ingreso.importe == importe,
-                    Ingreso.descripcion == desc,
-                )
-            ) or 0
+        # Dedup por transaction_id si existe, si no por (fecha, importe, descripcion)
+        if transaction_id:
+            if direccion == "ingreso":
+                duplicado = await db.scalar(
+                    select(func.count(Ingreso.id)).where(Ingreso.transaction_id == transaction_id)
+                ) or 0
+            else:
+                duplicado = await db.scalar(
+                    select(func.count(Gasto.id)).where(Gasto.transaction_id == transaction_id)
+                ) or 0
         else:
-            duplicado = await db.scalar(
-                select(func.count(Gasto.id)).where(
-                    Gasto.fecha == fecha,
-                    Gasto.importe == importe,
-                    Gasto.descripcion == desc,
-                )
-            ) or 0
+            if direccion == "ingreso":
+                duplicado = await db.scalar(
+                    select(func.count(Ingreso.id)).where(
+                        Ingreso.fecha == fecha,
+                        Ingreso.importe == importe,
+                        Ingreso.descripcion == desc,
+                    )
+                ) or 0
+            else:
+                duplicado = await db.scalar(
+                    select(func.count(Gasto.id)).where(
+                        Gasto.fecha == fecha,
+                        Gasto.importe == importe,
+                        Gasto.descripcion == desc,
+                    )
+                ) or 0
 
         transacciones.append(TransaccionPreview(
             indice=indice,
@@ -281,9 +264,10 @@ async def previsualizar(
             categoria_id=cat_id,
             es_duplicado=duplicado > 0,
             es_posible_suscripcion=_es_posible_suscripcion(desc),
+            transaction_id=transaction_id,
         ))
 
-    return PreviewResponse(transacciones=transacciones, omitidas=omitidas)
+    return PreviewResponse(transacciones=transacciones, omitidas=omitidas, groq_error=groq_error)
 
 
 @router.post("/confirmar", response_model=ConfirmarResponse)
@@ -301,6 +285,7 @@ async def confirmar(
                 importe=t.importe,
                 descripcion=t.descripcion or None,
                 categoria_id=t.categoria_id,
+                transaction_id=t.transaction_id,
             ))
             ingresos_n += 1
         else:
@@ -309,6 +294,7 @@ async def confirmar(
                 importe=t.importe,
                 descripcion=t.descripcion or None,
                 categoria_id=t.categoria_id,
+                transaction_id=t.transaction_id,
             ))
             gastos_n += 1
 

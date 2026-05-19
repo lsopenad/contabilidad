@@ -14,11 +14,13 @@ class TransaccionPreview(BaseModel):
     categoria_id: Optional[int] = None
     es_duplicado: bool = False
     es_posible_suscripcion: bool = False
+    transaction_id: Optional[str] = None
 
 
 class PreviewResponse(BaseModel):
     transacciones: list[TransaccionPreview]
     omitidas: int
+    groq_error: str | None = None
 
 
 class TransaccionConfirmar(BaseModel):
@@ -27,6 +29,7 @@ class TransaccionConfirmar(BaseModel):
     importe: Decimal
     tipo: Literal["ingreso", "gasto"]
     categoria_id: Optional[int] = None
+    transaction_id: Optional[str] = None
 
 
 class ConfirmarRequest(BaseModel):
