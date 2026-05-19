@@ -15,7 +15,7 @@ import { z } from "zod"
 const colorTipo: Record<TipoCategoria, string> = {
   ingreso: "#00ED64",
   gasto:   "#FF6B35",
-  ambos:   "#5C8097",
+  ambos:   "#8ABDD0",
 }
 
 const etiquetaTipo: Record<TipoCategoria, string> = {
@@ -47,7 +47,7 @@ function TablaGrupo({
     <div style={{ marginBottom: "2rem" }}>
       <div style={{ color, fontSize: "0.70rem", letterSpacing: "0.12em", marginBottom: "0.5rem", borderBottom: `1px solid ${color}22`, paddingBottom: "0.25rem" }}>
         {etiquetaTipo[tipo]}
-        <span style={{ color: "#1F4A5E", marginLeft: "0.5rem" }}>({filas.length})</span>
+        <span style={{ color: "#6198AE", marginLeft: "0.5rem" }}>({filas.length})</span>
       </div>
       {filas.length === 0 ? (
         <div style={{ color: "#1A3F54", fontSize: "0.80rem", padding: "0.5rem 0" }}>— sin categorías —</div>
@@ -65,9 +65,9 @@ function TablaGrupo({
                 <td style={{ padding: "4px 12px", whiteSpace: "nowrap", textAlign: "right" }}>
                   <button
                     onClick={() => onEditar(c)}
-                    style={{ color: "#1F4A5E", background: "none", border: "none", cursor: "pointer", fontSize: "0.75rem", marginRight: "0.5rem" }}
-                    onMouseEnter={(e) => (e.currentTarget.style.color = "#5C8097")}
-                    onMouseLeave={(e) => (e.currentTarget.style.color = "#1F4A5E")}
+                    style={{ color: "#6198AE", background: "none", border: "none", cursor: "pointer", fontSize: "0.75rem", marginRight: "0.5rem" }}
+                    onMouseEnter={(e) => (e.currentTarget.style.color = "#8ABDD0")}
+                    onMouseLeave={(e) => (e.currentTarget.style.color = "#6198AE")}
                   >[e]</button>
                   {confirmandoId === c.id ? (
                     <>
@@ -77,15 +77,15 @@ function TablaGrupo({
                       >[¿borrar?]</button>
                       <button
                         onClick={() => setConfirmandoId(null)}
-                        style={{ color: "#1F4A5E", background: "none", border: "none", cursor: "pointer", fontSize: "0.75rem" }}
+                        style={{ color: "#6198AE", background: "none", border: "none", cursor: "pointer", fontSize: "0.75rem" }}
                       >[no]</button>
                     </>
                   ) : (
                     <button
                       onClick={() => setConfirmandoId(c.id)}
-                      style={{ color: "#1F4A5E", background: "none", border: "none", cursor: "pointer", fontSize: "0.75rem" }}
+                      style={{ color: "#6198AE", background: "none", border: "none", cursor: "pointer", fontSize: "0.75rem" }}
                       onMouseEnter={(e) => (e.currentTarget.style.color = "#FF6B35")}
-                      onMouseLeave={(e) => (e.currentTarget.style.color = "#1F4A5E")}
+                      onMouseLeave={(e) => (e.currentTarget.style.color = "#6198AE")}
                     >[x]</button>
                   )}
                 </td>
@@ -141,7 +141,7 @@ export default function PaginaCategorias() {
         <div style={{ color: "#A5B4FC", fontSize: "0.70rem", letterSpacing: "0.12em" }}>CATEGORÍAS</div>
         <Button
           onClick={() => { setEditando(null); form.reset({ nombre: "", tipo: "gasto" }); setAbierto(true) }}
-          style={{ background: "#011829", color: "#5C8097", border: "1px solid #2A5A6E" }}
+          style={{ background: "#011829", color: "#8ABDD0", border: "1px solid #6198AE" }}
         >
           + nueva
         </Button>
@@ -162,7 +162,7 @@ export default function PaginaCategorias() {
       <Dialog open={abierto} onOpenChange={(v) => { setAbierto(v); if (!v) setEditando(null) }}>
         <DialogContent style={{ background: "#012030", border: "1px solid #1A3F54" }}>
           <DialogHeader>
-            <DialogTitle style={{ color: "#5C8097", fontSize: "0.80rem", letterSpacing: "0.1em" }}>
+            <DialogTitle style={{ color: "#8ABDD0", fontSize: "0.80rem", letterSpacing: "0.1em" }}>
               {editando ? "EDITAR CATEGORÍA" : "NUEVA CATEGORÍA"}
             </DialogTitle>
           </DialogHeader>
@@ -199,7 +199,7 @@ export default function PaginaCategorias() {
                   cancelar
                 </Button>
                 <Button type="submit" disabled={crear.isPending || editar.isPending}
-                  style={{ background: "#011829", color: "#5C8097", border: "1px solid #2A5A6E" }}>
+                  style={{ background: "#011829", color: "#8ABDD0", border: "1px solid #6198AE" }}>
                   {crear.isPending || editar.isPending ? "..." : "guardar"}
                 </Button>
               </div>

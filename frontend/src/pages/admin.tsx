@@ -37,7 +37,7 @@ export default function PaginaAdmin() {
 
   return (
     <div className="p-6 max-w-lg">
-      <h1 className="text-sm font-medium mb-6" style={{ color: "#5C8097" }}>
+      <h1 className="text-sm font-medium mb-6" style={{ color: "#8ABDD0" }}>
         admin
       </h1>
 
@@ -49,7 +49,7 @@ export default function PaginaAdmin() {
           <p className="text-xs font-medium" style={{ color: "#C8DEE8" }}>
             borrar gastos e ingresos
           </p>
-          <p className="text-xs" style={{ color: "#3D6676" }}>
+          <p className="text-xs" style={{ color: "#6198AE" }}>
             Elimina permanentemente todos los registros de gastos e ingresos.
             Las categorías, presupuestos y suscripciones no se modifican.
           </p>
@@ -63,7 +63,7 @@ export default function PaginaAdmin() {
         )}
 
         <div className="space-y-2">
-          <p className="text-xs" style={{ color: "#3D6676" }}>
+          <p className="text-xs" style={{ color: "#6198AE" }}>
             Escribe <span style={{ color: "#C8DEE8" }}>BORRAR</span> para confirmar
           </p>
           <Input

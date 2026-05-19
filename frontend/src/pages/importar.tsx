@@ -120,11 +120,11 @@ export default function PaginaImportar() {
       <div className="flex items-center justify-between mb-4" style={{ borderBottom: "1px solid #0F3244", paddingBottom: "0.75rem" }}>
         <div>
           <div style={{ color: "#A5B4FC", fontSize: "0.70rem", letterSpacing: "0.12em" }}>IMPORTAR EXTRACTO</div>
-          <div style={{ color: "#1F4A5E", fontSize: "0.70rem" }}>Trade Republic · CSV</div>
+          <div style={{ color: "#6198AE", fontSize: "0.70rem" }}>Trade Republic · CSV</div>
         </div>
         <div className="flex items-center gap-3">
           {preview && (
-            <span style={{ color: "#3D6676", fontSize: "0.70rem" }}>
+            <span style={{ color: "#6198AE", fontSize: "0.70rem" }}>
               {totalIngresos} ingresos · {totalGastos} gastos seleccionados
             </span>
           )}
@@ -138,7 +138,7 @@ export default function PaginaImportar() {
           <Button
             onClick={() => inputRef.current?.click()}
             disabled={cargando}
-            style={{ background: "#011829", color: "#5C8097", border: "1px solid #2A5A6E" }}
+            style={{ background: "#011829", color: "#8ABDD0", border: "1px solid #6198AE" }}
           >
             {cargando ? "procesando…" : "subir CSV"}
           </Button>
@@ -146,7 +146,7 @@ export default function PaginaImportar() {
             <>
               <Button
                 onClick={() => { setPreview(null); setExcluidas(new Set()); if (inputRef.current) inputRef.current.value = "" }}
-                style={{ background: "none", border: "1px solid #1A3F54", color: "#3D6676" }}
+                style={{ background: "none", border: "1px solid #1A3F54", color: "#6198AE" }}
               >
                 cancelar
               </Button>
@@ -177,11 +177,11 @@ export default function PaginaImportar() {
                   type="checkbox"
                   checked={excluidas.size === 0}
                   onChange={toggleTodas}
-                  style={{ accentColor: "#5C8097" }}
+                  style={{ accentColor: "#8ABDD0" }}
                 />
               </th>
               {["fecha", "descripción", "importe", "tipo", "categoría"].map((h) => (
-                <th key={h} style={{ padding: "4px 12px", color: "#5C8097", fontSize: "0.70rem", textAlign: "left", letterSpacing: "0.08em" }}>
+                <th key={h} style={{ padding: "4px 12px", color: "#8ABDD0", fontSize: "0.70rem", textAlign: "left", letterSpacing: "0.08em" }}>
                   {h}
                 </th>
               ))}
@@ -202,10 +202,10 @@ export default function PaginaImportar() {
                       type="checkbox"
                       checked={!excluida}
                       onChange={() => toggleExcluida(t.indice)}
-                      style={{ accentColor: "#5C8097" }}
+                      style={{ accentColor: "#8ABDD0" }}
                     />
                   </td>
-                  <td style={{ padding: "4px 12px", color: "#4E7A8A", fontSize: "0.80rem", whiteSpace: "nowrap" }}>
+                  <td style={{ padding: "4px 12px", color: "#6BA8BB", fontSize: "0.80rem", whiteSpace: "nowrap" }}>
                     {formatearFecha(t.fecha)}
                   </td>
                   <td style={{ padding: "4px 12px", color: "#9BB7C4", fontSize: "0.80rem", maxWidth: "22rem", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
@@ -224,10 +224,10 @@ export default function PaginaImportar() {
                   <td style={{ padding: "4px 12px", color: t.tipo === "ingreso" ? "#00ED64" : "#FF6B35", fontSize: "0.80rem", whiteSpace: "nowrap", textAlign: "right" }}>
                     {t.tipo === "ingreso" ? "+" : "-"}{formatearEuros(t.importe)}
                   </td>
-                  <td style={{ padding: "4px 12px", color: "#3D6676", fontSize: "0.70rem" }}>
+                  <td style={{ padding: "4px 12px", color: "#6198AE", fontSize: "0.70rem" }}>
                     {t.tipo === "ingreso" ? "ingreso" : "gasto"}
                   </td>
-                  <td style={{ padding: "4px 12px", color: "#3D6676", fontSize: "0.75rem" }}>
+                  <td style={{ padding: "4px 12px", color: "#6198AE", fontSize: "0.75rem" }}>
                     {nombreCategoria(t.categoria_id)}
                   </td>
                 </tr>

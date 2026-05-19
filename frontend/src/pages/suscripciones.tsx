@@ -116,15 +116,15 @@ export default function PaginaSuscripciones() {
       <div className="flex items-center justify-between mb-4" style={{ borderBottom: "1px solid #0F3244", paddingBottom: "0.75rem" }}>
         <div>
           <div style={{ color: "#A5B4FC", fontSize: "0.70rem", letterSpacing: "0.12em" }}>SUSCRIPCIONES</div>
-          <div style={{ color: "#1F4A5E", fontSize: "0.70rem" }}>recurrentes mensuales</div>
+          <div style={{ color: "#6198AE", fontSize: "0.70rem" }}>recurrentes mensuales</div>
         </div>
         <div className="flex items-center gap-4">
-          <span style={{ color: "#5C8097", fontSize: "1.00rem", fontWeight: 600 }}>
-            {formatearEuros(totalMensual)}<span style={{ color: "#1F4A5E", fontSize: "0.70rem" }}>/mes equiv.</span>
+          <span style={{ color: "#8ABDD0", fontSize: "1.00rem", fontWeight: 600 }}>
+            {formatearEuros(totalMensual)}<span style={{ color: "#6198AE", fontSize: "0.70rem" }}>/mes equiv.</span>
           </span>
           <Button
             onClick={() => { setEditando(null); form.reset(); setAbierto(true) }}
-            style={{ background: "#011829", color: "#5C8097", border: "1px solid #2A5A6E" }}
+            style={{ background: "#011829", color: "#8ABDD0", border: "1px solid #6198AE" }}
           >
             + nueva
           </Button>
@@ -134,14 +134,14 @@ export default function PaginaSuscripciones() {
       <table style={{ width: "100%", borderCollapse: "collapse" }}>
         <thead>
           <tr style={{ borderBottom: "1px solid #112B3A" }}>
-            <ThSort label="nombre"       campo="nombre"       actual={campo} dir={dir} onClick={ordenarPor} color="#5C8097" />
-            <ThSort label="importe"      campo="importe"      actual={campo} dir={dir} onClick={ordenarPor} color="#5C8097" />
-            <ThSort label="frecuencia"   campo="frecuencia"   actual={campo} dir={dir} onClick={ordenarPor} color="#5C8097" />
-            <ThSort label="desde"        campo="fecha_inicio" actual={campo} dir={dir} onClick={ordenarPor} color="#5C8097" />
-            <ThSort label="hasta"        campo="fecha_fin"    actual={campo} dir={dir} onClick={ordenarPor} color="#5C8097" />
-            <ThSort label="día cobro"    campo="dia_cobro"    actual={campo} dir={dir} onClick={ordenarPor} color="#5C8097" />
-            <ThSort label="notas"        campo="notas"        actual={campo} dir={dir} onClick={ordenarPor} color="#5C8097" />
-            <ThSort label="estado"       campo="estado"       actual={campo} dir={dir} onClick={ordenarPor} color="#5C8097" />
+            <ThSort label="nombre"       campo="nombre"       actual={campo} dir={dir} onClick={ordenarPor} color="#8ABDD0" />
+            <ThSort label="importe"      campo="importe"      actual={campo} dir={dir} onClick={ordenarPor} color="#8ABDD0" />
+            <ThSort label="frecuencia"   campo="frecuencia"   actual={campo} dir={dir} onClick={ordenarPor} color="#8ABDD0" />
+            <ThSort label="desde"        campo="fecha_inicio" actual={campo} dir={dir} onClick={ordenarPor} color="#8ABDD0" />
+            <ThSort label="hasta"        campo="fecha_fin"    actual={campo} dir={dir} onClick={ordenarPor} color="#8ABDD0" />
+            <ThSort label="día cobro"    campo="dia_cobro"    actual={campo} dir={dir} onClick={ordenarPor} color="#8ABDD0" />
+            <ThSort label="notas"        campo="notas"        actual={campo} dir={dir} onClick={ordenarPor} color="#8ABDD0" />
+            <ThSort label="estado"       campo="estado"       actual={campo} dir={dir} onClick={ordenarPor} color="#8ABDD0" />
             <th style={{ padding: "4px 12px" }} />
           </tr>
         </thead>
@@ -159,20 +159,20 @@ export default function PaginaSuscripciones() {
               onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
             >
               <td style={{ padding: "4px 12px", color: "#9BB7C4" }}>{s.nombre}</td>
-              <td style={{ padding: "4px 12px", color: "#5C8097" }}>{formatearEuros(s.importe)}</td>
-              <td style={{ padding: "4px 12px", color: "#3D6676" }}>{s.frecuencia ?? "mensual"}</td>
-              <td style={{ padding: "4px 12px", color: "#4E7A8A" }}>{s.fecha_inicio ? formatearFecha(s.fecha_inicio) : "—"}</td>
-              <td style={{ padding: "4px 12px", color: s.fecha_fin ? "#FF6B35" : "#1F4A5E" }}>{s.fecha_fin ? formatearFecha(s.fecha_fin) : "—"}</td>
-              <td style={{ padding: "4px 12px", color: "#3D6676" }}>{s.dia_cobro ? `día ${s.dia_cobro}` : "—"}</td>
-              <td style={{ padding: "4px 12px", color: "#2A5A6E", maxWidth: "10rem", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+              <td style={{ padding: "4px 12px", color: "#8ABDD0" }}>{formatearEuros(s.importe)}</td>
+              <td style={{ padding: "4px 12px", color: "#6198AE" }}>{s.frecuencia ?? "mensual"}</td>
+              <td style={{ padding: "4px 12px", color: "#6BA8BB" }}>{s.fecha_inicio ? formatearFecha(s.fecha_inicio) : "—"}</td>
+              <td style={{ padding: "4px 12px", color: s.fecha_fin ? "#FF6B35" : "#6198AE" }}>{s.fecha_fin ? formatearFecha(s.fecha_fin) : "—"}</td>
+              <td style={{ padding: "4px 12px", color: "#6198AE" }}>{s.dia_cobro ? `día ${s.dia_cobro}` : "—"}</td>
+              <td style={{ padding: "4px 12px", color: "#6198AE", maxWidth: "10rem", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                 {s.notas ?? "—"}
               </td>
               <td style={{ padding: "4px 12px" }}>
                 <button
                   onClick={() => toggleActiva.mutate({ id: s.id, activa: !s.activa })}
-                  style={{ color: s.activa ? "#00ED64" : "#1F4A5E", background: "none", border: "none", cursor: "pointer", fontSize: "0.80rem" }}
-                  onMouseEnter={(e) => (e.currentTarget.style.color = s.activa ? "#7EFFC0" : "#3D6676")}
-                  onMouseLeave={(e) => (e.currentTarget.style.color = s.activa ? "#00ED64" : "#1F4A5E")}
+                  style={{ color: s.activa ? "#00ED64" : "#6198AE", background: "none", border: "none", cursor: "pointer", fontSize: "0.80rem" }}
+                  onMouseEnter={(e) => (e.currentTarget.style.color = s.activa ? "#7EFFC0" : "#6198AE")}
+                  onMouseLeave={(e) => (e.currentTarget.style.color = s.activa ? "#00ED64" : "#6198AE")}
                 >
                   {s.activa ? "[activa]" : "[inactiva]"}
                 </button>
@@ -192,9 +192,9 @@ export default function PaginaSuscripciones() {
                     })
                     setAbierto(true)
                   }}
-                  style={{ color: "#1F4A5E", background: "none", border: "none", cursor: "pointer", fontSize: "0.80rem", marginRight: "0.5rem" }}
-                  onMouseEnter={(e) => (e.currentTarget.style.color = "#5C8097")}
-                  onMouseLeave={(e) => (e.currentTarget.style.color = "#1F4A5E")}
+                  style={{ color: "#6198AE", background: "none", border: "none", cursor: "pointer", fontSize: "0.80rem", marginRight: "0.5rem" }}
+                  onMouseEnter={(e) => (e.currentTarget.style.color = "#8ABDD0")}
+                  onMouseLeave={(e) => (e.currentTarget.style.color = "#6198AE")}
                 >
                   [e]
                 </button>
@@ -208,7 +208,7 @@ export default function PaginaSuscripciones() {
                     </button>
                     <button
                       onClick={() => setConfirmandoId(null)}
-                      style={{ color: "#1F4A5E", background: "none", border: "none", cursor: "pointer", fontSize: "0.80rem" }}
+                      style={{ color: "#6198AE", background: "none", border: "none", cursor: "pointer", fontSize: "0.80rem" }}
                     >
                       [no]
                     </button>
@@ -216,9 +216,9 @@ export default function PaginaSuscripciones() {
                 ) : (
                   <button
                     onClick={() => setConfirmandoId(s.id)}
-                    style={{ color: "#1F4A5E", background: "none", border: "none", cursor: "pointer", fontSize: "0.80rem" }}
+                    style={{ color: "#6198AE", background: "none", border: "none", cursor: "pointer", fontSize: "0.80rem" }}
                     onMouseEnter={(e) => (e.currentTarget.style.color = "#FF6B35")}
-                    onMouseLeave={(e) => (e.currentTarget.style.color = "#1F4A5E")}
+                    onMouseLeave={(e) => (e.currentTarget.style.color = "#6198AE")}
                   >
                     [x]
                   </button>
@@ -232,7 +232,7 @@ export default function PaginaSuscripciones() {
       <Dialog open={abierto} onOpenChange={(v) => { setAbierto(v); if (!v) setEditando(null) }}>
         <DialogContent style={{ background: "#012030", border: "1px solid #1A3F54" }}>
           <DialogHeader>
-            <DialogTitle style={{ color: "#5C8097", fontSize: "0.80rem", letterSpacing: "0.1em" }}>
+            <DialogTitle style={{ color: "#8ABDD0", fontSize: "0.80rem", letterSpacing: "0.1em" }}>
               {editando ? "EDITAR SUSCRIPCIÓN" : "NUEVA SUSCRIPCIÓN"}
             </DialogTitle>
           </DialogHeader>
@@ -295,7 +295,7 @@ export default function PaginaSuscripciones() {
                   cancelar
                 </Button>
                 <Button type="submit" disabled={crear.isPending || editar.isPending}
-                  style={{ background: "#011829", color: "#5C8097", border: "1px solid #2A5A6E" }}>
+                  style={{ background: "#011829", color: "#8ABDD0", border: "1px solid #6198AE" }}>
                   {crear.isPending || editar.isPending ? "..." : "guardar"}
                 </Button>
               </div>

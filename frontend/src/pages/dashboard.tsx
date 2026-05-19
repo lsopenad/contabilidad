@@ -56,7 +56,7 @@ export default function PaginaDashboard() {
   const suscripcionesActivas = suscripciones.filter((s) => s.activa)
   const totalSus = resumen ? Number(resumen.total_suscripciones) : 0
   const balance = resumen ? Number(resumen.total_ingresos) - Number(resumen.total_gastos) - totalSus : 0
-const presupuestoPorCategoria = Object.fromEntries(
+  const presupuestoPorCategoria = Object.fromEntries(
     presupuestos.map((p) => [p.categoria.id, Number(p.importe)])
   )
 
@@ -71,7 +71,7 @@ const presupuestoPorCategoria = Object.fromEntries(
 
       {balanceTotal && (
         <div style={{ background: "#001E2B", border: "1px solid #0F3244", padding: "0.75rem 1.25rem", display: "flex", alignItems: "baseline", gap: "1.5rem" }}>
-          <div style={{ color: "#1F4A5E", fontSize: "0.70rem", letterSpacing: "0.12em", textTransform: "uppercase", whiteSpace: "nowrap" }}>
+          <div style={{ color: "#6198AE", fontSize: "0.70rem", letterSpacing: "0.12em", textTransform: "uppercase", whiteSpace: "nowrap" }}>
             balance total
           </div>
           <div style={{ color: Number(balanceTotal.balance) >= 0 ? "#00ED64" : "#FF6B35", fontSize: "1.4rem", fontWeight: 700 }}>
@@ -79,15 +79,15 @@ const presupuestoPorCategoria = Object.fromEntries(
           </div>
           <div style={{ marginLeft: "auto", display: "flex", gap: "1.5rem" }}>
             <div style={{ textAlign: "right" }}>
-              <div style={{ color: "#1F4A5E", fontSize: "0.65rem", letterSpacing: "0.1em" }}>INGRESOS</div>
+              <div style={{ color: "#6198AE", fontSize: "0.65rem", letterSpacing: "0.1em" }}>INGRESOS</div>
               <div style={{ color: "#00ED64", fontSize: "0.80rem" }}>{formatearEuros(balanceTotal.total_ingresos)}</div>
             </div>
             <div style={{ textAlign: "right" }}>
-              <div style={{ color: "#1F4A5E", fontSize: "0.65rem", letterSpacing: "0.1em" }}>GASTOS</div>
+              <div style={{ color: "#6198AE", fontSize: "0.65rem", letterSpacing: "0.1em" }}>GASTOS</div>
               <div style={{ color: "#FF6B35", fontSize: "0.80rem" }}>{formatearEuros(balanceTotal.total_gastos)}</div>
             </div>
             <div style={{ textAlign: "right" }}>
-              <div style={{ color: "#1F4A5E", fontSize: "0.65rem", letterSpacing: "0.1em" }}>SUSCRIPCIONES</div>
+              <div style={{ color: "#6198AE", fontSize: "0.65rem", letterSpacing: "0.1em" }}>SUSCRIPCIONES</div>
               <div style={{ color: "#FFB020", fontSize: "0.80rem" }}>{formatearEuros(balanceTotal.total_suscripciones)}</div>
             </div>
           </div>
@@ -102,7 +102,7 @@ const presupuestoPorCategoria = Object.fromEntries(
           { label: "balance",       valor: String(balance),                color: balance >= 0 ? "#00ED64" : "#FF6B35" },
         ].map(({ label, valor, color }) => (
           <div key={label} style={{ background: "#001E2B", padding: "1rem 1.25rem" }}>
-            <div style={{ color: "#1F4A5E", fontSize: "0.70rem", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "0.3rem" }}>
+            <div style={{ color: "#6198AE", fontSize: "0.70rem", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "0.3rem" }}>
               {label}
             </div>
             <div style={{ color, fontSize: "1.15rem", fontWeight: 600 }}>
@@ -114,7 +114,7 @@ const presupuestoPorCategoria = Object.fromEntries(
 
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "2rem" }}>
         <div>
-          <div style={{ color: "#1F4A5E", fontSize: "0.70rem", letterSpacing: "0.12em", marginBottom: "0.5rem" }}>
+          <div style={{ color: "#6198AE", fontSize: "0.70rem", letterSpacing: "0.12em", marginBottom: "0.5rem" }}>
             ÚLTIMOS MOVIMIENTOS
           </div>
           <table style={{ width: "100%", borderCollapse: "collapse" }}>
@@ -124,10 +124,10 @@ const presupuestoPorCategoria = Object.fromEntries(
               )}
               {movimientos.map((m) => (
                 <tr key={`${m.tipo}-${m.id}`} style={{ borderBottom: "1px solid #0A2233" }}>
-                  <td style={{ padding: "3px 0", color: "#2A5A6E", fontSize: "0.80rem", width: "5rem" }}>
+                  <td style={{ padding: "3px 0", color: "#6198AE", fontSize: "0.80rem", width: "5rem" }}>
                     {formatearFecha(m.fecha)}
                   </td>
-                  <td style={{ padding: "3px 8px", color: "#3D6676", fontSize: "0.80rem" }}>
+                  <td style={{ padding: "3px 8px", color: "#6198AE", fontSize: "0.80rem" }}>
                     {m.categoria?.nombre ?? m.descripcion ?? "—"}
                   </td>
                   <td style={{ padding: "3px 0", textAlign: "right", color: m.tipo === "ingreso" ? "#00ED64" : "#FF6B35", fontSize: "0.80rem" }}>
@@ -140,7 +140,7 @@ const presupuestoPorCategoria = Object.fromEntries(
         </div>
 
         <div>
-          <div style={{ color: "#1F4A5E", fontSize: "0.70rem", letterSpacing: "0.12em", marginBottom: "0.5rem" }}>
+          <div style={{ color: "#6198AE", fontSize: "0.70rem", letterSpacing: "0.12em", marginBottom: "0.5rem" }}>
             GASTOS POR CATEGORÍA
           </div>
           <div className="space-y-2">
@@ -154,10 +154,10 @@ const presupuestoPorCategoria = Object.fromEntries(
               return (
                 <div key={c.categoria_id}>
                   <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "2px" }}>
-                    <span style={{ color: "#4E7A8A", fontSize: "0.77rem" }}>{c.categoria_nombre}</span>
-                    <span style={{ color: "#3D6676", fontSize: "0.77rem" }}>
+                    <span style={{ color: "#6BA8BB", fontSize: "0.77rem" }}>{c.categoria_nombre}</span>
+                    <span style={{ color: "#6198AE", fontSize: "0.77rem" }}>
                       {formatearEuros(c.total)}
-                      {presupuesto ? <span style={{ color: "#1F4A5E" }}> / {formatearEuros(presupuesto)}</span> : null}
+                      {presupuesto ? <span style={{ color: "#6198AE" }}> / {formatearEuros(presupuesto)}</span> : null}
                     </span>
                   </div>
                   {pct !== null && (
@@ -174,7 +174,7 @@ const presupuestoPorCategoria = Object.fromEntries(
 
       {suscripcionesActivas.length > 0 && (
         <div>
-          <div style={{ color: "#1F4A5E", fontSize: "0.70rem", letterSpacing: "0.12em", marginBottom: "0.5rem" }}>
+          <div style={{ color: "#6198AE", fontSize: "0.70rem", letterSpacing: "0.12em", marginBottom: "0.5rem" }}>
             SUSCRIPCIONES ACTIVAS
           </div>
           <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem" }}>
@@ -183,7 +183,7 @@ const presupuestoPorCategoria = Object.fromEntries(
                 key={s.id}
                 style={{ border: "1px solid #0F3244", padding: "0.25rem 0.75rem", fontSize: "0.77rem" }}
               >
-                <span style={{ color: "#3D6676" }}>{s.nombre}</span>
+                <span style={{ color: "#6198AE" }}>{s.nombre}</span>
                 <span style={{ color: "#FFB020", marginLeft: "0.5rem" }}>{formatearEuros(s.importe)}</span>
               </div>
             ))}
@@ -193,7 +193,7 @@ const presupuestoPorCategoria = Object.fromEntries(
 
       {grupos.length > 0 && (
         <div>
-          <div style={{ color: "#1F4A5E", fontSize: "0.70rem", letterSpacing: "0.12em", marginBottom: "0.5rem" }}>
+          <div style={{ color: "#6198AE", fontSize: "0.70rem", letterSpacing: "0.12em", marginBottom: "0.5rem" }}>
             GRUPOS DE PRESUPUESTO
           </div>
           <div className="space-y-2">
@@ -203,17 +203,17 @@ const presupuestoPorCategoria = Object.fromEntries(
               return (
                 <div key={g.id}>
                   <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "2px" }}>
-                    <span style={{ color: "#4E7A8A", fontSize: "0.77rem" }}>{g.nombre}</span>
-                    <span style={{ color: "#3D6676", fontSize: "0.77rem" }}>
+                    <span style={{ color: "#6BA8BB", fontSize: "0.77rem" }}>{g.nombre}</span>
+                    <span style={{ color: "#6198AE", fontSize: "0.77rem" }}>
                       {formatearEuros(g.total_gastado)}
-                      <span style={{ color: "#1F4A5E" }}> / {formatearEuros(g.importe)}</span>
+                      <span style={{ color: "#6198AE" }}> / {formatearEuros(g.importe)}</span>
                     </span>
                   </div>
                   <div style={{ height: "2px", background: "#112B3A" }}>
                     <div style={{ height: "100%", width: `${pct}%`, background: colorBarra, transition: "width 0.3s" }} />
                   </div>
                   {g.categorias.length > 0 && (
-                    <div style={{ marginTop: "3px", fontSize: "0.68rem", color: "#1F4A5E" }}>
+                    <div style={{ marginTop: "3px", fontSize: "0.68rem", color: "#6198AE" }}>
                       {g.categorias.map((c) => c.nombre).join(" · ")}
                     </div>
                   )}

@@ -33,14 +33,14 @@ export default function Layout() {
                 className={({ isActive }) =>
                   `flex items-center px-3 py-1.5 text-xs transition-colors ${
                     isActive
-                      ? "text-[#5C8097]"
-                      : "text-[#3D6676] hover:text-[#5C8097]"
+                      ? "text-[#8ABDD0]"
+                      : "text-[#6198AE] hover:text-[#8ABDD0]"
                   }`
                 }
               >
                 {({ isActive }) => (
                   <>
-                    <span className="mr-2 w-3 inline-block" style={{ color: isActive ? "#5C8097" : "transparent" }}>
+                    <span className="mr-2 w-3 inline-block" style={{ color: isActive ? "#00ED64" : "transparent" }}>
                       &gt;
                     </span>
                     {etiqueta}
@@ -56,14 +56,14 @@ export default function Layout() {
               className={({ isActive }) =>
                 `flex items-center px-3 py-1.5 text-xs transition-colors ${
                   isActive
-                    ? "text-[#FF6B35]"
-                    : "text-[#3D3020] hover:text-[#FF6B35]"
+                    ? "text-[#8ABDD0]"
+                    : "text-[#6198AE] hover:text-[#8ABDD0]"
                 }`
               }
             >
               {({ isActive }) => (
                 <>
-                  <span className="mr-2 w-3 inline-block" style={{ color: isActive ? "#FF6B35" : "transparent" }}>
+                  <span className="mr-2 w-3 inline-block" style={{ color: isActive ? "#00ED64" : "transparent" }}>
                     &gt;
                   </span>
                   admin

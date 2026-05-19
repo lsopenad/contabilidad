@@ -85,7 +85,7 @@ export function SelectorCategoria({ value, onChange, tipo }: Props) {
                 type="button"
                 disabled={!nombreNueva.trim() || crear.isPending}
                 onClick={() => crear.mutate(nombreNueva.trim())}
-                style={{ background: "#011829", color: "#5C8097", border: "1px solid #2A5A6E" }}
+                style={{ background: "#011829", color: "#8ABDD0", border: "1px solid #6198AE" }}
               >
                 {crear.isPending ? "..." : "crear"}
               </Button>

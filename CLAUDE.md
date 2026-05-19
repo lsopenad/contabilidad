@@ -40,9 +40,9 @@ backend/alembic/versions/   # Migraciones — leer aquí para esquema BD exacto
 
 frontend/src/
   App.tsx              # React Router routes
-  pages/dashboard.tsx      # KPIs mensuales + balance histórico
-  pages/ingresos.tsx       # CRUD ingresos
-  pages/gastos.tsx         # CRUD gastos
+  pages/dashboard.tsx      # KPIs mensuales + balance total histórico acumulado
+  pages/ingresos.tsx       # CRUD ingresos + operaciones en masa (borrado, categoría)
+  pages/gastos.tsx         # CRUD gastos + operaciones en masa (borrado, categoría)
   pages/suscripciones.tsx  # CRUD suscripciones recurrentes
   pages/presupuestos.tsx   # CRUD presupuestos por categoría y grupo
   pages/categorias.tsx     # CRUD categorías

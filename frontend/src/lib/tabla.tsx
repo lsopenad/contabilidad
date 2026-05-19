@@ -32,7 +32,7 @@ export function useSorte<T>(
   return { ordenados, campo, dir, ordenarPor }
 }
 
-export function ThSort({ label, campo, actual, dir, onClick, color = "#5C8097" }: {
+export function ThSort({ label, campo, actual, dir, onClick, color = "#8ABDD0" }: {
   label: string
   campo: string
   actual: string
@@ -44,12 +44,12 @@ export function ThSort({ label, campo, actual, dir, onClick, color = "#5C8097" }
   return (
     <th
       onClick={() => onClick(campo)}
-      onMouseEnter={(e) => { if (!activo) e.currentTarget.style.color = "#3D6676" }}
-      onMouseLeave={(e) => { if (!activo) e.currentTarget.style.color = "#1F4A5E" }}
+      onMouseEnter={(e) => { if (!activo) e.currentTarget.style.color = "#6198AE" }}
+      onMouseLeave={(e) => { if (!activo) e.currentTarget.style.color = "#6198AE" }}
       style={{
         textAlign: "left",
         padding: "4px 12px",
-        color: activo ? "#5C8097" : "#1F4A5E",
+        color: activo ? "#8ABDD0" : "#6198AE",
         cursor: "pointer",
         userSelect: "none",
         whiteSpace: "nowrap",

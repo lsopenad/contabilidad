@@ -49,13 +49,13 @@
   --primary-foreground:   #001E2B;
 
   --secondary:            #0A2535;
-  --secondary-foreground: #6B95A7;
+  --secondary-foreground: #7AACBF;
 
   --muted:                #012030;
-  --muted-foreground:     #4E7A8A;
+  --muted-foreground:     #6BA8BB;
 
   --accent:               #0A2535;
-  --accent-foreground:    #7AAABB;
+  --accent-foreground:    #8ABDD0;
 
   --destructive:          #FF6B35;
   --destructive-foreground: #001E2B;
@@ -112,7 +112,7 @@
     border-color: var(--primary) !important;
     outline: none !important;
   }
-  input::placeholder { color: #1A3D50 !important; }
+  input::placeholder { color: #4A8098 !important; }
 
   /* Buttons — squared, tracked */
   button {

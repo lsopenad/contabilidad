@@ -51,22 +51,22 @@ export default function PaginaInformes() {
         <div className="flex items-center gap-2">
           <button
             onClick={() => setAnio((a) => a - 1)}
-            style={{ color: "#1F4A5E", background: "none", border: "none", cursor: "pointer", fontSize: "0.80rem" }}
-            onMouseEnter={(e) => (e.currentTarget.style.color = "#5C8097")}
-            onMouseLeave={(e) => (e.currentTarget.style.color = "#1F4A5E")}
+            style={{ color: "#6198AE", background: "none", border: "none", cursor: "pointer", fontSize: "0.80rem" }}
+            onMouseEnter={(e) => (e.currentTarget.style.color = "#8ABDD0")}
+            onMouseLeave={(e) => (e.currentTarget.style.color = "#6198AE")}
           >‹</button>
-          <span style={{ color: "#5C8097", fontSize: "0.80rem", minWidth: "3rem", textAlign: "center" }}>{anio}</span>
+          <span style={{ color: "#8ABDD0", fontSize: "0.80rem", minWidth: "3rem", textAlign: "center" }}>{anio}</span>
           <button
             onClick={() => setAnio((a) => a + 1)}
-            style={{ color: "#1F4A5E", background: "none", border: "none", cursor: "pointer", fontSize: "0.80rem" }}
-            onMouseEnter={(e) => (e.currentTarget.style.color = "#5C8097")}
-            onMouseLeave={(e) => (e.currentTarget.style.color = "#1F4A5E")}
+            style={{ color: "#6198AE", background: "none", border: "none", cursor: "pointer", fontSize: "0.80rem" }}
+            onMouseEnter={(e) => (e.currentTarget.style.color = "#8ABDD0")}
+            onMouseLeave={(e) => (e.currentTarget.style.color = "#6198AE")}
           >›</button>
           <button
             onClick={exportarAnual}
-            style={{ color: "#1F4A5E", background: "none", border: "none", cursor: "pointer", fontSize: "0.80rem", marginLeft: "0.5rem" }}
-            onMouseEnter={(e) => (e.currentTarget.style.color = "#5C8097")}
-            onMouseLeave={(e) => (e.currentTarget.style.color = "#1F4A5E")}
+            style={{ color: "#6198AE", background: "none", border: "none", cursor: "pointer", fontSize: "0.80rem", marginLeft: "0.5rem" }}
+            onMouseEnter={(e) => (e.currentTarget.style.color = "#8ABDD0")}
+            onMouseLeave={(e) => (e.currentTarget.style.color = "#6198AE")}
             title="exportar año xlsx"
           >[↓ año]</button>
         </div>
@@ -82,7 +82,7 @@ export default function PaginaInformes() {
               color: Number(informe.balance) >= 0 ? "#00ED64" : "#FF6B35" },
           ].map(({ label, valor, color }) => (
             <div key={label} style={{ borderLeft: `2px solid ${color}`, paddingLeft: "0.75rem" }}>
-              <div style={{ color: "#1F4A5E", fontSize: "0.70rem", letterSpacing: "0.1em", textTransform: "uppercase" }}>{label}</div>
+              <div style={{ color: "#6198AE", fontSize: "0.70rem", letterSpacing: "0.1em", textTransform: "uppercase" }}>{label}</div>
               <div style={{ color, fontSize: "1.15rem", fontWeight: 600 }}>{formatearEuros(valor)}</div>
             </div>
           ))}
@@ -92,11 +92,11 @@ export default function PaginaInformes() {
       <table style={{ width: "100%", borderCollapse: "collapse" }}>
         <thead>
           <tr style={{ borderBottom: "1px solid #112B3A" }}>
-            <ThSort label="mes"           campo="mes"           actual={campo} dir={dir} onClick={ordenarPor} color="#5C8097" />
-            <ThSort label="ingresos"      campo="ingresos"      actual={campo} dir={dir} onClick={ordenarPor} color="#5C8097" />
-            <ThSort label="gastos"        campo="gastos"        actual={campo} dir={dir} onClick={ordenarPor} color="#5C8097" />
-            <ThSort label="suscripciones" campo="suscripciones" actual={campo} dir={dir} onClick={ordenarPor} color="#5C8097" />
-            <ThSort label="balance"       campo="balance"       actual={campo} dir={dir} onClick={ordenarPor} color="#5C8097" />
+            <ThSort label="mes"           campo="mes"           actual={campo} dir={dir} onClick={ordenarPor} color="#8ABDD0" />
+            <ThSort label="ingresos"      campo="ingresos"      actual={campo} dir={dir} onClick={ordenarPor} color="#8ABDD0" />
+            <ThSort label="gastos"        campo="gastos"        actual={campo} dir={dir} onClick={ordenarPor} color="#8ABDD0" />
+            <ThSort label="suscripciones" campo="suscripciones" actual={campo} dir={dir} onClick={ordenarPor} color="#8ABDD0" />
+            <ThSort label="balance"       campo="balance"       actual={campo} dir={dir} onClick={ordenarPor} color="#8ABDD0" />
             <th style={{ padding: "4px 12px" }} />
           </tr>
         </thead>
@@ -110,7 +110,7 @@ export default function PaginaInformes() {
                 onMouseEnter={(e) => (e.currentTarget.style.background = "#012030")}
                 onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
               >
-                <td style={{ padding: "4px 12px", color: "#3D6676" }}>{MESES_ABREV[m.mes - 1]}</td>
+                <td style={{ padding: "4px 12px", color: "#6198AE" }}>{MESES_ABREV[m.mes - 1]}</td>
                 <td style={{ padding: "4px 12px", color: "#00ED64" }}>{formatearEuros(m.total_ingresos)}</td>
                 <td style={{ padding: "4px 12px", color: "#FF6B35" }}>{formatearEuros(m.total_gastos)}</td>
                 <td style={{ padding: "4px 12px", color: "#FFB020" }}>{formatearEuros(m.total_suscripciones)}</td>
@@ -118,9 +118,9 @@ export default function PaginaInformes() {
                 <td style={{ padding: "4px 12px" }}>
                   <button
                     onClick={() => exportar(m.mes)}
-                    style={{ color: "#1F4A5E", background: "none", border: "none", cursor: "pointer", fontSize: "0.80rem" }}
-                    onMouseEnter={(e) => (e.currentTarget.style.color = "#5C8097")}
-                    onMouseLeave={(e) => (e.currentTarget.style.color = "#1F4A5E")}
+                    style={{ color: "#6198AE", background: "none", border: "none", cursor: "pointer", fontSize: "0.80rem" }}
+                    onMouseEnter={(e) => (e.currentTarget.style.color = "#8ABDD0")}
+                    onMouseLeave={(e) => (e.currentTarget.style.color = "#6198AE")}
                     title="exportar xlsx"
                   >
                     [↓]

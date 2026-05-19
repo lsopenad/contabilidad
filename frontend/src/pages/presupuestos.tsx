@@ -62,7 +62,7 @@ function ChipsMeses({ mesesSeleccionados, onChangeMesesExtra, mesesEliminar, onC
   }
   return (
     <div>
-      <div style={{ color: "#3D6676", fontSize: "0.70rem", marginBottom: "6px" }}>meses con copia:</div>
+      <div style={{ color: "#6198AE", fontSize: "0.70rem", marginBottom: "6px" }}>meses con copia:</div>
       <div style={{ display: "flex", flexWrap: "wrap", gap: "4px" }}>
         {MESES_ABREV.map((nombre, i) => {
           const m = i + 1
@@ -81,7 +81,7 @@ function ChipsMeses({ mesesSeleccionados, onChangeMesesExtra, mesesEliminar, onC
                 fontSize: "0.68rem",
                 border: `1px solid ${esBase ? "#112B3A" : eliminando ? "#FF6B35" : existe ? "#0E7490" : sel ? "#7DD3FC" : "#1A3F54"}`,
                 background: eliminando ? "#1A0A00" : existe ? "#083344" : sel ? "#0A2535" : "transparent",
-                color: esBase ? "#1F4A5E" : eliminando ? "#FF6B35" : existe ? "#22D3EE" : sel ? "#7DD3FC" : "#3D6676",
+                color: esBase ? "#6198AE" : eliminando ? "#FF6B35" : existe ? "#22D3EE" : sel ? "#7DD3FC" : "#6198AE",
                 cursor: esBase ? "default" : "pointer",
                 textDecoration: eliminando ? "line-through" : "none",
               }}
@@ -241,7 +241,7 @@ export default function PaginaPresupuestos() {
         </div>
         <Button
           onClick={() => { setEditando(null); form.reset({ mes: String(mes), anio: String(anio) }); setAbierto(true) }}
-          style={{ background: "#011829", color: "#5C8097", border: "1px solid #2A5A6E" }}
+          style={{ background: "#011829", color: "#8ABDD0", border: "1px solid #6198AE" }}
         >
           + nuevo
         </Button>
@@ -250,8 +250,8 @@ export default function PaginaPresupuestos() {
       <table style={{ width: "100%", borderCollapse: "collapse" }}>
         <thead>
           <tr style={{ borderBottom: "1px solid #112B3A" }}>
-            <ThSort label="categoría"   campo="categoria" actual={campo} dir={dir} onClick={ordenarPor} color="#5C8097" />
-            <ThSort label="presupuesto" campo="importe"   actual={campo} dir={dir} onClick={ordenarPor} color="#5C8097" />
+            <ThSort label="categoría"   campo="categoria" actual={campo} dir={dir} onClick={ordenarPor} color="#8ABDD0" />
+            <ThSort label="presupuesto" campo="importe"   actual={campo} dir={dir} onClick={ordenarPor} color="#8ABDD0" />
             <th style={{ padding: "4px 12px" }} />
           </tr>
         </thead>
@@ -268,8 +268,8 @@ export default function PaginaPresupuestos() {
               onMouseEnter={(e) => (e.currentTarget.style.background = "#012030")}
               onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
             >
-              <td style={{ padding: "4px 12px", color: "#4E7A8A" }}>{p.categoria.nombre}</td>
-              <td style={{ padding: "4px 12px", color: "#5C8097" }}>{formatearEuros(p.importe)}</td>
+              <td style={{ padding: "4px 12px", color: "#6BA8BB" }}>{p.categoria.nombre}</td>
+              <td style={{ padding: "4px 12px", color: "#8ABDD0" }}>{formatearEuros(p.importe)}</td>
               <td style={{ padding: "4px 12px", whiteSpace: "nowrap" }}>
                 <button
                   onClick={() => {
@@ -279,13 +279,12 @@ export default function PaginaPresupuestos() {
                       importe: String(p.importe),
                       mes: String(p.mes),
                       anio: String(p.anio),
-                      repetir_mensual: !!p.repeticion_id,
                     })
                     setAbierto(true)
                   }}
-                  style={{ color: "#1F4A5E", background: "none", border: "none", cursor: "pointer", fontSize: "0.80rem", marginRight: "0.5rem" }}
-                  onMouseEnter={(e) => (e.currentTarget.style.color = "#5C8097")}
-                  onMouseLeave={(e) => (e.currentTarget.style.color = "#1F4A5E")}
+                  style={{ color: "#6198AE", background: "none", border: "none", cursor: "pointer", fontSize: "0.80rem", marginRight: "0.5rem" }}
+                  onMouseEnter={(e) => (e.currentTarget.style.color = "#8ABDD0")}
+                  onMouseLeave={(e) => (e.currentTarget.style.color = "#6198AE")}
                 >
                   [e]
                 </button>
@@ -299,7 +298,7 @@ export default function PaginaPresupuestos() {
                     </button>
                     <button
                       onClick={() => setConfirmandoId(null)}
-                      style={{ color: "#1F4A5E", background: "none", border: "none", cursor: "pointer", fontSize: "0.80rem" }}
+                      style={{ color: "#6198AE", background: "none", border: "none", cursor: "pointer", fontSize: "0.80rem" }}
                     >
                       [no]
                     </button>
@@ -307,9 +306,9 @@ export default function PaginaPresupuestos() {
                 ) : (
                   <button
                     onClick={() => setConfirmandoId(p.id)}
-                    style={{ color: "#1F4A5E", background: "none", border: "none", cursor: "pointer", fontSize: "0.80rem" }}
+                    style={{ color: "#6198AE", background: "none", border: "none", cursor: "pointer", fontSize: "0.80rem" }}
                     onMouseEnter={(e) => (e.currentTarget.style.color = "#FF6B35")}
-                    onMouseLeave={(e) => (e.currentTarget.style.color = "#1F4A5E")}
+                    onMouseLeave={(e) => (e.currentTarget.style.color = "#6198AE")}
                   >
                     [x]
                   </button>
@@ -323,7 +322,7 @@ export default function PaginaPresupuestos() {
       {/* Grupos de presupuesto */}
       <div className="flex items-center justify-between mt-8 mb-3" style={{ borderBottom: "1px solid #0F3244", paddingBottom: "0.5rem" }}>
         <div style={{ color: "#A5B4FC", fontSize: "0.70rem", letterSpacing: "0.12em" }}>GRUPOS DE PRESUPUESTO</div>
-        <Button onClick={abrirNuevoGrupo} style={{ background: "#011829", color: "#5C8097", border: "1px solid #2A5A6E" }}>
+        <Button onClick={abrirNuevoGrupo} style={{ background: "#011829", color: "#8ABDD0", border: "1px solid #6198AE" }}>
           + nuevo grupo
         </Button>
       </div>
@@ -340,15 +339,15 @@ export default function PaginaPresupuestos() {
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: "4px" }}>
                   <span style={{ color: "#9BB7C4", fontSize: "0.85rem" }}>{g.nombre}</span>
                   <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
-                    <span style={{ color: "#3D6676", fontSize: "0.77rem" }}>
+                    <span style={{ color: "#6198AE", fontSize: "0.77rem" }}>
                       {formatearEuros(g.total_gastado)}
-                      <span style={{ color: "#1F4A5E" }}> / {formatearEuros(g.importe)}</span>
+                      <span style={{ color: "#6198AE" }}> / {formatearEuros(g.importe)}</span>
                     </span>
                     <button
                       onClick={() => abrirEditarGrupo(g)}
-                      style={{ color: "#1F4A5E", background: "none", border: "none", cursor: "pointer", fontSize: "0.75rem" }}
-                      onMouseEnter={(e) => (e.currentTarget.style.color = "#5C8097")}
-                      onMouseLeave={(e) => (e.currentTarget.style.color = "#1F4A5E")}
+                      style={{ color: "#6198AE", background: "none", border: "none", cursor: "pointer", fontSize: "0.75rem" }}
+                      onMouseEnter={(e) => (e.currentTarget.style.color = "#8ABDD0")}
+                      onMouseLeave={(e) => (e.currentTarget.style.color = "#6198AE")}
                     >[e]</button>
                     {confirmandoGrupoId === g.id ? (
                       <>
@@ -358,15 +357,15 @@ export default function PaginaPresupuestos() {
                         >[¿borrar?]</button>
                         <button
                           onClick={() => setConfirmandoGrupoId(null)}
-                          style={{ color: "#1F4A5E", background: "none", border: "none", cursor: "pointer", fontSize: "0.75rem" }}
+                          style={{ color: "#6198AE", background: "none", border: "none", cursor: "pointer", fontSize: "0.75rem" }}
                         >[no]</button>
                       </>
                     ) : (
                       <button
                         onClick={() => setConfirmandoGrupoId(g.id)}
-                        style={{ color: "#1F4A5E", background: "none", border: "none", cursor: "pointer", fontSize: "0.75rem" }}
+                        style={{ color: "#6198AE", background: "none", border: "none", cursor: "pointer", fontSize: "0.75rem" }}
                         onMouseEnter={(e) => (e.currentTarget.style.color = "#FF6B35")}
-                        onMouseLeave={(e) => (e.currentTarget.style.color = "#1F4A5E")}
+                        onMouseLeave={(e) => (e.currentTarget.style.color = "#6198AE")}
                       >[x]</button>
                     )}
                   </div>
@@ -377,7 +376,7 @@ export default function PaginaPresupuestos() {
                 {g.categorias.length > 0 && (
                   <div style={{ display: "flex", flexWrap: "wrap", gap: "0.25rem" }}>
                     {g.categorias.map((c) => (
-                      <span key={c.id} style={{ fontSize: "0.70rem", color: "#2A5A6E", border: "1px solid #112B3A", padding: "1px 6px" }}>
+                      <span key={c.id} style={{ fontSize: "0.70rem", color: "#6198AE", border: "1px solid #112B3A", padding: "1px 6px" }}>
                         {c.nombre}
                       </span>
                     ))}
@@ -393,7 +392,7 @@ export default function PaginaPresupuestos() {
       <Dialog open={abierto} onOpenChange={(v) => { setAbierto(v); if (!v) { setEditando(null); setMesesExtraPres([]); setMesesEliminarPres([]) } }}>
         <DialogContent style={{ background: "#012030", border: "1px solid #1A3F54" }}>
           <DialogHeader>
-            <DialogTitle style={{ color: "#5C8097", fontSize: "0.80rem", letterSpacing: "0.1em" }}>
+            <DialogTitle style={{ color: "#8ABDD0", fontSize: "0.80rem", letterSpacing: "0.1em" }}>
               {editando ? "EDITAR PRESUPUESTO" : "NUEVO PRESUPUESTO"}
             </DialogTitle>
           </DialogHeader>
@@ -442,7 +441,7 @@ export default function PaginaPresupuestos() {
                   cancelar
                 </Button>
                 <Button type="submit" disabled={guardar.isPending}
-                  style={{ background: "#011829", color: "#5C8097", border: "1px solid #2A5A6E" }}>
+                  style={{ background: "#011829", color: "#8ABDD0", border: "1px solid #6198AE" }}>
                   {guardar.isPending ? "..." : "guardar"}
                 </Button>
               </div>
@@ -455,7 +454,7 @@ export default function PaginaPresupuestos() {
       <Dialog open={abiertoGrupo} onOpenChange={(v) => { setAbiertoGrupo(v); if (!v) { setEditandoGrupo(null); setMesesExtraGrupo([]); setMesesEliminarGrupo([]) } }}>
         <DialogContent style={{ background: "#012030", border: "1px solid #1A3F54" }}>
           <DialogHeader>
-            <DialogTitle style={{ color: "#5C8097", fontSize: "0.80rem", letterSpacing: "0.1em" }}>
+            <DialogTitle style={{ color: "#8ABDD0", fontSize: "0.80rem", letterSpacing: "0.1em" }}>
               {editandoGrupo ? "EDITAR GRUPO" : "NUEVO GRUPO"}
             </DialogTitle>
           </DialogHeader>
@@ -491,7 +490,7 @@ export default function PaginaPresupuestos() {
                 )} />
               </div>
               <div>
-                <div style={{ color: "#5C8097", fontSize: "0.75rem", marginBottom: "0.5rem" }}>categorías</div>
+                <div style={{ color: "#8ABDD0", fontSize: "0.75rem", marginBottom: "0.5rem" }}>categorías</div>
                 <Select
                   value=""
                   onValueChange={(v) => setCatIdsSeleccionadas((prev) => [...prev, Number(v)])}
@@ -515,7 +514,7 @@ export default function PaginaPresupuestos() {
                       return (
                         <span key={id} style={{ display: "inline-flex", alignItems: "center", gap: "4px", background: "#0A2535", border: "1px solid #1A3F54", borderRadius: "4px", padding: "2px 8px", fontSize: "0.75rem", color: "#6B95A7" }}>
                           {cat.nombre}
-                          <button type="button" onClick={() => setCatIdsSeleccionadas((prev) => prev.filter((x) => x !== id))} style={{ background: "none", border: "none", cursor: "pointer", color: "#4E7A8A", lineHeight: 1, padding: 0 }}>×</button>
+                          <button type="button" onClick={() => setCatIdsSeleccionadas((prev) => prev.filter((x) => x !== id))} style={{ background: "none", border: "none", cursor: "pointer", color: "#6BA8BB", lineHeight: 1, padding: 0 }}>×</button>
                         </span>
                       )
                     })}
@@ -536,7 +535,7 @@ export default function PaginaPresupuestos() {
                   cancelar
                 </Button>
                 <Button type="submit" disabled={guardarGrupo.isPending}
-                  style={{ background: "#011829", color: "#5C8097", border: "1px solid #2A5A6E" }}>
+                  style={{ background: "#011829", color: "#8ABDD0", border: "1px solid #6198AE" }}>
                   {guardarGrupo.isPending ? "..." : "guardar"}
                 </Button>
               </div>

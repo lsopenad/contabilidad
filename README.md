@@ -78,7 +78,7 @@ pnpm dev
 
 ## Funcionalidades
 
-- **Ingresos y gastos** — registro mensual con categorías y descripción. Soporte de repetición automática en múltiples meses.
+- **Ingresos y gastos** — registro mensual con categorías y descripción. Soporte de repetición automática en múltiples meses. Operaciones en masa: borrado múltiple y cambio de categoría en bloque.
 - **Suscripciones** — seguimiento de pagos recurrentes con frecuencia configurable (mensual, bimestral, trimestral, semestral, anual). Al desactivar se registra la fecha de baja (`fecha_fin`) y el historial se preserva en los informes. Al reactivar, empieza a contar desde la fecha de reactivación.
 - **Presupuestos** — límite mensual por categoría o por grupos de categorías.
 - **Dashboard** — KPIs mensuales (ingresos, gastos, suscripciones, balance) y balance total histórico acumulado.

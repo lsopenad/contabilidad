@@ -53,21 +53,21 @@ export function SelectorMes() {
 
   const btn = {
     background: "none", border: "none", cursor: "pointer",
-    color: "#2A5A6E", fontSize: "0.70rem", padding: "0 2px", lineHeight: 1,
+    color: "#6198AE", fontSize: "0.70rem", padding: "0 2px", lineHeight: 1,
   }
 
   return (
     <div style={{ display: "flex", alignItems: "center", gap: "0.25rem" }}>
       <button style={btn} onClick={irAnterior}
         onMouseEnter={(e) => (e.currentTarget.style.color = "#7DD3FC")}
-        onMouseLeave={(e) => (e.currentTarget.style.color = "#2A5A6E")}
+        onMouseLeave={(e) => (e.currentTarget.style.color = "#6198AE")}
       >[&lt;]</button>
       <span style={{ color: "#7DD3FC", fontSize: "0.70rem", minWidth: "5.5rem", textAlign: "center" }}>
         {etiqueta}
       </span>
       <button style={btn} onClick={irSiguiente}
         onMouseEnter={(e) => (e.currentTarget.style.color = "#7DD3FC")}
-        onMouseLeave={(e) => (e.currentTarget.style.color = "#2A5A6E")}
+        onMouseLeave={(e) => (e.currentTarget.style.color = "#6198AE")}
       >[&gt;]</button>
       {!esHoy && (
         <button style={{ ...btn, color: "#00ED64", marginLeft: "0.25rem" }} onClick={irHoy}
