@@ -8,6 +8,7 @@ import PaginaPresupuestos from "@/pages/presupuestos"
 import PaginaInformes from "@/pages/informes"
 import PaginaCategorias from "@/pages/categorias"
 import PaginaImportar from "@/pages/importar"
+import PaginaAdmin from "@/pages/admin"
 
 export default function App() {
   return (
@@ -21,6 +22,7 @@ export default function App() {
         <Route path="informes" element={<PaginaInformes />} />
         <Route path="categorias" element={<PaginaCategorias />} />
         <Route path="importar" element={<PaginaImportar />} />
+        <Route path="admin" element={<PaginaAdmin />} />
       </Route>
     </Routes>
   )

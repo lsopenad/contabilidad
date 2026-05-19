@@ -48,6 +48,28 @@ export default function Layout() {
                 )}
               </NavLink>
             ))}
+
+            <div style={{ borderTop: "1px solid #0F3244", margin: "8px 4px 4px" }} />
+
+            <NavLink
+              to="/admin"
+              className={({ isActive }) =>
+                `flex items-center px-3 py-1.5 text-xs transition-colors ${
+                  isActive
+                    ? "text-[#FF6B35]"
+                    : "text-[#3D3020] hover:text-[#FF6B35]"
+                }`
+              }
+            >
+              {({ isActive }) => (
+                <>
+                  <span className="mr-2 w-3 inline-block" style={{ color: isActive ? "#FF6B35" : "transparent" }}>
+                    &gt;
+                  </span>
+                  admin
+                </>
+              )}
+            </NavLink>
           </nav>
 
           <div className="p-3" style={{ borderTop: "1px solid #0F3244" }}>
