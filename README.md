@@ -10,12 +10,13 @@ Uso personal, sin autenticación.
 
 | Capa | Tecnología |
 |------|-----------|
-| Backend | FastAPI 0.136 · SQLAlchemy 2 async · Alembic · Pydantic v2 |
+| Backend | FastAPI 0.136.1 · SQLAlchemy 2 async · Alembic · Pydantic v2 |
 | Base de datos | PostgreSQL (asyncpg) |
 | Frontend | React 19 · Vite · TypeScript · Tailwind CSS · shadcn/ui |
 | Estado servidor | TanStack Query v5 |
 | Formularios | react-hook-form + Zod |
 | Exportación | openpyxl (Excel) |
+| IA (importación) | Groq (llama3) — normalización de descripciones CSV |
 
 ---
 
@@ -83,7 +84,8 @@ pnpm dev
 - **Dashboard** — KPIs mensuales (ingresos, gastos, suscripciones, balance) y balance total histórico acumulado.
 - **Informes** — balance mensual (ingresos − gastos − suscripciones) e informe anual mes a mes.
 - **Exportación Excel** — descarga de datos mensuales en formato `.xlsx`.
-- **Importación de extractos** — sube un PDF de Trade Republic, previsualiza las transacciones (con detección de duplicados y posibles suscripciones), excluye las que no quieras y confirma la importación.
+- **Importación de extractos** — sube un CSV de Trade Republic, normaliza descripciones con Groq, previsualiza transacciones (deduplicación por `transaction_id`, detección de posibles suscripciones), excluye las que no quieras y confirma.
+- **Administración** — borrado masivo de gastos e ingresos (con confirmación).
 
 ---
 
@@ -93,6 +95,7 @@ pnpm dev
 |----------|-------------|
 | `DATABASE_URL` | Conexión PostgreSQL asyncpg: `postgresql+asyncpg://user:pass@host/db` |
 | `ALEMBIC_DATABASE_URL` | Solo si la URL de migraciones difiere de `DATABASE_URL` |
+| `GROQ_API_KEY` | API key de Groq para normalizar descripciones en la importación CSV |
 
 **Nunca** commitear el fichero `.env`.
 

@@ -40,10 +40,18 @@ backend/alembic/versions/   # Migraciones — leer aquí para esquema BD exacto
 
 frontend/src/
   App.tsx              # React Router routes
-  pages/               # Una página por sección
-  components/layout/   # Nav + Outlet
-  components/ui/       # shadcn/ui
-  components/selector-categoria.tsx  # Selector compartido de categorías (tipo: ingreso/gasto/ambos)
+  pages/dashboard.tsx      # KPIs mensuales + balance histórico
+  pages/ingresos.tsx       # CRUD ingresos
+  pages/gastos.tsx         # CRUD gastos
+  pages/suscripciones.tsx  # CRUD suscripciones recurrentes
+  pages/presupuestos.tsx   # CRUD presupuestos por categoría y grupo
+  pages/categorias.tsx     # CRUD categorías
+  pages/informes.tsx       # Informe anual mes a mes + descarga Excel
+  pages/importar.tsx       # Importación CSV (Trade Republic) con Groq + previsualización
+  pages/admin.tsx          # Borrado masivo de gastos e ingresos
+  components/layout/layout.tsx        # Layout con nav y Outlet
+  components/ui/                      # shadcn/ui (button, dialog, form, input, label, select)
+  components/selector-categoria.tsx   # Selector compartido de categorías (tipo: ingreso/gasto/ambos)
   lib/api.ts           # axios instance → /api (proxy Vite → :8000)
   lib/utils.ts         # cn(), formatearEuros(), formatearFecha(), normalizarImporte(), fechaHoy(), MESES_ABREV, MESES_NOMBRE
   lib/mes-context.tsx  # MesProvider + SelectorMes + useMes
@@ -51,8 +59,6 @@ frontend/src/
   lib/tipos.ts         # Interfaces TypeScript del dominio (Ingreso, Gasto, Suscripcion, etc.)
   lib/crud.ts          # useDialogoCrud<T>() — estado compartido de diálogos CRUD
   lib/esquemas.ts      # esquemaImporte (Zod) compartido
-  pages/informes.tsx   # Informe anual mes a mes + descarga Excel mensual/anual
-  pages/importar.tsx   # Importación de extractos PDF (Trade Republic) con previsualización
 ```
 
 ---
@@ -95,6 +101,7 @@ Invariante global: `importe > 0` en ingresos, gastos, presupuestos, grupos y sus
 | ---------------------- | ------------------------------------------------------------ |
 | `DATABASE_URL`         | PostgreSQL asyncpg: `postgresql+asyncpg://user:pass@host/db` |
 | `ALEMBIC_DATABASE_URL` | Solo si la URL de migraciones difiere                        |
+| `GROQ_API_KEY`         | API key de Groq para normalizar CSV en importación           |
 
 **Nunca** hardcodear credenciales. **Nunca** commitear `.env`.
 
