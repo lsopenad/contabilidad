@@ -12,7 +12,7 @@ import { type Ingreso } from "@/lib/tipos"
 import { MESES_ABREV, fechaHoy, formatearEuros, formatearFecha, normalizarImporte } from "@/lib/utils"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { useForm } from "react-hook-form"
 import { toast } from "sonner"
 import { z } from "zod"
@@ -92,6 +92,12 @@ export default function PaginaIngresos() {
 
   const [mesesExtra, setMesesExtra] = useState<number[]>([])
   const [mesesEliminar, setMesesEliminar] = useState<number[]>([])
+  const [seleccionados, setSeleccionados] = useState<Set<number>>(new Set())
+  const [confirmandoBulk, setConfirmandoBulk] = useState(false)
+  const [dialogoCategoriaBulk, setDialogoCategoriaBulk] = useState(false)
+  const [categoriaBulkId, setCategoriaBulkId] = useState<string | undefined>(undefined)
+
+  useEffect(() => { setSeleccionados(new Set()) }, [mes, anio])
 
   const { data: ingresos = [] } = useQuery<Ingreso[]>({
     queryKey: ["ingresos", mes, anio],
@@ -151,6 +157,30 @@ export default function PaginaIngresos() {
     },
   })
 
+  const eliminarBulk = useMutation({
+    mutationFn: (ids: number[]) => api.delete("/ingresos/bulk", { data: { ids } }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["ingresos"] })
+      qc.invalidateQueries({ queryKey: ["informes"] })
+      setSeleccionados(new Set())
+      setConfirmandoBulk(false)
+      toast.success("ingresos eliminados")
+    },
+  })
+
+  const editarCategoriaBulk = useMutation({
+    mutationFn: ({ ids, categoria_id }: { ids: number[]; categoria_id: number | null }) =>
+      api.patch("/ingresos/bulk-categoria", { ids, categoria_id }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["ingresos"] })
+      qc.invalidateQueries({ queryKey: ["informes"] })
+      setSeleccionados(new Set())
+      setDialogoCategoriaBulk(false)
+      setCategoriaBulkId(undefined)
+      toast.success("categoría actualizada")
+    },
+  })
+
   const form = useForm<Campos>({
     resolver: zodResolver(esquema),
     defaultValues: { fecha: fechaHoy() },
@@ -194,6 +224,22 @@ export default function PaginaIngresos() {
     setAbierto(true)
   }
 
+  function toggleSeleccion(id: number) {
+    setSeleccionados(prev => {
+      const next = new Set(prev)
+      next.has(id) ? next.delete(id) : next.add(id)
+      return next
+    })
+  }
+
+  function toggleTodo() {
+    if (seleccionados.size === ordenados.length && ordenados.length > 0) {
+      setSeleccionados(new Set())
+    } else {
+      setSeleccionados(new Set(ordenados.map(i => i.id)))
+    }
+  }
+
   return (
     <div className="p-6">
       <div className="flex items-center justify-between mb-4" style={{ borderBottom: "1px solid #0F3244", paddingBottom: "0.75rem" }}>
@@ -211,9 +257,43 @@ export default function PaginaIngresos() {
         </div>
       </div>
 
+      {seleccionados.size > 0 && (
+        <div style={{ display: "flex", alignItems: "center", gap: "12px", padding: "6px 0", marginBottom: "6px", borderBottom: "1px solid #1A3F54" }}>
+          <span style={{ color: "#5C8097", fontSize: "0.75rem" }}>{seleccionados.size} seleccionado{seleccionados.size !== 1 ? "s" : ""}</span>
+          <button
+            onClick={() => setDialogoCategoriaBulk(true)}
+            style={{ color: "#5C8097", background: "none", border: "1px solid #2A5A6E", cursor: "pointer", fontSize: "0.75rem", padding: "2px 8px" }}
+          >
+            editar categoría
+          </button>
+          <button
+            onClick={() => setConfirmandoBulk(true)}
+            style={{ color: "#FF6B35", background: "none", border: "1px solid #FF6B35", cursor: "pointer", fontSize: "0.75rem", padding: "2px 8px" }}
+          >
+            borrar
+          </button>
+          <button
+            onClick={() => setSeleccionados(new Set())}
+            style={{ color: "#1F4A5E", background: "none", border: "none", cursor: "pointer", fontSize: "0.75rem" }}
+            onMouseEnter={(e) => (e.currentTarget.style.color = "#5C8097")}
+            onMouseLeave={(e) => (e.currentTarget.style.color = "#1F4A5E")}
+          >
+            deseleccionar
+          </button>
+        </div>
+      )}
+
       <table style={{ width: "100%", borderCollapse: "collapse" }}>
         <thead>
           <tr style={{ borderBottom: "1px solid #112B3A" }}>
+            <th style={{ padding: "4px 8px", textAlign: "left" }}>
+              <input
+                type="checkbox"
+                checked={seleccionados.size === ordenados.length && ordenados.length > 0}
+                onChange={toggleTodo}
+                style={{ accentColor: "#5C8097" }}
+              />
+            </th>
             <ThSort label="fecha"       campo="fecha"       actual={campo} dir={dir} onClick={ordenarPor} color="#5C8097" />
             <ThSort label="importe"     campo="importe"     actual={campo} dir={dir} onClick={ordenarPor} color="#5C8097" />
             <ThSort label="categoría"   campo="categoria"   actual={campo} dir={dir} onClick={ordenarPor} color="#5C8097" />
@@ -223,7 +303,7 @@ export default function PaginaIngresos() {
         </thead>
         <tbody>
           {ordenados.length === 0 && (
-            <tr><td colSpan={5} style={{ padding: "2rem 12px", color: "#1A3F54", textAlign: "center" }}>
+            <tr><td colSpan={6} style={{ padding: "2rem 12px", color: "#1A3F54", textAlign: "center" }}>
               — sin registros —
             </td></tr>
           )}
@@ -234,6 +314,14 @@ export default function PaginaIngresos() {
               onMouseEnter={(e) => (e.currentTarget.style.background = "#012030")}
               onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
             >
+              <td style={{ padding: "4px 8px" }}>
+                <input
+                  type="checkbox"
+                  checked={seleccionados.has(ing.id)}
+                  onChange={() => toggleSeleccion(ing.id)}
+                  style={{ accentColor: "#5C8097" }}
+                />
+              </td>
               <td style={{ padding: "4px 12px", color: "#4E7A8A" }}>
                 {formatearFecha(ing.fecha)}
                 {ing.repeticion_id && <span style={{ color: "#7DD3FC", marginLeft: "4px", fontSize: "0.70rem" }}>↻</span>}
@@ -280,6 +368,57 @@ export default function PaginaIngresos() {
           ))}
         </tbody>
       </table>
+
+      <Dialog open={confirmandoBulk} onOpenChange={setConfirmandoBulk}>
+        <DialogContent style={{ background: "#012030", border: "1px solid #1A3F54" }}>
+          <DialogHeader>
+            <DialogTitle style={{ color: "#FF6B35", fontSize: "0.80rem", letterSpacing: "0.1em" }}>
+              CONFIRMAR BORRADO
+            </DialogTitle>
+          </DialogHeader>
+          <p style={{ color: "#5C8097", fontSize: "0.85rem" }}>
+            ¿Borrar {seleccionados.size} ingreso{seleccionados.size !== 1 ? "s" : ""}? Esta acción no se puede deshacer.
+          </p>
+          <div className="flex justify-end gap-2 pt-1">
+            <Button type="button" variant="outline" onClick={() => setConfirmandoBulk(false)}
+              style={{ background: "none", border: "1px solid #1A3F54", color: "#6B95A7" }}>
+              cancelar
+            </Button>
+            <Button
+              onClick={() => eliminarBulk.mutate([...seleccionados])}
+              disabled={eliminarBulk.isPending}
+              style={{ background: "#1A0A00", color: "#FF6B35", border: "1px solid #FF6B35" }}>
+              {eliminarBulk.isPending ? "..." : "borrar"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={dialogoCategoriaBulk} onOpenChange={(v) => { setDialogoCategoriaBulk(v); if (!v) setCategoriaBulkId(undefined) }}>
+        <DialogContent style={{ background: "#012030", border: "1px solid #1A3F54" }}>
+          <DialogHeader>
+            <DialogTitle style={{ color: "#5C8097", fontSize: "0.80rem", letterSpacing: "0.1em" }}>
+              EDITAR CATEGORÍA EN MASA
+            </DialogTitle>
+          </DialogHeader>
+          <p style={{ color: "#3D6676", fontSize: "0.75rem" }}>
+            {seleccionados.size} ingreso{seleccionados.size !== 1 ? "s" : ""} seleccionados · se actualizarán también los hermanos vinculados
+          </p>
+          <SelectorCategoria tipo="ingreso" value={categoriaBulkId} onChange={setCategoriaBulkId} />
+          <div className="flex justify-end gap-2 pt-1">
+            <Button type="button" variant="outline" onClick={() => setDialogoCategoriaBulk(false)}
+              style={{ background: "none", border: "1px solid #1A3F54", color: "#6B95A7" }}>
+              cancelar
+            </Button>
+            <Button
+              onClick={() => editarCategoriaBulk.mutate({ ids: [...seleccionados], categoria_id: categoriaBulkId ? Number(categoriaBulkId) : null })}
+              disabled={editarCategoriaBulk.isPending}
+              style={{ background: "#011829", color: "#5C8097", border: "1px solid #2A5A6E" }}>
+              {editarCategoriaBulk.isPending ? "..." : "guardar"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       <Dialog open={abierto} onOpenChange={(v) => { setAbierto(v); if (!v) { setEditando(null); setMesesExtra([]); setMesesEliminar([]) } }}>
         <DialogContent style={{ background: "#012030", border: "1px solid #1A3F54" }}>

@@ -2,12 +2,12 @@ import calendar
 import uuid
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
-from sqlalchemy import delete, extract, func, select
+from sqlalchemy import delete, extract, func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..database import obtener_sesion
 from ..modelos.ingreso import Ingreso
-from ..schemas.ingreso import IngresoActualizar, IngresoCrear, IngresoRespuesta
+from ..schemas.ingreso import IngresoBulkCategoria, IngresoBulkEliminar, IngresoActualizar, IngresoCrear, IngresoRespuesta
 
 router = APIRouter()
 
@@ -57,6 +57,56 @@ async def crear_ingreso(
     await db.commit()
     resultado = await db.execute(select(Ingreso).where(Ingreso.id == ingreso.id))
     return resultado.scalar_one()
+
+
+@router.delete("/bulk", status_code=status.HTTP_204_NO_CONTENT)
+async def eliminar_ingresos_bulk(
+    datos: IngresoBulkEliminar,
+    db: AsyncSession = Depends(obtener_sesion),
+) -> None:
+    if not datos.ids:
+        return
+    resultado = await db.execute(
+        select(Ingreso.repeticion_id).where(
+            Ingreso.id.in_(datos.ids),
+            Ingreso.repeticion_id.isnot(None),
+        )
+    )
+    rep_ids = set(resultado.scalars().all())
+    await db.execute(delete(Ingreso).where(Ingreso.id.in_(datos.ids)))
+    for rep_id in rep_ids:
+        restantes = await db.scalar(
+            select(func.count(Ingreso.id)).where(Ingreso.repeticion_id == rep_id)
+        )
+        if restantes == 1:
+            ultimo = await db.scalar(select(Ingreso).where(Ingreso.repeticion_id == rep_id))
+            if ultimo:
+                ultimo.repeticion_id = None
+    await db.commit()
+
+
+@router.patch("/bulk-categoria", status_code=status.HTTP_204_NO_CONTENT)
+async def actualizar_categoria_ingresos_bulk(
+    datos: IngresoBulkCategoria,
+    db: AsyncSession = Depends(obtener_sesion),
+) -> None:
+    if not datos.ids:
+        return
+    resultado = await db.execute(
+        select(Ingreso.repeticion_id).where(
+            Ingreso.id.in_(datos.ids),
+            Ingreso.repeticion_id.isnot(None),
+        )
+    )
+    rep_ids = set(resultado.scalars().all())
+    await db.execute(
+        update(Ingreso).where(Ingreso.id.in_(datos.ids)).values(categoria_id=datos.categoria_id)
+    )
+    if rep_ids:
+        await db.execute(
+            update(Ingreso).where(Ingreso.repeticion_id.in_(rep_ids)).values(categoria_id=datos.categoria_id)
+        )
+    await db.commit()
 
 
 @router.patch("/{ingreso_id}", response_model=IngresoRespuesta)

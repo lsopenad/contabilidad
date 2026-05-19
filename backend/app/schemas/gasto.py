@@ -48,3 +48,12 @@ class GastoRespuesta(GastoBase):
     repeticion_id: Optional[str] = None
 
     model_config = {"from_attributes": True}
+
+
+class GastoBulkEliminar(BaseModel):
+    ids: list[int]
+
+
+class GastoBulkCategoria(BaseModel):
+    ids: list[int]
+    categoria_id: Optional[int] = None

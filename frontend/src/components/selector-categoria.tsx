@@ -50,7 +50,7 @@ export function SelectorCategoria({ value, onChange, tipo }: Props) {
     <>
       <Select onValueChange={handleChange} value={value}>
         <SelectTrigger><SelectValue placeholder="— sin categoría —" /></SelectTrigger>
-        <SelectContent>
+        <SelectContent className="max-h-60 overflow-y-auto">
           {categorias.map((c) => (
             <SelectItem key={c.id} value={String(c.id)}>{c.nombre}</SelectItem>
           ))}

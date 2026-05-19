@@ -48,3 +48,12 @@ class IngresoRespuesta(IngresoBase):
     repeticion_id: Optional[str] = None
 
     model_config = {"from_attributes": True}
+
+
+class IngresoBulkEliminar(BaseModel):
+    ids: list[int]
+
+
+class IngresoBulkCategoria(BaseModel):
+    ids: list[int]
+    categoria_id: Optional[int] = None
