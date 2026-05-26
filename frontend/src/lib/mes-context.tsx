@@ -8,6 +8,8 @@ interface MesContextValue {
   irAnterior: () => void
   irSiguiente: () => void
   irHoy: () => void
+  irAnioAnterior: () => void
+  irAnioSiguiente: () => void
 }
 
 const MesContext = createContext<MesContextValue | null>(null)
@@ -33,8 +35,11 @@ export function MesProvider({ children }: { children: React.ReactNode }) {
     setAnio(h.getFullYear())
   }
 
+  const irAnioAnterior = () => setAnio((a) => a - 1)
+  const irAnioSiguiente = () => setAnio((a) => a + 1)
+
   return (
-    <MesContext.Provider value={{ mes, anio, etiqueta: `${MESES_ABREV[mes - 1]} ${anio}`, irAnterior, irSiguiente, irHoy }}>
+    <MesContext.Provider value={{ mes, anio, etiqueta: `${MESES_ABREV[mes - 1]} ${anio}`, irAnterior, irSiguiente, irHoy, irAnioAnterior, irAnioSiguiente }}>
       {children}
     </MesContext.Provider>
   )
@@ -47,7 +52,7 @@ export function useMes() {
 }
 
 export function SelectorMes() {
-  const { etiqueta, irAnterior, irSiguiente, irHoy } = useMes()
+  const { etiqueta, irAnterior, irSiguiente, irHoy, irAnioAnterior, irAnioSiguiente } = useMes()
   const hoy = new Date()
   const esHoy = etiqueta === `${MESES_ABREV[hoy.getMonth()]} ${hoy.getFullYear()}`
 
@@ -55,9 +60,15 @@ export function SelectorMes() {
     background: "none", border: "none", cursor: "pointer",
     color: "#6198AE", fontSize: "0.70rem", padding: "0 2px", lineHeight: 1,
   }
+  const btnAnio = { ...btn, color: "#4A7A8A" }
 
   return (
     <div style={{ display: "flex", alignItems: "center", gap: "0.25rem" }}>
+      <button style={btnAnio} onClick={irAnioAnterior}
+        title="Año anterior"
+        onMouseEnter={(e) => (e.currentTarget.style.color = "#7DD3FC")}
+        onMouseLeave={(e) => (e.currentTarget.style.color = "#4A7A8A")}
+      >[«]</button>
       <button style={btn} onClick={irAnterior}
         onMouseEnter={(e) => (e.currentTarget.style.color = "#7DD3FC")}
         onMouseLeave={(e) => (e.currentTarget.style.color = "#6198AE")}
@@ -69,6 +80,11 @@ export function SelectorMes() {
         onMouseEnter={(e) => (e.currentTarget.style.color = "#7DD3FC")}
         onMouseLeave={(e) => (e.currentTarget.style.color = "#6198AE")}
       >[&gt;]</button>
+      <button style={btnAnio} onClick={irAnioSiguiente}
+        title="Año siguiente"
+        onMouseEnter={(e) => (e.currentTarget.style.color = "#7DD3FC")}
+        onMouseLeave={(e) => (e.currentTarget.style.color = "#4A7A8A")}
+      >[»]</button>
       {!esHoy && (
         <button style={{ ...btn, color: "#00ED64", marginLeft: "0.25rem" }} onClick={irHoy}
           onMouseEnter={(e) => (e.currentTarget.style.color = "#7EFFC0")}
