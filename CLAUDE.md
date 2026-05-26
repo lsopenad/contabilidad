@@ -70,8 +70,8 @@ Tablas activas — esquema exacto en `backend/alembic/versions/`.
 | Tabla | Propósito |
 | --- | --- |
 | `categorias` | Categorías de ingresos/gastos (`tipo`: ingreso/gasto/ambos) |
-| `ingresos` | Entradas de ingresos (`repeticion_id` UUID vincula copias mensuales) |
-| `gastos` | Entradas de gastos, FK categoría (`repeticion_id` igual) |
+| `ingresos` | Entradas de ingresos (`repeticion_id` UUID vincula copias mensuales; `transaction_id` único para deduplicación en importación CSV) |
+| `gastos` | Entradas de gastos, FK categoría (`repeticion_id` igual; `transaction_id` igual) |
 | `presupuestos` | Presupuesto mensual por categoría, unique (categoria_id, mes, anio) |
 | `suscripciones` | Suscripciones recurrentes (`dia_cobro` 1-31, `activa` bool, `frecuencia`: mensual/bimestral/trimestral/semestral/anual, `fecha_inicio` DATE, `fecha_fin` DATE nullable — al desactivar se fija a hoy, al reactivar `fecha_inicio` = hoy y se limpia) |
 | `grupos_presupuesto` | Grupos de presupuesto mensual con categorías N:M (`repeticion_id` igual) |
@@ -91,7 +91,7 @@ Invariante global: `importe > 0` en ingresos, gastos, presupuestos, grupos y sus
 - **Frontend**: componentes funcionales, datos vía `useQuery` / `useMutation`.
 - **Migraciones**: cambio de esquema → `alembic revision --autogenerate` → `alembic upgrade head`. Nunca editar migraciones ya aplicadas.
 - **Dependencias**: actualizar `requirements.txt` (backend) o `package.json` (frontend) al añadir paquetes.
-- **Paleta UI**: color primario neutro `#5C8097`. Semánticos: `#00ED64` ingreso, `#FF6B35` gasto/peligro. No añadir acentos por sección.
+- **Paleta UI**: `--primary: #00ED64` (ingreso/acción principal), `--destructive: #FF6B35` (gasto/peligro). Fondo oscuro `#001E2B`, neutros azulados. No añadir acentos por sección.
 
 ---
 
