@@ -27,7 +27,8 @@ interface PreviewResponse {
 export default function PaginaImportar() {
   const qc = useQueryClient()
   const inputRef = useRef<HTMLInputElement>(null)
-  const [preview, setPreview] = useState<PreviewResponse | null>(null)
+  const [transacciones, setTransacciones] = useState<TransaccionPreview[]>([])
+  const [previewMeta, setPreviewMeta] = useState<{ omitidas: number; groq_error?: string } | null>(null)
   const [excluidas, setExcluidas] = useState<Set<number>>(new Set())
   const [cargando, setCargando] = useState(false)
   const [confirmando, setConfirmando] = useState(false)
@@ -37,9 +38,6 @@ export default function PaginaImportar() {
     queryFn: async () => (await api.get("/categorias/")).data,
   })
 
-  const nombreCategoria = (id?: number) =>
-    id ? (categorias.find((c) => c.id === id)?.nombre ?? "—") : "—"
-
   const toggleExcluida = (indice: number) =>
     setExcluidas((prev) => {
       const next = new Set(prev)
@@ -48,24 +46,35 @@ export default function PaginaImportar() {
     })
 
   const toggleTodas = () => {
-    if (!preview) return
-    const todos = preview.transacciones.map((t) => t.indice)
+    const todos = transacciones.map((t) => t.indice)
     setExcluidas((prev) =>
       prev.size === todos.length ? new Set() : new Set(todos)
     )
   }
 
+  const cambiarCategoria = (indice: number, categoriaId: number | undefined) =>
+    setTransacciones((prev) =>
+      prev.map((t) => t.indice === indice ? { ...t, categoria_id: categoriaId } : t)
+    )
+
+  const limpiarPreview = () => {
+    setTransacciones([])
+    setPreviewMeta(null)
+    setExcluidas(new Set())
+    if (inputRef.current) inputRef.current.value = ""
+  }
+
   const handleArchivo = async (archivo: File) => {
     setCargando(true)
-    setPreview(null)
-    setExcluidas(new Set())
+    limpiarPreview()
     try {
       const form = new FormData()
       form.append("archivo", archivo)
       const { data } = await api.post<PreviewResponse>("/importar/previsualizar", form, {
         headers: { "Content-Type": "multipart/form-data" },
       })
-      setPreview(data)
+      setTransacciones(data.transacciones)
+      setPreviewMeta({ omitidas: data.omitidas, groq_error: data.groq_error })
       if (data.groq_error) {
         toast.warning(`normalización desactivada: ${data.groq_error}`)
       }
@@ -80,8 +89,8 @@ export default function PaginaImportar() {
   }
 
   const handleConfirmar = async () => {
-    if (!preview) return
-    const seleccionadas = preview.transacciones
+    if (!previewMeta) return
+    const seleccionadas = transacciones
       .filter((t) => !excluidas.has(t.indice))
       .map(({ fecha, descripcion, importe, tipo, categoria_id, transaction_id }) => ({
         fecha, descripcion, importe, tipo, categoria_id, transaction_id,
@@ -99,9 +108,7 @@ export default function PaginaImportar() {
       qc.invalidateQueries({ queryKey: ["ingresos"] })
       qc.invalidateQueries({ queryKey: ["gastos"] })
       qc.invalidateQueries({ queryKey: ["informes"] })
-      setPreview(null)
-      setExcluidas(new Set())
-      if (inputRef.current) inputRef.current.value = ""
+      limpiarPreview()
     } catch {
       toast.error("error al confirmar la importación")
     } finally {
@@ -109,9 +116,7 @@ export default function PaginaImportar() {
     }
   }
 
-  const seleccionadas = preview
-    ? preview.transacciones.filter((t) => !excluidas.has(t.indice))
-    : []
+  const seleccionadas = transacciones.filter((t) => !excluidas.has(t.indice))
   const totalIngresos = seleccionadas.filter((t) => t.tipo === "ingreso").length
   const totalGastos = seleccionadas.filter((t) => t.tipo === "gasto").length
 
@@ -123,7 +128,7 @@ export default function PaginaImportar() {
           <div style={{ color: "#6198AE", fontSize: "0.70rem" }}>Trade Republic · CSV</div>
         </div>
         <div className="flex items-center gap-3">
-          {preview && (
+          {previewMeta && (
             <span style={{ color: "#6198AE", fontSize: "0.70rem" }}>
               {totalIngresos} ingresos · {totalGastos} gastos seleccionados
             </span>
@@ -142,10 +147,10 @@ export default function PaginaImportar() {
           >
             {cargando ? "procesando…" : "subir CSV"}
           </Button>
-          {preview && (
+          {previewMeta && (
             <>
               <Button
-                onClick={() => { setPreview(null); setExcluidas(new Set()); if (inputRef.current) inputRef.current.value = "" }}
+                onClick={limpiarPreview}
                 style={{ background: "none", border: "1px solid #1A3F54", color: "#6198AE" }}
               >
                 cancelar
@@ -162,13 +167,13 @@ export default function PaginaImportar() {
         </div>
       </div>
 
-      {!preview && !cargando && (
+      {!previewMeta && !cargando && (
         <div style={{ color: "#1A3F54", textAlign: "center", padding: "4rem 0", fontSize: "0.80rem" }}>
           — sube un CSV de Trade Republic para empezar —
         </div>
       )}
 
-      {preview && (
+      {previewMeta && (
         <table style={{ width: "100%", borderCollapse: "collapse" }}>
           <thead>
             <tr style={{ borderBottom: "1px solid #112B3A" }}>
@@ -188,8 +193,11 @@ export default function PaginaImportar() {
             </tr>
           </thead>
           <tbody>
-            {preview.transacciones.map((t) => {
+            {transacciones.map((t) => {
               const excluida = excluidas.has(t.indice)
+              const categsFiltradas = categorias.filter(
+                (c) => c.tipo === t.tipo || c.tipo === "ambos"
+              )
               return (
                 <tr
                   key={t.indice}
@@ -227,8 +235,28 @@ export default function PaginaImportar() {
                   <td style={{ padding: "4px 12px", color: "#6198AE", fontSize: "0.70rem" }}>
                     {t.tipo === "ingreso" ? "ingreso" : "gasto"}
                   </td>
-                  <td style={{ padding: "4px 12px", color: "#6198AE", fontSize: "0.75rem" }}>
-                    {nombreCategoria(t.categoria_id)}
+                  <td style={{ padding: "4px 8px", minWidth: "140px" }}>
+                    <select
+                      value={t.categoria_id ?? ""}
+                      onChange={(e) =>
+                        cambiarCategoria(t.indice, e.target.value ? Number(e.target.value) : undefined)
+                      }
+                      style={{
+                        background: "#011829",
+                        border: "1px solid #1A3F54",
+                        borderRadius: "4px",
+                        color: t.categoria_id ? "#9BB7C4" : "#3A6070",
+                        fontSize: "0.75rem",
+                        padding: "2px 6px",
+                        width: "100%",
+                        cursor: "pointer",
+                      }}
+                    >
+                      <option value="">— sin categoría —</option>
+                      {categsFiltradas.map((c) => (
+                        <option key={c.id} value={c.id}>{c.nombre}</option>
+                      ))}
+                    </select>
                   </td>
                 </tr>
               )

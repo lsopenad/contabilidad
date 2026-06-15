@@ -7,9 +7,10 @@ from datetime import date
 from decimal import Decimal
 from typing import Optional
 
-from fastapi import APIRouter, Depends, File, UploadFile
+from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
 from groq import Groq
-from sqlalchemy import func, select
+from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..config import config
@@ -213,6 +214,29 @@ async def previsualizar(
     entradas_groq = [{"desc": f["descripcion_raw"], "dir": f["direccion"]} for f in filas_raw]
     descripciones, groq_error = await _normalizar_con_groq(entradas_groq)
 
+    # Cargar en batch todos los identificadores existentes para dedup en Python
+    ids_ingresos_tx = set(
+        (await db.execute(
+            select(Ingreso.transaction_id).where(Ingreso.transaction_id.isnot(None))
+        )).scalars().all()
+    )
+    ids_gastos_tx = set(
+        (await db.execute(
+            select(Gasto.transaction_id).where(Gasto.transaction_id.isnot(None))
+        )).scalars().all()
+    )
+    # Para dedup sin transaction_id: tuples (fecha, importe, descripcion)
+    claves_ingresos = set(
+        (await db.execute(
+            select(Ingreso.fecha, Ingreso.importe, Ingreso.descripcion)
+        )).all()
+    )
+    claves_gastos = set(
+        (await db.execute(
+            select(Gasto.fecha, Gasto.importe, Gasto.descripcion)
+        )).all()
+    )
+
     transacciones: list[TransaccionPreview] = []
     omitidas = 0
 
@@ -227,33 +251,18 @@ async def previsualizar(
         transaction_id: Optional[str] = fila["transaction_id"]
         cat_id = _categoria_para(desc, importe)
 
-        # Dedup por transaction_id si existe, si no por (fecha, importe, descripcion)
+        # Dedup en Python usando los sets cargados en batch
         if transaction_id:
             if direccion == "ingreso":
-                duplicado = await db.scalar(
-                    select(func.count(Ingreso.id)).where(Ingreso.transaction_id == transaction_id)
-                ) or 0
+                duplicado = 1 if transaction_id in ids_ingresos_tx else 0
             else:
-                duplicado = await db.scalar(
-                    select(func.count(Gasto.id)).where(Gasto.transaction_id == transaction_id)
-                ) or 0
+                duplicado = 1 if transaction_id in ids_gastos_tx else 0
         else:
+            clave = (fecha, importe, desc if desc else None)
             if direccion == "ingreso":
-                duplicado = await db.scalar(
-                    select(func.count(Ingreso.id)).where(
-                        Ingreso.fecha == fecha,
-                        Ingreso.importe == importe,
-                        Ingreso.descripcion == desc,
-                    )
-                ) or 0
+                duplicado = 1 if clave in claves_ingresos else 0
             else:
-                duplicado = await db.scalar(
-                    select(func.count(Gasto.id)).where(
-                        Gasto.fecha == fecha,
-                        Gasto.importe == importe,
-                        Gasto.descripcion == desc,
-                    )
-                ) or 0
+                duplicado = 1 if clave in claves_gastos else 0
 
         transacciones.append(TransaccionPreview(
             indice=indice,
@@ -298,5 +307,13 @@ async def confirmar(
             ))
             gastos_n += 1
 
-    await db.commit()
+    try:
+        await db.commit()
+    except IntegrityError:
+        await db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Una o más transacciones ya existen (transaction_id duplicado). "
+                   "Revisar la previsualización para desmarcar los duplicados antes de confirmar.",
+        )
     return ConfirmarResponse(ingresos_creados=ingresos_n, gastos_creados=gastos_n)
