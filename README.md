@@ -9,14 +9,16 @@ Uso personal, sin autenticación.
 ## Stack
 
 | Capa | Tecnología |
-|------|-----------|
-| Backend | FastAPI 0.136.1 · SQLAlchemy 2 async · Alembic · Pydantic v2 |
+| ---- | ---------- |
+| Backend | FastAPI · SQLAlchemy async · Alembic · Pydantic v2 |
 | Base de datos | PostgreSQL (asyncpg) |
-| Frontend | React 19 · Vite · TypeScript · Tailwind CSS · shadcn/ui |
-| Estado servidor | TanStack Query v5 |
+| Frontend | React · Vite · TypeScript · Tailwind CSS · shadcn/ui |
+| Estado servidor | TanStack Query |
 | Formularios | react-hook-form + Zod |
 | Exportación | openpyxl (Excel) |
-| IA (importación) | Groq (llama3) — normalización de descripciones CSV |
+| IA (importación) | Groq — normalización de descripciones CSV |
+
+Versiones exactas: `backend/requirements.txt` y `frontend/package.json`.
 
 ---
 
@@ -92,7 +94,7 @@ pnpm dev
 ## Variables de entorno
 
 | Variable | Descripción |
-|----------|-------------|
+| -------- | ----------- |
 | `DATABASE_URL` | Conexión PostgreSQL asyncpg: `postgresql+asyncpg://user:pass@host/db` |
 | `ALEMBIC_DATABASE_URL` | Solo si la URL de migraciones difiere de `DATABASE_URL` |
 | `GROQ_API_KEY` | API key de Groq para normalizar descripciones en la importación CSV |
@@ -118,7 +120,7 @@ alembic upgrade head
 
 ## Estructura del proyecto
 
-```
+```text
 backend/
   app/
     main.py          # FastAPI app, CORS, montaje de routers

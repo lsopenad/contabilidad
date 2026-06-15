@@ -33,22 +33,24 @@ backend/app/
   main.py       # FastAPI app, CORS, routers montados en /api/<entidad>
   config.py     # Settings vía pydantic-settings
   database.py   # async_engine, AsyncSession, obtener_sesion()
-  modelos/      # SQLAlchemy ORM models
+  modelos/      # SQLAlchemy ORM models (uno por tabla)
   schemas/      # Pydantic schemas: <Entidad>Crear / Actualizar / Respuesta
-  routers/      # Un router por entidad
-backend/alembic/versions/   # Migraciones — leer aquí para esquema BD exacto
+                #   + importar.py (CSV), informe.py (respuestas de informes)
+  routers/      # Un router por entidad + excel.py (exportación) + importar.py + informes.py + admin.py
+backend/alembic/versions/   # Migraciones — fuente de verdad del esquema BD
 
 frontend/src/
   App.tsx              # React Router routes
-  pages/dashboard.tsx      # KPIs mensuales + balance total histórico acumulado
-  pages/ingresos.tsx       # CRUD ingresos + operaciones en masa (borrado, categoría)
-  pages/gastos.tsx         # CRUD gastos + operaciones en masa (borrado, categoría)
-  pages/suscripciones.tsx  # CRUD suscripciones recurrentes
-  pages/presupuestos.tsx   # CRUD presupuestos por categoría y grupo
-  pages/categorias.tsx     # CRUD categorías
-  pages/informes.tsx       # Informe anual mes a mes + descarga Excel
-  pages/importar.tsx       # Importación CSV (Trade Republic) con Groq + previsualización
-  pages/admin.tsx          # Borrado masivo de gastos e ingresos
+  pages/               # Una página por sección (ver Dominio BD para entidades)
+    dashboard.tsx      # KPIs mensuales + balance total histórico acumulado
+    ingresos.tsx       # CRUD ingresos + operaciones en masa (borrado, categoría)
+    gastos.tsx         # CRUD gastos + operaciones en masa (borrado, categoría)
+    suscripciones.tsx  # CRUD suscripciones recurrentes
+    presupuestos.tsx   # CRUD presupuestos por categoría y grupo
+    categorias.tsx     # CRUD categorías
+    informes.tsx       # Informe anual mes a mes + descarga Excel
+    importar.tsx       # Importación CSV (Trade Republic) con Groq + previsualización
+    admin.tsx          # Borrado masivo de gastos e ingresos
   components/layout/layout.tsx        # Layout con nav y Outlet
   components/ui/                      # shadcn/ui (button, dialog, form, input, label, select)
   components/selector-categoria.tsx   # Selector compartido de categorías (tipo: ingreso/gasto/ambos)

@@ -13,6 +13,10 @@ fi
 
 pip3 install -r requirements.txt -q
 
+pkill -f "uvicorn app.main:app" 2>/dev/null || true
+pkill -f "pnpm dev" 2>/dev/null || true
+sleep 1
+
 uvicorn app.main:app --reload --host 0.0.0.0 --port 8000 &
 BACKEND_PID=$!
 echo "▶  Backend PID $BACKEND_PID — http://localhost:8000"
