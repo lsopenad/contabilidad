@@ -8,16 +8,29 @@ from alembic import context
 
 load_dotenv(Path(__file__).parent.parent / ".env")
 
+import sys as _sys
+_sys.path.insert(0, str(Path(__file__).parent.parent))
+
+from app.database import Base  # noqa: F401
+import app.modelos.categoria  # noqa: F401
+import app.modelos.gasto  # noqa: F401
+import app.modelos.ingreso  # noqa: F401
+import app.modelos.presupuesto  # noqa: F401
+import app.modelos.suscripcion  # noqa: F401
+import app.modelos.grupo_presupuesto  # noqa: F401
+
 config = context.config
 
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
-target_metadata = None
+target_metadata = Base.metadata
 
 
 def _url_desde_env() -> str:
-    return os.getenv("ALEMBIC_DATABASE_URL") or os.getenv("DATABASE_URL", "")
+    url = os.getenv("ALEMBIC_DATABASE_URL") or os.getenv("DATABASE_URL", "")
+    # Alembic usa driver síncrono — reemplazar asyncpg por psycopg2
+    return url.replace("postgresql+asyncpg", "postgresql+psycopg2")
 
 
 def run_migrations_offline() -> None:
