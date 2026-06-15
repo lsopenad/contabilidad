@@ -33,6 +33,14 @@ def _es_mes_pago(s: Suscripcion, mes: int, anio: int) -> bool:
     return (target_idx - inicio_idx) % periodo == 0
 
 
+def _total_suscripciones_en_mes(subs: list, mes: int, anio: int) -> Decimal:
+    return sum(
+        Decimal(str(s.importe))
+        for s in subs
+        if _es_mes_pago(s, mes, anio)
+    ) or Decimal("0")
+
+
 async def _total_mensual_suscripciones(db: AsyncSession, mes: int, anio: int) -> Decimal:
     subs = (await db.execute(select(Suscripcion))).scalars().all()
     return sum(
@@ -100,9 +108,10 @@ async def informe_anual(
     ingresos_por_mes = {int(f.mes): Decimal(str(f.total)) for f in filas_ingresos}
     gastos_por_mes = {int(f.mes): Decimal(str(f.total)) for f in filas_gastos}
 
+    todas_subs = (await db.execute(select(Suscripcion))).scalars().all()
     meses = []
     for m in range(1, 13):
-        sus_mes = await _total_mensual_suscripciones(db, m, anio)
+        sus_mes = _total_suscripciones_en_mes(todas_subs, m, anio)
         meses.append(ResumenMes(
             mes=m,
             anio=anio,
